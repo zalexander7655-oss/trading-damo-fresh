@@ -5,34 +5,37 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Trading Master</title>
 <style>
-body{margin:0;font-family:Arial;background:linear-gradient(135deg,#e0f2fe,#f0fdfa);min-height:100vh;position:relative;padding-bottom:70px}
+body{margin:0;font-family:Arial;background:#eef6f7;min-height:100vh}
 .topbar{display:flex;justify-content:space-between;padding:15px}
 .topbar button{padding:10px 18px;border:none;border-radius:8px;cursor:pointer;font-weight:bold}
-.center{text-align:center;padding:20px;max-width:400px;margin:auto}
-.logo-area{width:90px;height:90px;margin:20px auto;display:flex;align-items:center;justify-content:center;border:2px dashed #0ea5e9;border-radius:12px;color:#0ea5e9}
+.center{text-align:center;padding:40px 20px;max-width:600px;margin:auto}
+h1.one-line{white-space:nowrap;font-size:28px;margin:30px 0}
+h1 .w1{color:#000}
+h1 .w2{color:#d4a800}
 .box{background:white;padding:20px;border-radius:12px;box-shadow:0 4px 10px rgba(0,0,0,0.1);margin-top:15px}
 input{width:90%;padding:12px;margin:8px 0;border:1px solid #cbd5e1;border-radius:8px}
-button.green{background:#22c55e;color:white;width:100%;font-size:16px;padding:14px;border:none;border-radius:10px;cursor:pointer;margin-top:10px}
+.pass-wrap{position:relative;width:95%;margin:auto}
+.pass-wrap input{width:100%;box-sizing:border-box}
+.eye{position:absolute;right:10px;top:50%;transform:translateY(-50%);cursor:pointer;background:none;border:none;font-size:18px}
+button.green{background:#22c55e;color:white;padding:14px 30px;font-size:18px;border:none;border-radius:10px;cursor:pointer;margin-top:20px;min-width:220px}
 button.linkbtn{background:#e2e8f0;width:100%;margin-top:8px;padding:12px;border:none;border-radius:8px;cursor:pointer}
 .hidden{display:none}
-.bottom-bar{position:fixed;bottom:15px;left:15px;right:15px;display:flex;justify-content:space-between}
-.bottom-bar button{padding:12px 20px;border:none;border-radius:8px;font-weight:bold;cursor:pointer}
+.bottom-left{position:fixed;bottom:15px;left:15px}
+.bottom-left button{background:#facc15;padding:12px 20px;border:none;border-radius:8px;font-weight:bold;cursor:pointer}
+.err{font-size:80px;margin:0}
 </style>
 </head>
 <body>
 
-<!-- AUTH PAGE -->
 <div id="authPage" class="center">
-<div class="logo-area">MY LOGO</div>
 <h2>Trading Master Login</h2>
-
 <div id="registerBox" class="box">
 <h3>Create Account</h3>
 <input id="fName" placeholder="First Name">
 <input id="lName" placeholder="Last Name">
 <input id="rEmail" placeholder="Email" type="email">
-<input id="rPass" placeholder="Password" type="password">
-<input id="rPass2" placeholder="Confirm Password" type="password">
+<div class="pass-wrap"><input id="rPass" placeholder="Password" type="password"><button class="eye" onclick="togglePass('rPass',this)">👁️</button></div>
+<div class="pass-wrap"><input id="rPass2" placeholder="Confirm Password" type="password"><button class="eye" onclick="togglePass('rPass2',this)">👁️</button></div>
 <button class="green" onclick="sendOTP('register')">Continue</button>
 <button class="linkbtn" onclick="showLogin()">Sign Up</button>
 <button class="linkbtn" onclick="showForgot()">Forgot Password</button>
@@ -41,7 +44,7 @@ button.linkbtn{background:#e2e8f0;width:100%;margin-top:8px;padding:12px;border:
 <div id="loginBox" class="box hidden">
 <h3>Sign Up</h3>
 <input id="lEmail" placeholder="Email" type="email">
-<input id="lPass" placeholder="Password" type="password">
+<div class="pass-wrap"><input id="lPass" placeholder="Password" type="password"><button class="eye" onclick="togglePass('lPass',this)">👁️</button></div>
 <button class="green" onclick="doLogin()">Login</button>
 <button class="linkbtn" onclick="showRegister()">Back</button>
 </div>
@@ -49,8 +52,8 @@ button.linkbtn{background:#e2e8f0;width:100%;margin-top:8px;padding:12px;border:
 <div id="forgotBox" class="box hidden">
 <h3>Forgot Password</h3>
 <input id="fEmail" placeholder="Email" type="email">
-<input id="fNewPass" placeholder="New Password" type="password">
-<input id="fNewPass2" placeholder="Confirm Password" type="password">
+<div class="pass-wrap"><input id="fNewPass" placeholder="New Password" type="password"><button class="eye" onclick="togglePass('fNewPass',this)">👁️</button></div>
+<div class="pass-wrap"><input id="fNewPass2" placeholder="Confirm Password" type="password"><button class="eye" onclick="togglePass('fNewPass2',this)">👁️</button></div>
 <button class="green" onclick="sendOTP('forgot')">Continue</button>
 <button class="linkbtn" onclick="showRegister()">Back</button>
 </div>
@@ -63,46 +66,36 @@ button.linkbtn{background:#e2e8f0;width:100%;margin-top:8px;padding:12px;border:
 </div>
 </div>
 
-<!-- MAIN PAGE -->
 <div id="mainPage" class="hidden">
 <div class="topbar">
-<button style="background:#8b5cf6;color:white" onclick="showPurchases()">Purchases</button>
+<button style="background:#8b5cf6;color:white" onclick="go404()">Purchases</button>
 <button style="background:#ef4444;color:white" onclick="logout()">Logout</button>
 </div>
-
 <div class="center">
-<div class="logo-area">MY LOGO</div>
-<h1>Welcome to Trading Master</h1>
+<h1 class="one-line"><span class="w1">Welcome</span> <span class="w2">to Trading Master</span></h1>
 <p id="welcomeUser"></p>
-<div class="box">
-<p>Balance: $<span id="bal">0.00</span></p>
-<p style="font-size:12px;color:gray">Purchased amount will show here</p>
-<button class="green" onclick="goTrading()">Start Now Trading</button>
+<button class="green" onclick="go404()">Start Now Trading</button>
 </div>
+<div class="bottom-left"><button onclick="go404()">Help</button></div>
 </div>
 
-<div class="bottom-bar">
-<button style="background:#facc15" onclick="showHelp()">Help</button>
-<span></span>
-</div>
-</div>
-
-<!-- TRADING PAGE -->
-<div id="tradePage" class="hidden center">
-<h2>Trading</h2>
-<p>Demo Trading Area</p>
+<div id="p404" class="hidden center">
+<p class="err">404</p>
+<h2>Page Not Found</h2>
+<p>This page will be added later.</p>
 <button class="green" onclick="backMain()">Back</button>
 </div>
 
 <script>
-let currentOTP="", currentMode="", tempUser={};
-let balance=parseFloat(localStorage.getItem('tm_bal')||0);
-
+function togglePass(id,btn){
+ let x=document.getElementById(id);
+ if(x.type==="password"){x.type="text";btn.textContent="🙈"} else {x.type="password";btn.textContent="👁️"}
+}
+let currentOTP="",currentMode="",tempUser={};
 function showLogin(){hideAll();document.getElementById('loginBox').classList.remove('hidden')}
 function showRegister(){hideAll();document.getElementById('registerBox').classList.remove('hidden')}
 function showForgot(){hideAll();document.getElementById('forgotBox').classList.remove('hidden')}
 function hideAll(){['registerBox','loginBox','forgotBox','otpBox'].forEach(id=>document.getElementById(id).classList.add('hidden'))}
-
 function sendOTP(mode){
  currentMode=mode;
  if(mode=='register'){
@@ -113,9 +106,9 @@ function sendOTP(mode){
  if(mode=='forgot'){
   let e=document.getElementById('fEmail').value,p=document.getElementById('fNewPass').value,p2=document.getElementById('fNewPass2').value;
   if(!e||p!=p2||!p){alert('Check fields');return}
-  let saved=JSON.parse(localStorage.getItem('tm_user_'+e)||'null');
-  if(!saved){alert('Email not found');return}
-  tempUser={email:e,pass:p,fname:saved.fname};
+  let s=JSON.parse(localStorage.getItem('tm_user_'+e)||'null');
+  if(!s){alert('Email not found');return}
+  tempUser={email:e,pass:p,fname:s.fname};
  }
  currentOTP=Math.floor(1000+Math.random()*9000).toString();
  document.getElementById('demoOTP').innerText=currentOTP;
@@ -135,27 +128,21 @@ function doLogin(){
 }
 function openMain(user){
  document.getElementById('authPage').classList.add('hidden');
- document.getElementById('tradePage').classList.add('hidden');
+ document.getElementById('p404').classList.add('hidden');
  document.getElementById('mainPage').classList.remove('hidden');
  document.getElementById('welcomeUser').innerText='Welcome '+(user.fname||user.email);
- document.getElementById('bal').innerText=balance.toFixed(2);
 }
-function goTrading(){
+function go404(){
  document.getElementById('mainPage').classList.add('hidden');
- document.getElementById('tradePage').classList.remove('hidden');
+ document.getElementById('p404').classList.remove('hidden');
 }
 function backMain(){
- document.getElementById('tradePage').classList.add('hidden');
+ document.getElementById('p404').classList.add('hidden');
  document.getElementById('mainPage').classList.remove('hidden');
 }
-function showPurchases(){
- let amt=prompt('Enter purchase amount to add demo balance:');
- if(amt){balance+=parseFloat(amt);localStorage.setItem('tm_bal',balance);document.getElementById('bal').innerText=balance.toFixed(2);alert('Purchased! New Balance: $'+balance.toFixed(2));}
-}
-function showHelp(){alert('Help: support@tradingmaster.demo');}
-function logout(){localStorage.removeItem('tm_last');location.reload();}
+function logout(){localStorage.removeItem('tm_last');location.reload()}
 let last=localStorage.getItem('tm_last');
-if(last){let u=JSON.parse(localStorage.getItem('tm_user_'+last)||'null');if(u) openMain(u);}
+if(last){let u=JSON.parse(localStorage.getItem('tm_user_'+last)||'null');if(u) openMain(u)}
 </script>
 </body>
 </html>
