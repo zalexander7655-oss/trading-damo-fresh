@@ -9,8 +9,8 @@ body{margin:0;font-family:Arial;background:#eef6f7;min-height:100vh}
 .topbar{display:flex;justify-content:space-between;padding:15px}
 .topbar button{padding:10px 18px;border:none;border-radius:8px;cursor:pointer;font-weight:bold}
 .center{text-align:center;padding:20px;max-width:700px;margin:auto}
-.main-top-space{height:90px}
-h1.one-line{white-space:nowrap;font-size:46px;font-weight:900;color:#000;margin:10px 0 30px 0;letter-spacing:1px}
+.main-top-space{height:110px}
+h1.one-line{font-size:46px;font-weight:900;color:#000;margin:0 0 35px 0}
 .box{background:white;padding:20px;border-radius:12px;box-shadow:0 4px 10px rgba(0,0,0,0.1);margin-top:15px}
 input{width:90%;padding:12px;margin:8px 0;border:1px solid #cbd5e1;border-radius:8px}
 .pass-wrap{position:relative;width:95%;margin:auto}
@@ -25,13 +25,11 @@ button.linkbtn{background:#e2e8f0;width:100%;margin-top:8px;padding:12px;border:
 </style>
 </head>
 <body>
-
 <div id="authPage" class="center">
 <h2>Trading Master Login</h2>
 <div id="registerBox" class="box">
 <h3>Create Account</h3>
-<input id="fName" placeholder="First Name">
-<input id="lName" placeholder="Last Name">
+<input id="fName" placeholder="First Name"><input id="lName" placeholder="Last Name">
 <input id="rEmail" placeholder="Email" type="email">
 <div class="pass-wrap"><input id="rPass" placeholder="Password" type="password"><button class="eye" onclick="togglePass('rPass',this)">👁️</button></div>
 <div class="pass-wrap"><input id="rPass2" placeholder="Confirm Password" type="password"><button class="eye" onclick="togglePass('rPass2',this)">👁️</button></div>
@@ -39,78 +37,41 @@ button.linkbtn{background:#e2e8f0;width:100%;margin-top:8px;padding:12px;border:
 <button class="linkbtn" onclick="showLogin()">Sign Up</button>
 <button class="linkbtn" onclick="showForgot()">Forgot Password</button>
 </div>
-
-<div id="loginBox" class="box hidden">
-<h3>Sign Up</h3>
-<input id="lEmail" placeholder="Email" type="email">
-<div class="pass-wrap"><input id="lPass" placeholder="Password" type="password"><button class="eye" onclick="togglePass('lPass',this)">👁️</button></div>
-<button class="green" onclick="doLogin()">Login</button>
-<button class="linkbtn" onclick="showRegister()">Back</button>
+<div id="loginBox" class="box hidden"><h3>Sign Up</h3><input id="lEmail" placeholder="Email" type="email"><div class="pass-wrap"><input id="lPass" placeholder="Password" type="password"><button class="eye" onclick="togglePass('lPass',this)">👁️</button></div><button class="green" onclick="doLogin()">Login</button><button class="linkbtn" onclick="showRegister()">Back</button></div>
+<div id="forgotBox" class="box hidden"><h3>Forgot Password</h3><input id="fEmail" placeholder="Email" type="email"><div class="pass-wrap"><input id="fNewPass" placeholder="New Password" type="password"><button class="eye" onclick="togglePass('fNewPass',this)">👁️</button></div><div class="pass-wrap"><input id="fNewPass2" placeholder="Confirm Password" type="password"><button class="eye" onclick="togglePass('fNewPass2',this)">👁️</button></div><button class="green" onclick="sendOTP('forgot')">Continue</button><button class="linkbtn" onclick="showRegister()">Back</button></div>
+<div id="otpBox" class="box hidden"><h3>Enter OTP</h3><p>Demo OTP: <b id="demoOTP"></b></p><input id="otpInput" placeholder="Enter 6 character OTP"><button class="green" onclick="verifyOTP()">Verify</button></div>
 </div>
-
-<div id="forgotBox" class="box hidden">
-<h3>Forgot Password</h3>
-<input id="fEmail" placeholder="Email" type="email">
-<div class="pass-wrap"><input id="fNewPass" placeholder="New Password" type="password"><button class="eye" onclick="togglePass('fNewPass',this)">👁️</button></div>
-<div class="pass-wrap"><input id="fNewPass2" placeholder="Confirm Password" type="password"><button class="eye" onclick="togglePass('fNewPass2',this)">👁️</button></div>
-<button class="green" onclick="sendOTP('forgot')">Continue</button>
-<button class="linkbtn" onclick="showRegister()">Back</button>
-</div>
-
-<div id="otpBox" class="box hidden">
-<h3>Enter OTP</h3>
-<p>Demo OTP: <b id="demoOTP"></b></p>
-<input id="otpInput" placeholder="Enter 6 character OTP">
-<button class="green" onclick="verifyOTP()">Verify</button>
-</div>
-</div>
-
 <div id="mainPage" class="hidden">
-<div class="topbar">
-<button style="background:#8b5cf6;color:white" onclick="go404()">Purchases</button>
-<button style="background:#ef4444;color:white" onclick="logout()">Logout</button>
-</div>
-<div class="center">
-<div class="main-top-space"></div>
-<h1 class="one-line">Welcome to Trading Master</h1>
-<p id="welcomeUser"></p>
-<button class="green" onclick="go404()">Start Now Trading</button>
-</div>
+<div class="topbar"><button style="background:#8b5cf6;color:white" onclick="go404()">Purchases</button><button style="background:#ef4444;color:white" onclick="logout()">Logout</button></div>
+<div class="center"><div class="main-top-space"></div><h1 class="one-line">Welcome to Trading Master</h1><p id="welcomeUser"></p><button class="green" onclick="go404()">Start Now Trading</button></div>
 <div class="bottom-left"><button onclick="go404()">Help</button></div>
 </div>
-
-<div id="p404" class="hidden center">
-<p class="err">404</p>
-<h2>Page Not Found</h2>
-<p>This page will be added later.</p>
-<button class="green" onclick="backMain()">Back</button>
-</div>
-
+<div id="p404" class="hidden center"><p class="err">404</p><h2>Page Not Found</h2><p>This page will be added later.</p><button class="green" onclick="backMain()">Back</button></div>
 <script>
-function togglePass(id,btn){
- let x=document.getElementById(id);
- if(x.type==="password"){x.type="text";btn.textContent="🙈"} else {x.type="password";btn.textContent="👁️"}
-}
+function togglePass(id,btn){let x=document.getElementById(id);if(x.type==="password"){x.type="text";btn.textContent="🙈"}else{x.type="password";btn.textContent="👁️"}}
 function generateOTP(){
- const chars="ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnpqrstuvwxyz23456789";
+ const letters="ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnpqrstuvwxyz";
+ const numbers="23456789";
  let otp="";
- for(let i=0;i<6;i++){ otp+=chars.charAt(Math.floor(Math.random()*chars.length)); }
- return otp;
+ for(let i=0;i<3;i++) otp+=letters.charAt(Math.floor(Math.random()*letters.length));
+ for(let i=0;i<3;i++) otp+=numbers.charAt(Math.floor(Math.random()*numbers.length));
+ return otp.split('').sort(()=>Math.random()-0.5).join('');
 }
-let currentOTP="",currentMode="",tempUser={};
+let currentOTP="",tempUser={};
 function showLogin(){hideAll();document.getElementById('loginBox').classList.remove('hidden')}
 function showRegister(){hideAll();document.getElementById('registerBox').classList.remove('hidden')}
 function showForgot(){hideAll();document.getElementById('forgotBox').classList.remove('hidden')}
 function hideAll(){['registerBox','loginBox','forgotBox','otpBox'].forEach(id=>document.getElementById(id).classList.add('hidden'))}
-function sendOTP(mode){
- currentMode=mode;
- if(mode=='register'){
-  let e=document.getElementById('rEmail').value,p=document.getElementById('rPass').value,p2=document.getElementById('rPass2').value;
+function sendOTP(m){
+ if(m=='register'){
+  let e=document.getElementById('rEmail').value.trim().toLowerCase(),p=document.getElementById('rPass').value,p2=document.getElementById('rPass2').value;
   if(!e||p!=p2||!p){alert('Check fields');return}
+  let exists=localStorage.getItem('tm_user_'+e);
+  if(exists){alert('your mail already login - Please use Sign Up with same mail');showLogin();return}
   tempUser={email:e,pass:p,fname:document.getElementById('fName').value};
  }
- if(mode=='forgot'){
-  let e=document.getElementById('fEmail').value,p=document.getElementById('fNewPass').value,p2=document.getElementById('fNewPass2').value;
+ if(m=='forgot'){
+  let e=document.getElementById('fEmail').value.trim().toLowerCase(),p=document.getElementById('fNewPass').value,p2=document.getElementById('fNewPass2').value;
   if(!e||p!=p2||!p){alert('Check fields');return}
   let s=JSON.parse(localStorage.getItem('tm_user_'+e)||'null');
   if(!s){alert('Email not found');return}
@@ -120,35 +81,13 @@ function sendOTP(mode){
  document.getElementById('demoOTP').innerText=currentOTP;
  hideAll();document.getElementById('otpBox').classList.remove('hidden');
 }
-function verifyOTP(){
- if(document.getElementById('otpInput').value===currentOTP){
-  localStorage.setItem('tm_user_'+tempUser.email,JSON.stringify(tempUser));
-  localStorage.setItem('tm_last',tempUser.email);
-  openMain(tempUser);
- } else alert('Wrong OTP');
-}
-function doLogin(){
- let e=document.getElementById('lEmail').value,p=document.getElementById('lPass').value;
- let s=JSON.parse(localStorage.getItem('tm_user_'+e)||'null');
- if(s&&s.pass==p){localStorage.setItem('tm_last',e);openMain(s)} else alert('Wrong email/password');
-}
-function openMain(user){
- document.getElementById('authPage').classList.add('hidden');
- document.getElementById('p404').classList.add('hidden');
- document.getElementById('mainPage').classList.remove('hidden');
- document.getElementById('welcomeUser').innerText='Welcome '+(user.fname||user.email);
-}
-function go404(){
- document.getElementById('mainPage').classList.add('hidden');
- document.getElementById('p404').classList.remove('hidden');
-}
-function backMain(){
- document.getElementById('p404').classList.add('hidden');
- document.getElementById('mainPage').classList.remove('hidden');
-}
+function verifyOTP(){if(document.getElementById('otpInput').value===currentOTP){localStorage.setItem('tm_user_'+tempUser.email,JSON.stringify(tempUser));localStorage.setItem('tm_last',tempUser.email);openMain(tempUser)}else alert('Wrong OTP')}
+function doLogin(){let e=document.getElementById('lEmail').value.trim().toLowerCase(),p=document.getElementById('lPass').value;let s=JSON.parse(localStorage.getItem('tm_user_'+e)||'null');if(s&&s.pass==p){localStorage.setItem('tm_last',e);openMain(s)}else alert('Wrong email/password')}
+function openMain(u){document.getElementById('authPage').classList.add('hidden');document.getElementById('p404').classList.add('hidden');document.getElementById('mainPage').classList.remove('hidden');document.getElementById('welcomeUser').innerText='Welcome '+(u.fname||u.email)}
+function go404(){document.getElementById('mainPage').classList.add('hidden');document.getElementById('p404').classList.remove('hidden')}
+function backMain(){document.getElementById('p404').classList.add('hidden');document.getElementById('mainPage').classList.remove('hidden')}
 function logout(){localStorage.removeItem('tm_last');location.reload()}
-let last=localStorage.getItem('tm_last');
-if(last){let u=JSON.parse(localStorage.getItem('tm_user_'+last)||'null');if(u) openMain(u)}
+let last=localStorage.getItem('tm_last');if(last){let u=JSON.parse(localStorage.getItem('tm_user_'+last)||'null');if(u)openMain(u)}
 </script>
 </body>
 </html>
