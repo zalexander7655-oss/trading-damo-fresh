@@ -75,7 +75,8 @@ function drawChart(){
   let all=candles.flatMap(k=>[k.h,k.l]);
   let mn=Math.min(...all), mx=Math.max(...all);
   let range=mx-mn||1;
-  let totalSlots = candles.length + Math.floor(candles.length*0.2); // 20% khali aage
+  // 40% aage khali
+  let totalSlots = Math.floor(candles.length / 0.6);
   let cw = cv.width / totalSlots;
   candles.forEach((k,i)=>{
     let x=i*cw+cw*0.2;
@@ -98,7 +99,6 @@ document.getElementById('startBtn').addEventListener('click',function(){
     let c=o+(Math.random()-0.48)*300;
     let h=Math.max(o,c)+Math.random()*80;
     let l=Math.min(o,c)-Math.random()*80;
-    // naya candle har 3 sec me
     if(Math.random()>0.7){
       candles.push({o,h,l,c});
       if(candles.length>50) candles.shift();
@@ -113,6 +113,11 @@ document.getElementById('startBtn').addEventListener('click',function(){
 });
 
 function openTrade(type){
+  // Balance 0 ho to trading BLOCK
+  if(balance <= 0){
+    alert('Balance $0.00 hai - Trading nahi ho sakti! Pehle balance add karein.');
+    return;
+  }
   let lot=parseFloat(document.getElementById('lot').value);
   let sym=document.getElementById('symbol').value;
   let tr={sym,type,lot,entry:price,time:new Date().toLocaleTimeString()};
@@ -121,13 +126,13 @@ function openTrade(type){
 }
 
 function checkTrades(){
-  // har trade 8 sec baad close, random profit/loss
   if(myTrades.length>0 && Math.random()>0.8){
     let tr=myTrades.shift();
-    let pnl=(Math.random()-0.45)*tr.lot*200; // profit/loss
+    let pnl=(Math.random()-0.45)*tr.lot*200;
     balance+=pnl;
+    if(balance<0) balance=0; // 0 se neeche nahi jayega
     document.getElementById('balance').innerText='$'+balance.toFixed(2);
-    document.getElementById('balance').style.color=pnl>=0?'#00c853':'#ff3d00';
+    document.getElementById('balance').style.color=balance>0?'#00c853':'#ff3d00';
     history.push({...tr,pnl:pnl.toFixed(2)});
     updateHist();
     document.getElementById('openPos').innerHTML+='<p>Closed '+tr.type+' PnL: $'+pnl.toFixed(2)+'</p>';
