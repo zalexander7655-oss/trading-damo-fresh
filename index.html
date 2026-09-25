@@ -24,7 +24,6 @@ button.linkbtn{background:#e2e8f0;width:100%;margin-top:8px;padding:12px;border:
 .hidden{display:none}
 .bottom-left{position:fixed;bottom:15px;left:15px}
 .bottom-left button{background:#facc15;padding:12px 20px;border:none;border-radius:8px;font-weight:bold;cursor:pointer}
-.err{font-size:80px;margin:0}
 </style>
 </head>
 <body>
@@ -45,17 +44,16 @@ button.linkbtn{background:#e2e8f0;width:100%;margin-top:8px;padding:12px;border:
 <div id="otpBox" class="box hidden"><h3>Enter OTP</h3><p>Demo OTP: <b id="demoOTP"></b></p><input id="otpInput" placeholder="Enter 6 character OTP"><button class="green" onclick="verifyOTP()">Verify</button></div>
 </div>
 <div id="mainPage" class="hidden">
-<div class="topbar"><button style="background:#8b5cf6;color:white" onclick="go404()">Purchases</button><button style="background:#ef4444;color:white" onclick="logout()">Logout</button></div>
+<div class="topbar"><button style="background:#8b5cf6;color:white" onclick="location.href='purchase.html'">Purchases</button><button style="background:#ef4444;color:white" onclick="logout()">Logout</button></div>
 <div class="center">
 <div class="main-top-space"></div>
 <img src="logo_transparent.png" class="logo-main" alt="Trading Master Logo">
 <h1 class="one-line">Welcome to Trading Master</h1>
 <p id="welcomeUser" class="welcome-name"></p>
-<button class="green" onclick="go404()">Start Now Trading</button>
+<button class="green" onclick="location.href='trade.html'">Start Now Trading</button>
 </div>
-<div class="bottom-left"><button onclick="go404()">Help</button></div>
+<div class="bottom-left"><button onclick="location.href='help.html'">Help</button></div>
 </div>
-<div id="p404" class="hidden center"><p class="err">404</p><h2>Page Not Found</h2><p>This page will be added later.</p><button class="green" onclick="backMain()">Back</button></div>
 <script>
 function togglePass(id,btn){let x=document.getElementById(id);if(x.type==="password"){x.type="text";btn.textContent="🙈"}else{x.type="password";btn.textContent="👁️"}}
 function generateOTP(){const l="ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnpqrstuvwxyz";const n="23456789";let o="";for(let i=0;i<3;i++)o+=l.charAt(Math.floor(Math.random()*l.length));for(let i=0;i<3;i++)o+=n.charAt(Math.floor(Math.random()*n.length));return o.split('').sort(()=>Math.random()-0.5).join('')}
@@ -67,9 +65,7 @@ function hideAll(){['registerBox','loginBox','forgotBox','otpBox'].forEach(id=>d
 function sendOTP(m){if(m=='register'){let e=document.getElementById('rEmail').value.trim().toLowerCase(),p=document.getElementById('rPass').value,p2=document.getElementById('rPass2').value;if(!e||p!=p2||!p){alert('Check fields');return}if(localStorage.getItem('tm_user_'+e)){alert('your mail already login - Please use Sign Up with same mail');showLogin();return}tempUser={email:e,pass:p,fname:document.getElementById('fName').value}}if(m=='forgot'){let e=document.getElementById('fEmail').value.trim().toLowerCase(),p=document.getElementById('fNewPass').value,p2=document.getElementById('fNewPass2').value;if(!e||p!=p2||!p){alert('Check fields');return}let s=JSON.parse(localStorage.getItem('tm_user_'+e)||'null');if(!s){alert('Email not found');return}tempUser={email:e,pass:p,fname:s.fname}}currentOTP=generateOTP();document.getElementById('demoOTP').innerText=currentOTP;hideAll();document.getElementById('otpBox').classList.remove('hidden')}
 function verifyOTP(){if(document.getElementById('otpInput').value===currentOTP){localStorage.setItem('tm_user_'+tempUser.email,JSON.stringify(tempUser));localStorage.setItem('tm_last',tempUser.email);openMain(tempUser)}else alert('Wrong OTP')}
 function doLogin(){let e=document.getElementById('lEmail').value.trim().toLowerCase(),p=document.getElementById('lPass').value;let s=JSON.parse(localStorage.getItem('tm_user_'+e)||'null');if(s&&s.pass==p){localStorage.setItem('tm_last',e);openMain(s)}else alert('Wrong email/password')}
-function openMain(u){document.getElementById('authPage').classList.add('hidden');document.getElementById('p404').classList.add('hidden');document.getElementById('mainPage').classList.remove('hidden');document.getElementById('welcomeUser').innerText='Welcome '+(u.fname||u.email)}
-function go404(){document.getElementById('mainPage').classList.add('hidden');document.getElementById('p404').classList.remove('hidden')}
-function backMain(){document.getElementById('p404').classList.add('hidden');document.getElementById('mainPage').classList.remove('hidden')}
+function openMain(u){document.getElementById('authPage').classList.add('hidden');document.getElementById('mainPage').classList.remove('hidden');document.getElementById('welcomeUser').innerText='Welcome '+(u.fname||u.email)}
 function logout(){localStorage.removeItem('tm_last');location.reload()}
 let last=localStorage.getItem('tm_last');if(last){let u=JSON.parse(localStorage.getItem('tm_user_'+last)||'null');if(u)openMain(u)}
 </script>
