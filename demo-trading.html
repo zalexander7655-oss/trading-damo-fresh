@@ -58,12 +58,13 @@ let price = 50000;
 let candles = [];
 let history = [];
 let myTrades = [];
+let tickCount = 0;
 
 for(let i=0;i<40;i++){
   let o = price;
-  let c = o + (Math.random()-0.5)*400;
-  let h = Math.max(o,c)+Math.random()*100;
-  let l = Math.min(o,c)-Math.random()*100;
+  let c = o + (Math.random()-0.5)*150;
+  let h = Math.max(o,c)+Math.random()*40;
+  let l = Math.min(o,c)-Math.random()*40;
   candles.push({o,h,l,c});
   price=c;
 }
@@ -75,14 +76,13 @@ function drawChart(){
   let all=candles.flatMap(k=>[k.h,k.l]);
   let mn=Math.min(...all), mx=Math.max(...all);
   let range=mx-mn||1;
-  // 40% aage khali
   let totalSlots = Math.floor(candles.length / 0.6);
   let cw = cv.width / totalSlots;
   candles.forEach((k,i)=>{
     let x=i*cw+cw*0.2;
     let y = (v)=> cv.height-20 - ((v-mn)/range)*(cv.height-40);
     let col = k.c>=k.o ? '#00c853' : '#ff3d00';
-    ctx.strokeStyle=col; ctx.fillStyle=col;
+    ctx.strokeStyle=col; ctx.fillStyle=col; ctx.lineWidth=1;
     ctx.beginPath(); ctx.moveTo(x+cw*0.3, y(k.h)); ctx.lineTo(x+cw*0.3, y(k.l)); ctx.stroke();
     let yo=y(k.o), yc=y(k.c);
     ctx.fillRect(x, Math.min(yo,yc), cw*0.6, Math.abs(yc-yo)||2);
@@ -94,28 +94,26 @@ document.getElementById('startBtn').addEventListener('click',function(){
   document.getElementById('tradingPanel').style.display='block';
   drawChart();
   setInterval(()=>{
-    let last=candles[candles.length-1];
-    let o=last.c;
-    let c=o+(Math.random()-0.48)*300;
-    let h=Math.max(o,c)+Math.random()*80;
-    let l=Math.min(o,c)-Math.random()*80;
-    if(Math.random()>0.7){
-      candles.push({o,h,l,c});
+    tickCount++;
+    let last = candles[candles.length-1];
+    let move = (Math.random()-0.49)*60;
+    price = last.c + move;
+    last.c = price;
+    if(price > last.h) last.h = price;
+    if(price < last.l) last.l = price;
+    if(tickCount % 15 === 0){
+      candles.push({o:last.c, h:last.c, l:last.c, c:last.c});
       if(candles.length>50) candles.shift();
-    } else {
-      last.c=c; last.h=Math.max(last.h,h); last.l=Math.min(last.l,l);
     }
-    price=c;
     document.getElementById('livePrice').innerText='$'+price.toFixed(2);
     drawChart();
     checkTrades();
-  },1000);
+  },400);
 });
 
 function openTrade(type){
-  // Balance 0 ho to trading BLOCK
   if(balance <= 0){
-    alert('Balance $0.00 hai - Trading nahi ho sakti! Pehle balance add karein.');
+    alert('Balance is $0.00 - Trading not allowed! Please add balance first.');
     return;
   }
   let lot=parseFloat(document.getElementById('lot').value);
@@ -126,11 +124,12 @@ function openTrade(type){
 }
 
 function checkTrades(){
-  if(myTrades.length>0 && Math.random()>0.8){
+  if(myTrades.length>0 && Math.random()>0.85){
     let tr=myTrades.shift();
-    let pnl=(Math.random()-0.45)*tr.lot*200;
+    let diff = price - tr.entry;
+    let pnl = tr.type==='BUY' ? diff*tr.lot*0.5 : -diff*tr.lot*0.5;
     balance+=pnl;
-    if(balance<0) balance=0; // 0 se neeche nahi jayega
+    if(balance<0) balance=0;
     document.getElementById('balance').innerText='$'+balance.toFixed(2);
     document.getElementById('balance').style.color=balance>0?'#00c853':'#ff3d00';
     history.push({...tr,pnl:pnl.toFixed(2)});
