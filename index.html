@@ -5,23 +5,25 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Trading Master</title>
 <style>
-body{margin:0;font-family:Arial;background:linear-gradient(135deg,#e0f2fe,#f0fdfa);min-height:100vh}
+body{margin:0;font-family:Arial;background:linear-gradient(135deg,#e0f2fe,#f0fdfa);min-height:100vh;position:relative;padding-bottom:70px}
+.topbar{display:flex;justify-content:space-between;padding:15px}
+.topbar button{padding:10px 18px;border:none;border-radius:8px;cursor:pointer;font-weight:bold}
 .center{text-align:center;padding:20px;max-width:400px;margin:auto}
-.logo{width:80px;height:80px;background:#0ea5e9;color:white;font-size:38px;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:20px auto}
+.logo-area{width:90px;height:90px;margin:20px auto;display:flex;align-items:center;justify-content:center;border:2px dashed #0ea5e9;border-radius:12px;color:#0ea5e9}
 .box{background:white;padding:20px;border-radius:12px;box-shadow:0 4px 10px rgba(0,0,0,0.1);margin-top:15px}
 input{width:90%;padding:12px;margin:8px 0;border:1px solid #cbd5e1;border-radius:8px}
-button{padding:12px 20px;border:none;border-radius:8px;cursor:pointer;font-weight:bold;margin:5px}
-.green{background:#22c55e;color:white;width:100%;font-size:16px}
-.linkbtn{background:#e2e8f0;width:100%;margin-top:8px}
-.navbar{display:flex;justify-content:space-between;padding:15px}
+button.green{background:#22c55e;color:white;width:100%;font-size:16px;padding:14px;border:none;border-radius:10px;cursor:pointer;margin-top:10px}
+button.linkbtn{background:#e2e8f0;width:100%;margin-top:8px;padding:12px;border:none;border-radius:8px;cursor:pointer}
 .hidden{display:none}
+.bottom-bar{position:fixed;bottom:15px;left:15px;right:15px;display:flex;justify-content:space-between}
+.bottom-bar button{padding:12px 20px;border:none;border-radius:8px;font-weight:bold;cursor:pointer}
 </style>
 </head>
 <body>
 
-<!-- LOGIN / SIGNUP PAGE -->
+<!-- AUTH PAGE -->
 <div id="authPage" class="center">
-<div class="logo">TM</div>
+<div class="logo-area">MY LOGO</div>
 <h2>Trading Master Login</h2>
 
 <div id="registerBox" class="box">
@@ -32,23 +34,23 @@ button{padding:12px 20px;border:none;border-radius:8px;cursor:pointer;font-weigh
 <input id="rPass" placeholder="Password" type="password">
 <input id="rPass2" placeholder="Confirm Password" type="password">
 <button class="green" onclick="sendOTP('register')">Continue</button>
-<button class="linkbtn" onclick="showLogin()">Sign Up / Login (Existing User)</button>
+<button class="linkbtn" onclick="showLogin()">Sign Up</button>
 <button class="linkbtn" onclick="showForgot()">Forgot Password</button>
 </div>
 
 <div id="loginBox" class="box hidden">
-<h3>Sign Up - Existing User</h3>
+<h3>Sign Up</h3>
 <input id="lEmail" placeholder="Email" type="email">
 <input id="lPass" placeholder="Password" type="password">
-<button class="green" onclick="doLogin()">Login to Main Page</button>
-<button class="linkbtn" onclick="showRegister()">Back to Create Account</button>
+<button class="green" onclick="doLogin()">Login</button>
+<button class="linkbtn" onclick="showRegister()">Back</button>
 </div>
 
 <div id="forgotBox" class="box hidden">
 <h3>Forgot Password</h3>
-<input id="fEmail" placeholder="Same Email" type="email">
+<input id="fEmail" placeholder="Email" type="email">
 <input id="fNewPass" placeholder="New Password" type="password">
-<input id="fNewPass2" placeholder="Confirm New Password" type="password">
+<input id="fNewPass2" placeholder="Confirm Password" type="password">
 <button class="green" onclick="sendOTP('forgot')">Continue</button>
 <button class="linkbtn" onclick="showRegister()">Back</button>
 </div>
@@ -57,36 +59,44 @@ button{padding:12px 20px;border:none;border-radius:8px;cursor:pointer;font-weigh
 <h3>Enter OTP</h3>
 <p>Demo OTP: <b id="demoOTP"></b></p>
 <input id="otpInput" placeholder="Enter OTP">
-<button class="green" onclick="verifyOTP()">Verify & Login</button>
+<button class="green" onclick="verifyOTP()">Verify</button>
 </div>
 </div>
 
 <!-- MAIN PAGE -->
 <div id="mainPage" class="hidden">
-<div class="navbar">
-<button style="background:#facc15" onclick="alert('Help: support@tradingmaster.demo - Demo only')">Help</button>
+<div class="topbar">
 <button style="background:#8b5cf6;color:white" onclick="showPurchases()">Purchases</button>
+<button style="background:#ef4444;color:white" onclick="logout()">Logout</button>
 </div>
+
 <div class="center">
-<div class="logo">TM</div>
+<div class="logo-area">MY LOGO</div>
 <h1>Welcome to Trading Master</h1>
 <p id="welcomeUser"></p>
 <div class="box">
-<p>Balance: $<span id="bal">1000</span></p>
-<p style="font-size:28px;color:#22c55e" id="price">$100.00</p>
-<button class="green" onclick="startTradingDemo()">Start Now Trading</button>
-<button class="linkbtn" onclick="logout()">Logout</button>
-<div id="tradeArea" class="hidden">
-<button style="background:#22c55e;color:white" onclick="trade(1)">BUY</button>
-<button style="background:#ef4444;color:white" onclick="trade(-1)">SELL</button>
+<p>Balance: $<span id="bal">0.00</span></p>
+<p style="font-size:12px;color:gray">Purchased amount will show here</p>
+<button class="green" onclick="goTrading()">Start Now Trading</button>
 </div>
 </div>
+
+<div class="bottom-bar">
+<button style="background:#facc15" onclick="showHelp()">Help</button>
+<span></span>
 </div>
+</div>
+
+<!-- TRADING PAGE -->
+<div id="tradePage" class="hidden center">
+<h2>Trading</h2>
+<p>Demo Trading Area</p>
+<button class="green" onclick="backMain()">Back</button>
 </div>
 
 <script>
 let currentOTP="", currentMode="", tempUser={};
-let price=100, balance=parseFloat(localStorage.getItem('tm_bal')||1000);
+let balance=parseFloat(localStorage.getItem('tm_bal')||0);
 
 function showLogin(){hideAll();document.getElementById('loginBox').classList.remove('hidden')}
 function showRegister(){hideAll();document.getElementById('registerBox').classList.remove('hidden')}
@@ -96,54 +106,56 @@ function hideAll(){['registerBox','loginBox','forgotBox','otpBox'].forEach(id=>d
 function sendOTP(mode){
  currentMode=mode;
  if(mode=='register'){
-  let e=document.getElementById('rEmail').value, p=document.getElementById('rPass').value, p2=document.getElementById('rPass2').value;
-  if(!e||p!=p2||!p){alert('Check email/password');return}
-  tempUser={email:e, pass:p, fname:document.getElementById('fName').value};
+  let e=document.getElementById('rEmail').value,p=document.getElementById('rPass').value,p2=document.getElementById('rPass2').value;
+  if(!e||p!=p2||!p){alert('Check fields');return}
+  tempUser={email:e,pass:p,fname:document.getElementById('fName').value};
  }
  if(mode=='forgot'){
-  let e=document.getElementById('fEmail').value, p=document.getElementById('fNewPass').value, p2=document.getElementById('fNewPass2').value;
+  let e=document.getElementById('fEmail').value,p=document.getElementById('fNewPass').value,p2=document.getElementById('fNewPass2').value;
   if(!e||p!=p2||!p){alert('Check fields');return}
   let saved=JSON.parse(localStorage.getItem('tm_user_'+e)||'null');
   if(!saved){alert('Email not found');return}
-  tempUser={email:e, pass:p, fname:saved.fname};
+  tempUser={email:e,pass:p,fname:saved.fname};
  }
  currentOTP=Math.floor(1000+Math.random()*9000).toString();
  document.getElementById('demoOTP').innerText=currentOTP;
  hideAll();document.getElementById('otpBox').classList.remove('hidden');
 }
-
 function verifyOTP(){
- let v=document.getElementById('otpInput').value;
- if(v==currentOTP){
-  localStorage.setItem('tm_user_'+tempUser.email, JSON.stringify(tempUser));
-  localStorage.setItem('tm_last', tempUser.email);
+ if(document.getElementById('otpInput').value==currentOTP){
+  localStorage.setItem('tm_user_'+tempUser.email,JSON.stringify(tempUser));
+  localStorage.setItem('tm_last',tempUser.email);
   openMain(tempUser);
  } else alert('Wrong OTP');
 }
-
 function doLogin(){
- let e=document.getElementById('lEmail').value, p=document.getElementById('lPass').value;
- let saved=JSON.parse(localStorage.getItem('tm_user_'+e)||'null');
- if(saved && saved.pass==p){ localStorage.setItem('tm_last', e); openMain(saved); }
- else alert('Wrong email/password - No OTP needed for existing user');
+ let e=document.getElementById('lEmail').value,p=document.getElementById('lPass').value;
+ let s=JSON.parse(localStorage.getItem('tm_user_'+e)||'null');
+ if(s&&s.pass==p){localStorage.setItem('tm_last',e);openMain(s)} else alert('Wrong email/password');
 }
-
 function openMain(user){
  document.getElementById('authPage').classList.add('hidden');
+ document.getElementById('tradePage').classList.add('hidden');
  document.getElementById('mainPage').classList.remove('hidden');
- document.getElementById('welcomeUser').innerText='Welcome '+ (user.fname||user.email);
+ document.getElementById('welcomeUser').innerText='Welcome '+(user.fname||user.email);
  document.getElementById('bal').innerText=balance.toFixed(2);
- setInterval(()=>{price+=(Math.random()-0.5)*2; let el=document.getElementById('price'); if(el) el.innerText='$'+price.toFixed(2)},1000);
 }
-
-function startTradingDemo(){document.getElementById('tradeArea').classList.remove('hidden'); alert('Trading started - Demo only');}
-function trade(d){ balance+= d*price*0.01; localStorage.setItem('tm_bal', balance); document.getElementById('bal').innerText=balance.toFixed(2); }
-function showPurchases(){alert('Purchases saved. Balance: $'+balance.toFixed(2)+' - Demo data saved, no loss.')}
-function logout(){location.reload()}
-
-// auto login if already
+function goTrading(){
+ document.getElementById('mainPage').classList.add('hidden');
+ document.getElementById('tradePage').classList.remove('hidden');
+}
+function backMain(){
+ document.getElementById('tradePage').classList.add('hidden');
+ document.getElementById('mainPage').classList.remove('hidden');
+}
+function showPurchases(){
+ let amt=prompt('Enter purchase amount to add demo balance:');
+ if(amt){balance+=parseFloat(amt);localStorage.setItem('tm_bal',balance);document.getElementById('bal').innerText=balance.toFixed(2);alert('Purchased! New Balance: $'+balance.toFixed(2));}
+}
+function showHelp(){alert('Help: support@tradingmaster.demo');}
+function logout(){localStorage.removeItem('tm_last');location.reload();}
 let last=localStorage.getItem('tm_last');
-if(last){ let u=JSON.parse(localStorage.getItem('tm_user_'+last)||'null'); if(u) openMain(u); }
+if(last){let u=JSON.parse(localStorage.getItem('tm_user_'+last)||'null');if(u) openMain(u);}
 </script>
 </body>
 </html>
