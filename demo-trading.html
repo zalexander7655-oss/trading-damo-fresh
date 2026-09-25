@@ -1,63 +1,72 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Global Demo Trading Pro</title>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <style>
-body{background:#0e1117;color:#fff;font-family:Arial;margin:0}
-.header{background:#161b22;padding:15px;display:flex;justify-content:space-between;align-items:center}
-.btn{background:#00c853;color:#fff;border:none;padding:10px 20px;border-radius:5px;cursor:pointer;font-weight:bold;margin:5px}
+body{background:#0e1117;color:#fff;font-family:Arial;margin:0;text-align:center}
+.header{background:#161b22;padding:15px;display:flex;justify-content:space-between}
+.btn{background:#00c853;color:#fff;border:none;padding:12px 25px;border-radius:5px;cursor:pointer;font-weight:bold;font-size:16px;margin:10px}
 .btn-red{background:#ff3d00}
-.card{background:#161b22;margin:15px;padding:15px;border-radius:10px}
+.card{background:#161b22;margin:15px;padding:20px;border-radius:10px}
 </style>
 </head>
 <body>
 <div class="header">
-<div><h2>Global Demo Trading Pro</h2></div>
-<div><span id="balance" style="color:#00c853;font-size:20px;">$100,000.00</span></div>
+<div><b>Global Demo Trading Pro</b></div>
+<div><span id="balance" style="color:#00c853;">$100,000.00</span></div>
 </div>
 
-<div class="card" id="welcomeCard" style="text-align:center">
+<div id="welcomeCard" class="card">
 <h1>Welcome to Live Demo Trading</h1>
-<p>Practice with $100,000 virtual money. Forex, Crypto, Stocks for all world.</p>
-<button class="btn" onclick="startTrading()">Start Now Trading</button>
+<p>Practice with $100,000 virtual money.</p>
+<button class="btn" id="startBtn">Start Now Trading</button>
 </div>
 
-<div class="card" id="tradingPanel" style="display:none">
-<h3>Symbol: <select id="symbol"><option>EUR/USD</option><option>BTC/USD</option><option>ETH/USD</option><option>AAPL</option><option>TSLA</option><option>GOLD</option></select>
-<span id="livePrice" style="color:#00c853;">$0</span></h3>
-<canvas id="chart"></canvas>
-<br><br>
+<div id="tradingPanel" class="card" style="display:none;">
+<h3><select id="symbol"><option>EUR/USD</option><option>BTC/USD</option><option>ETH/USD</option><option>AAPL</option><option>GOLD</option></select>
+<span id="livePrice" style="color:#00c853;">$50000</span></h3>
+<canvas id="chart" height="200"></canvas><br>
 Lot: <input type="number" id="lot" value="1" style="width:60px">
-<button class="btn" onclick="doTrade('BUY')">BUY</button>
-<button class="btn btn-red" onclick="doTrade('SELL')">SELL</button>
-<h4>Positions</h4><div id="pos">No trades yet</div>
+<button class="btn" onclick="trade('BUY')">BUY</button>
+<button class="btn btn-red" onclick="trade('SELL')">SELL</button>
+<div id="pos"><p>No trades yet</p></div>
 </div>
 
 <script>
-let bal=100000, price=50000, myChart;
+let price = 50000;
 let arr = [];
-for(let i=0;i<50;i++){ arr.push(50000+Math.random()*1000); }
+for(let i=0;i<50;i++){ arr.push(50000 + Math.random()*500); }
 
-function startTrading(){
- document.getElementById('welcomeCard').style.display='none';
- document.getElementById('tradingPanel').style.display='block';
- let ctx=document.getElementById('chart').getContext('2d');
- myChart=new Chart(ctx,{type:'line',data:{labels:Array(50).fill(''),datasets:[{label:'Live Price',data:arr,borderColor:'#00c853',tension:0.2}]},options:{animation:false}});
- setInterval(()=>{
-  price=price+(Math.random()-0.48)*200;
-  arr.push(price); arr.shift();
-  myChart.data.datasets[0].data=arr; myChart.update();
-  document.getElementById('livePrice').innerText='$'+price.toFixed(2);
- },1000);
-}
-function doTrade(type){
- let sym=document.getElementById('symbol').value;
- let lot=document.getElementById('lot').value;
- document.getElementById('pos').innerHTML+='<p>'+type+' '+sym+' Lot:'+lot+' @ $'+price.toFixed(2)+'</p>';
- alert(type+' order placed DEMO');
+document.getElementById('startBtn').addEventListener('click', function(){
+  document.getElementById('welcomeCard').style.display = 'none';
+  document.getElementById('tradingPanel').style.display = 'block';
+  
+  let ctx = document.getElementById('chart').getContext('2d');
+  window.myChart = new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels: Array(50).fill(''),
+      datasets: [{ label: 'Price', data: arr, borderColor: '#00c853', borderWidth: 2, pointRadius: 0 }]
+    },
+    options: { animation: false }
+  });
+
+  setInterval(function(){
+    price = price + (Math.random() - 0.48) * 200;
+    arr.push(price); arr.shift();
+    window.myChart.data.datasets[0].data = arr;
+    window.myChart.update();
+    document.getElementById('livePrice').innerText = '$' + price.toFixed(2);
+  }, 1000);
+});
+
+function trade(type){
+  let s = document.getElementById('symbol').value;
+  document.getElementById('pos').innerHTML += '<p>'+type+' '+s+' @ $'+price.toFixed(2)+'</p>';
+  alert(type + ' Demo Order Placed');
 }
 </script>
 </body>
