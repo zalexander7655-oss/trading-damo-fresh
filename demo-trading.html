@@ -1,73 +1,147 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Global Demo Trading Pro</title>
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<title>Trading Master - Demo</title>
 <style>
 body{background:#0e1117;color:#fff;font-family:Arial;margin:0;text-align:center}
-.header{background:#161b22;padding:15px;display:flex;justify-content:space-between}
-.btn{background:#00c853;color:#fff;border:none;padding:12px 25px;border-radius:5px;cursor:pointer;font-weight:bold;font-size:16px;margin:10px}
+.header{background:#161b22;padding:12px;display:flex;justify-content:space-between;align-items:center}
+.btn{background:#00c853;color:#fff;border:none;padding:12px 25px;border-radius:6px;cursor:pointer;font-weight:bold;font-size:16px;margin:5px}
 .btn-red{background:#ff3d00}
+.btn-hist{background:#1e88e5;color:#fff;border:none;padding:8px 15px;border-radius:5px;cursor:pointer}
 .card{background:#161b22;margin:15px;padding:20px;border-radius:10px}
+#chart{width:100%;height:350px;background:#0e1117}
+#historyModal{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.9);z-index:100}
+.hist-box{background:#161b22;margin:50px auto;padding:20px;width:90%;max-width:500px;border-radius:10px;max-height:70%;overflow:auto}
+table{width:100%;border-collapse:collapse;font-size:14px}
+th,td{border:1px solid #333;padding:8px}
+th{background:#222}
 </style>
 </head>
 <body>
 <div class="header">
-<div><b>Global Demo Trading Pro</b></div>
-<div><span id="balance" style="color:#00c853;">$100,000.00</span></div>
+<div><b>Trading Master</b></div>
+<div>
+<span>Balance: <b id="balance" style="color:#00c853;">$0.00</b></span>
+<button class="btn-hist" onclick="showHistory()">History</button>
+</div>
 </div>
 
 <div id="welcomeCard" class="card">
-<h1>Welcome to Live Demo Trading</h1>
-<p>Practice with $100,000 virtual money.</p>
+<h1>Welcome to Trading Master</h1>
+<p>Welcome ishrat</p>
 <button class="btn" id="startBtn">Start Now Trading</button>
 </div>
 
 <div id="tradingPanel" class="card" style="display:none;">
 <h3><select id="symbol"><option>EUR/USD</option><option>BTC/USD</option><option>ETH/USD</option><option>AAPL</option><option>GOLD</option></select>
-<span id="livePrice" style="color:#00c853;">$50000</span></h3>
-<canvas id="chart" height="200"></canvas><br>
-Lot: <input type="number" id="lot" value="1" style="width:60px">
-<button class="btn" onclick="trade('BUY')">BUY</button>
-<button class="btn btn-red" onclick="trade('SELL')">SELL</button>
-<div id="pos"><p>No trades yet</p></div>
+<span id="livePrice" style="color:#00c853;">$50000.00</span></h3>
+<canvas id="chart" width="800" height="350"></canvas><br><br>
+Lot: <input type="number" id="lot" value="1" min="1" style="width:60px;padding:5px">
+<button class="btn" onclick="openTrade('BUY')">BUY</button>
+<button class="btn btn-red" onclick="openTrade('SELL')">SELL</button>
+<div id="openPos"></div>
+</div>
+
+<div id="historyModal">
+<div class="hist-box">
+<h3>Trading History</h3>
+<button class="btn-hist" onclick="hideHistory()">Close</button>
+<table><thead><tr><th>Symbol</th><th>Type</th><th>Lot</th><th>PnL</th></tr></thead><tbody id="histBody"></tbody></table>
+</div>
 </div>
 
 <script>
+let balance = 0;
 let price = 50000;
-let arr = [];
-for(let i=0;i<50;i++){ arr.push(50000 + Math.random()*500); }
+let candles = [];
+let history = [];
+let myTrades = [];
 
-document.getElementById('startBtn').addEventListener('click', function(){
-  document.getElementById('welcomeCard').style.display = 'none';
-  document.getElementById('tradingPanel').style.display = 'block';
-  
-  let ctx = document.getElementById('chart').getContext('2d');
-  window.myChart = new Chart(ctx, {
-    type: 'line',
-    data: {
-      labels: Array(50).fill(''),
-      datasets: [{ label: 'Price', data: arr, borderColor: '#00c853', borderWidth: 2, pointRadius: 0 }]
-    },
-    options: { animation: false }
+for(let i=0;i<40;i++){
+  let o = price;
+  let c = o + (Math.random()-0.5)*400;
+  let h = Math.max(o,c)+Math.random()*100;
+  let l = Math.min(o,c)-Math.random()*100;
+  candles.push({o,h,l,c});
+  price=c;
+}
+
+function drawChart(){
+  let cv=document.getElementById('chart');
+  let ctx=cv.getContext('2d');
+  ctx.clearRect(0,0,cv.width,cv.height);
+  let all=candles.flatMap(k=>[k.h,k.l]);
+  let mn=Math.min(...all), mx=Math.max(...all);
+  let range=mx-mn||1;
+  let totalSlots = candles.length + Math.floor(candles.length*0.2); // 20% khali aage
+  let cw = cv.width / totalSlots;
+  candles.forEach((k,i)=>{
+    let x=i*cw+cw*0.2;
+    let y = (v)=> cv.height-20 - ((v-mn)/range)*(cv.height-40);
+    let col = k.c>=k.o ? '#00c853' : '#ff3d00';
+    ctx.strokeStyle=col; ctx.fillStyle=col;
+    ctx.beginPath(); ctx.moveTo(x+cw*0.3, y(k.h)); ctx.lineTo(x+cw*0.3, y(k.l)); ctx.stroke();
+    let yo=y(k.o), yc=y(k.c);
+    ctx.fillRect(x, Math.min(yo,yc), cw*0.6, Math.abs(yc-yo)||2);
   });
+}
 
-  setInterval(function(){
-    price = price + (Math.random() - 0.48) * 200;
-    arr.push(price); arr.shift();
-    window.myChart.data.datasets[0].data = arr;
-    window.myChart.update();
-    document.getElementById('livePrice').innerText = '$' + price.toFixed(2);
-  }, 1000);
+document.getElementById('startBtn').addEventListener('click',function(){
+  document.getElementById('welcomeCard').style.display='none';
+  document.getElementById('tradingPanel').style.display='block';
+  drawChart();
+  setInterval(()=>{
+    let last=candles[candles.length-1];
+    let o=last.c;
+    let c=o+(Math.random()-0.48)*300;
+    let h=Math.max(o,c)+Math.random()*80;
+    let l=Math.min(o,c)-Math.random()*80;
+    // naya candle har 3 sec me
+    if(Math.random()>0.7){
+      candles.push({o,h,l,c});
+      if(candles.length>50) candles.shift();
+    } else {
+      last.c=c; last.h=Math.max(last.h,h); last.l=Math.min(last.l,l);
+    }
+    price=c;
+    document.getElementById('livePrice').innerText='$'+price.toFixed(2);
+    drawChart();
+    checkTrades();
+  },1000);
 });
 
-function trade(type){
-  let s = document.getElementById('symbol').value;
-  document.getElementById('pos').innerHTML += '<p>'+type+' '+s+' @ $'+price.toFixed(2)+'</p>';
-  alert(type + ' Demo Order Placed');
+function openTrade(type){
+  let lot=parseFloat(document.getElementById('lot').value);
+  let sym=document.getElementById('symbol').value;
+  let tr={sym,type,lot,entry:price,time:new Date().toLocaleTimeString()};
+  myTrades.push(tr);
+  document.getElementById('openPos').innerHTML+='<p>'+type+' '+lot+' '+sym+' @ $'+price.toFixed(2)+' - Running...</p>';
 }
+
+function checkTrades(){
+  // har trade 8 sec baad close, random profit/loss
+  if(myTrades.length>0 && Math.random()>0.8){
+    let tr=myTrades.shift();
+    let pnl=(Math.random()-0.45)*tr.lot*200; // profit/loss
+    balance+=pnl;
+    document.getElementById('balance').innerText='$'+balance.toFixed(2);
+    document.getElementById('balance').style.color=pnl>=0?'#00c853':'#ff3d00';
+    history.push({...tr,pnl:pnl.toFixed(2)});
+    updateHist();
+    document.getElementById('openPos').innerHTML+='<p>Closed '+tr.type+' PnL: $'+pnl.toFixed(2)+'</p>';
+  }
+}
+function updateHist(){
+  let b=document.getElementById('histBody');
+  b.innerHTML='';
+  history.forEach(h=>{
+    b.innerHTML+='<tr><td>'+h.sym+'</td><td>'+h.type+'</td><td>'+h.lot+'</td><td style="color:'+(h.pnl>=0?'#00c853':'#ff3d00')+'">$'+h.pnl+'</td></tr>';
+  });
+}
+function showHistory(){document.getElementById('historyModal').style.display='block';}
+function hideHistory(){document.getElementById('historyModal').style.display='none';}
 </script>
 </body>
 </html>
