@@ -9,7 +9,8 @@ body{margin:0;font-family:Arial;background:#eef6f7;min-height:100vh}
 .topbar{display:flex;justify-content:space-between;padding:15px}
 .topbar button{padding:10px 18px;border:none;border-radius:8px;cursor:pointer;font-weight:bold}
 .center{text-align:center;padding:20px;max-width:700px;margin:auto}
-.main-top-space{height:220px}
+.main-top-space{height:30px}
+.logo-main{width:180px;max-width:60%;margin-bottom:10px}
 h1.one-line{font-size:46px;font-weight:900;color:#000;margin:0 0 15px 0}
 p.welcome-name{margin:0 0 25px 0}
 .box{background:white;padding:20px;border-radius:12px;box-shadow:0 4px 10px rgba(0,0,0,0.1);margin-top:15px}
@@ -44,7 +45,13 @@ button.linkbtn{background:#e2e8f0;width:100%;margin-top:8px;padding:12px;border:
 </div>
 <div id="mainPage" class="hidden">
 <div class="topbar"><button style="background:#8b5cf6;color:white" onclick="go404()">Purchases</button><button style="background:#ef4444;color:white" onclick="logout()">Logout</button></div>
-<div class="center"><div class="main-top-space"></div><h1 class="one-line">Welcome to Trading Master</h1><p id="welcomeUser" class="welcome-name"></p><button class="green" onclick="go404()">Start Now Trading</button></div>
+<div class="center">
+<div class="main-top-space"></div>
+<img src="logo_transparent.png" class="logo-main" alt="Trading Master Logo">
+<h1 class="one-line">Welcome to Trading Master</h1>
+<p id="welcomeUser" class="welcome-name"></p>
+<button class="green" onclick="go404()">Start Now Trading</button>
+</div>
 <div class="bottom-left"><button onclick="go404()">Help</button></div>
 </div>
 <div id="p404" class="hidden center"><p class="err">404</p><h2>Page Not Found</h2><p>This page will be added later.</p><button class="green" onclick="backMain()">Back</button></div>
