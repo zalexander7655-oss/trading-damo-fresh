@@ -1,24 +1,46 @@
-{
-  "name": "nextjs-boilerplate",
-  "version": "0.1.0",
-  "private": true,
-  "scripts": {
-    "dev": "next dev",
-    "build": "next build",
-    "start": "next start"
-  },
-  "dependencies": {
-    "next": "14.2.5",
-    "react": "18.2.0",
-    "react-dom": "18.2.0",
-    "resend": "^4.0.0",
-    "nodemailer": "^6.9.13"
-  },
-  "devDependencies": {
-    "typescript": "^5",
-    "@types/node": "^20",
-    "@types/react": "^18",
-    "@types/react-dom": "^18",
-    "@types/nodemailer": "^6.4.14"
-  }
+<!DOCTYPE html>
+<html>
+<head>
+<title>Trading Demo Live</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<style>
+body{font-family:Arial;text-align:center;background:#0f172a;color:white;margin:0;padding:20px}
+.card{background:#1e293b;padding:20px;border-radius:12px;max-width:400px;margin:auto}
+#price{font-size:32px;color:#22c55e}
+button{padding:12px 25px;margin:10px;font-size:16px;border:none;border-radius:8px;cursor:pointer}
+.buy{background:#22c55e;color:white}.sell{background:#ef4444;color:white}
+canvas{background:#020617;border-radius:8px;width:100%;height:150px}
+</style>
+</head>
+<body>
+<div class="card">
+<h2>Trading Demo Live</h2>
+<div id="price">$100.00</div>
+<canvas id="c"></canvas>
+<p>Balance: $<span id="bal">1000</span></p>
+<button class="buy" onclick="trade(1)">BUY</button>
+<button class="sell" onclick="trade(-1)">SELL</button>
+<p style="font-size:12px;color:#94a3b8">Ye sirf demo hai. No real money. For education only.</p>
+</div>
+<script>
+let p=100,bal=1000,prices=[100];
+let ctx=document.getElementById('c').getContext('2d');
+function draw(){
+ ctx.clearRect(0,0,300,150);ctx.beginPath();ctx.strokeStyle='#22c55e';
+ prices.forEach((v,i)=>{let x=i*10,y=150-(v-90)*5;i==0?ctx.moveTo(x,y):ctx.lineTo(x,y)});
+ ctx.stroke();
 }
+function tick(){
+ p+= (Math.random()-0.5)*2;
+ prices.push(p);if(prices.length>30)prices.shift();
+ document.getElementById('price').innerText='$'+p.toFixed(2);
+ draw();
+}
+function trade(d){
+ if(d==1){bal+=p*0.01}else{bal-=p*0.01}
+ document.getElementById('bal').innerText=bal.toFixed(2);
+}
+setInterval(tick,1000);draw();
+</script>
+</body>
+</html>
