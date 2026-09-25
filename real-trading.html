@@ -7,61 +7,27 @@
 <style>
 body{background:#fefce8;font-family:Arial;margin:0;text-align:center;color:#1e2329}
 .header{background:#ffffff;padding:15px;box-shadow:0 2px 5px rgba(0,0,0,0.1);font-weight:bold;font-size:20px}
-.card{background:#ffffff;max-width:650px;margin:30px auto;padding:30px;border-radius:12px;box-shadow:0 4px 15px rgba(0,0,0,0.1)}
-.btn-binance{background:#F0B90B;color:#1e2329;border:none;padding:16px 35px;border-radius:10px;font-weight:bold;font-size:18px;cursor:pointer;margin:10px;width:90%;max-width:380px}
-.btn-back{background:#e2e8f0;color:#1e2329;border:none;padding:12px 25px;border-radius:8px;cursor:pointer;margin-top:15px;font-weight:bold}
-.ref-box{background:#fef9c3;border:1px dashed #F0B90B;padding:15px;border-radius:8px;margin:20px 0;word-break:break-all}
-.steps{text-align:left;margin:20px auto;max-width:500px;line-height:1.9}
-.badge{display:inline-block;background:#00c853;color:white;padding:5px 15px;border-radius:20px;font-size:14px;font-weight:bold;margin:5px}
+.card{background:#ffffff;max-width:500px;margin:80px auto;padding:40px 30px;border-radius:12px;box-shadow:0 4px 15px rgba(0,0,0,0.1)}
+.btn-create{background:#F0B90B;color:#1e2329;border:none;padding:18px 40px;border-radius:10px;font-weight:bold;font-size:20px;cursor:pointer;width:90%;max-width:350px}
+.btn-back{background:#e2e8f0;color:#1e2329;border:none;padding:12px 25px;border-radius:8px;cursor:pointer;margin-top:20px;font-weight:bold}
 </style>
 </head>
 <body>
 <div class="header">Real Trading</div>
 
 <div class="card">
-<h1>Connect with Binance</h1>
-<div>
-<span class="badge">International</span>
-<span class="badge" style="background:#1e88e5;">All Countries Supported</span>
-</div>
-
-<p>Anyone from any country can create a Binance account with our referral link and start real trading.</p>
-
-<div class="steps">
-<b>How it works for international users:</b><br>
-1. Click <b>Connect Binance</b> below<br>
-2. Binance will open - it auto-detects your country<br>
-3. Click Sign Up - create new account with Email / Phone / Google<br>
-4. If you already have Binance, just Login<br>
-5. Your account will link automatically with Referral ID below<br>
-6. Complete KYC for your country and start trading
-</div>
-
-<div class="ref-box">
-<b>Referral ID for All Countries:</b><br>
-<span style="font-size:22px;color:#a16207;"><b>GRO_28502_HBWV9</b></span><br><br>
-<small>Works worldwide - USA, UK, Pakistan, India, UAE, Europe, Africa, Asia</small>
-</div>
-
-<button class="btn-binance" onclick="connectBinance()">Connect Binance - All Countries</button><br>
-<button class="btn-binance" id="startRealBtn" style="display:none;background:#00c853;color:white;" onclick="alert('Real trading dashboard coming soon!')">Start Real Trading Now</button><br>
-
+<h1>Real Trading</h1>
+<br>
+<button class="btn-create" onclick="createAccount()">Create Account</button>
+<br>
 <button class="btn-back" onclick="location.href='index.html'">Back to Home</button>
 </div>
 
 <script>
 const REF_LINK = "https://www.binance.com/referral/earn-together/refer2earn-usdc/claim?hl=en&ref=GRO_28502_HBWV9&utm_source=referral_entrance";
 
-function connectBinance(){
-  localStorage.setItem('tm_binance_connected','yes');
-  // Open international referral link - works for all countries
+function createAccount(){
   window.open(REF_LINK, '_blank');
-  document.getElementById('startRealBtn').style.display='inline-block';
-  alert('Binance opened! Select your country, create account or login. Referral ID GRO_28502_HBWV9 will auto-apply.');
-}
-
-if(localStorage.getItem('tm_binance_connected')==='yes'){
-  document.getElementById('startRealBtn').style.display='inline-block';
 }
 </script>
 </body>
