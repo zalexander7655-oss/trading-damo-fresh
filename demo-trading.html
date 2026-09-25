@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Global Demo Trading Pro</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<style>
+body{background:#0e1117;color:#fff;font-family:Arial;margin:0}
+.header{background:#161b22;padding:15px;display:flex;justify-content:space-between;align-items:center}
+.btn{background:#00c853;color:#fff;border:none;padding:10px 20px;border-radius:5px;cursor:pointer;font-weight:bold}
+.btn-red{background:#ff3d00}
+.card{background:#161b22;margin:15px;padding:15px;border-radius:10px}
+#balance{font-size:24px;color:#00c853}
+</style>
+</head>
+<body>
+<div class="header">
+<div><h2>🌍 Global Demo Trading Pro</h2></div>
+<div><span id="userEmail">Demo User</span> | <span id="balance">$100,000.00</span></div>
+</div>
+
+<div class="card" id="welcomeCard" style="text-align:center">
+<h1>Welcome to Live Demo Trading</h1>
+<p>Practice trading with $100,000 virtual money. For all world markets: Forex, Crypto, Stocks.</p>
+<button class="btn" onclick="startTrading()">Start Now Trading</button>
+</div>
+
+<div class="card" id="tradingPanel" style="display:none">
+<h3>Live Market: <select id="symbol" onchange="changeSymbol()">
+<option>EUR/USD</option><option>BTC/USD</option><option>ETH/USD</option>
+<option>AAPL</option><option>TSLA</option><option>GOLD</option>
+</select> - <span id="livePrice" style="color:#00c853">$0.00</span></h3>
+<canvas id="chart" height="120"></canvas>
+<br>
+<label>Lot Size: <input type="number" id="lot" value="1" min="0.01" step="0.01"></label>
+<label>Leverage: <select id="leverage"><option>1:10</option><option>1:50</option><option>1:100</option><option>1:500</option></select></label>
+<br><br>
+<button class="btn" onclick="trade('BUY')">BUY ▲</button>
+<button class="btn btn-red" onclick="trade('SELL')">SELL ▼</button>
+<button class="btn" style="background:#555" onclick="toggleSettings()">Settings ⚙️</button>
+<div id="settings" style="display:none;margin-top:10px">
+<p>Chart Type: <select><option>Candlestick</option><option>Line</option></select></p>
+<p>Theme: <select><option>Dark</option><option>Light</option></select></p>
+</div>
+<h4>Open Positions</h4>
+<div id="positions">No open trades</div>
+</div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+const firebaseConfig = {
+  apiKey: "AIzaSyD0QuBguIMYEieiOBpzUeGnyMAotaExUKA",
+  authDomain: "trading-damo-fresh.firebaseapp.com",
+  projectId: "trading-damo-fresh",
+  storageBucket: "trading-damo-fresh.firebasestorage.app",
+  messagingSenderId: "1002108502743",
+  appId: "1:1002108502743:web:4c019984dfe319292ea692"
+};
+initializeApp(firebaseConfig);
+</script>
+
+<script>
+let balance = 100000;
+let price = 50000;
+let chart;
+let prices = Array.from({length:50},()=> 50000 + Math.random()*1000);
+
+function startTrading(){
+ document.getElementById('welcomeCard').style.display='none';
+ document.getElementById('tradingPanel').style.display='block';
+ initChart();
+ setInterval(updatePrice, 1000);
+}
+function initChart(){
+ const ctx = document.getElementById('chart').getContext('2d');
+ chart = new Chart(ctx,{type:'line',data:{labels:prices.map((_,i)=>i),datasets:[{label:'Live Price',data:prices,borderColor:'#00c853',fill:false}]},options:{animation:false}});
+}
+function updatePrice(){
+ price += (Math.random()-0.48)*200;
+ prices.push(price); prices.shift();
+ chart.data.datasets[0].data = prices; chart.update();
+ document.getElementById('livePrice').innerText = '$'+price.toFixed(2);
+}
+function changeSymbol(){ price = Math.random()*50000+1000; prices = Array.from({length:50},()=>price+Math.random()*500); }
+function trade(type){
+ const lot = parseFloat(document.getElementById('lot').value);
+ const div = document.getElementById('positions');
+ div.innerHTML += `<p>${type} ${document.getElementById('symbol').value} | Lot: ${lot} | Price: $${price.toFixed(2)} <button onclick="this.parentElement.remove();closeTrade()">Close</button></p>`;
+ alert(type + ' order placed in DEMO mode');
+}
+function closeTrade(){ balance += Math.random()*100-50; document.getElementById('balance').innerText='$'+balance.toFixed(2); }
+function toggleSettings(){ const s=document.getElementById('settings'); s.style.display=s.style.display=='none'?'block':'none'; }
+</script>
+</body>
+</html>
