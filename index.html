@@ -11,19 +11,21 @@ body{margin:0;font-family:Arial;background:#eef6f7;min-height:100vh}
 .center{text-align:center;padding:20px;max-width:700px;margin:auto}
 .main-top-space{height:30px}
 .logo-main{width:180px;max-width:60%;margin-bottom:10px}
-#mainPage{background:#0b0e11;min-height:100vh;color:#fff}
-#mainPage h1.one-line{font-size:46px;font-weight:900;color:#fff;margin:0 0 15px 0}
-p.welcome-name{margin:0 0 25px 0;color:#fff}
+#mainPage{background:#ffffff;min-height:100vh;color:#1e2329}
+#mainPage h1.one-line{font-size:46px;font-weight:900;color:#1e2329;margin:0 0 15px 0}
+p.welcome-name{margin:0 0 25px 0;color:#474d57}
 .box{background:white;padding:20px;border-radius:12px;box-shadow:0 4px 10px rgba(0,0,0,0.1);margin-top:15px}
 input{width:90%;padding:12px;margin:8px 0;border:1px solid #cbd5e1;border-radius:8px}
 .pass-wrap{position:relative;width:95%;margin:auto}
 .pass-wrap input{width:100%;box-sizing:border-box}
 .eye{position:absolute;right:10px;top:50%;transform:translateY(-50%);cursor:pointer;background:none;border:none;font-size:18px}
-button.green{background:#22c55e;color:white;padding:14px 30px;font-size:18px;border:none;border-radius:10px;cursor:pointer;margin-top:15px;min-width:220px}
+button.green{background:#F0B90B;color:#1e2329;padding:14px 30px;font-size:18px;border:none;border-radius:10px;cursor:pointer;margin-top:15px;min-width:220px;font-weight:bold}
 button.linkbtn{background:#e2e8f0;width:100%;margin-top:8px;padding:12px;border:none;border-radius:8px;cursor:pointer}
 .hidden{display:none}
 .bottom-left{position:fixed;bottom:15px;left:15px}
 .bottom-left button{background:#facc15;padding:12px 20px;border:none;border-radius:8px;font-weight:bold;cursor:pointer}
+.bottom-right{position:fixed;bottom:15px;right:15px}
+.bottom-right button{background:#F0B90B;color:#1e2329;padding:12px 20px;border:none;border-radius:8px;font-weight:bold;cursor:pointer}
 </style>
 </head>
 <body>
@@ -50,9 +52,10 @@ button.linkbtn{background:#e2e8f0;width:100%;margin-top:8px;padding:12px;border:
 <img src="logo_transparent.png" class="logo-main" alt="Trading Master Logo">
 <h1 class="one-line">Welcome to Trading Master</h1>
 <p id="welcomeUser" class="welcome-name"></p>
-<button class="green" onclick="location.href='trade.html'">Start Now Trading</button>
+<button class="green" onclick="location.href='demo-trading.html'">Start Now Trading</button>
 </div>
 <div class="bottom-left"><button onclick="location.href='help.html'">Help</button></div>
+<div class="bottom-right"><button onclick="location.href='real-trading.html'">Real Trading</button></div>
 </div>
 <script>
 function togglePass(id,btn){let x=document.getElementById(id);if(x.type==="password"){x.type="text";btn.textContent="🙈"}else{x.type="password";btn.textContent="👁️"}}
