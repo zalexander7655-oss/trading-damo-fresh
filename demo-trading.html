@@ -10,6 +10,7 @@ body{background:#0b0e11;color:#fff;font-family:Arial;margin:0;font-size:12px;dis
 .header{background:#12161c;padding:6px 10px;display:flex;justify-content:space-between;align-items:center;height:38px;flex-shrink:0}
 .btn{background:#0ecb81;color:#fff;border:none;padding:6px 12px;border-radius:4px;cursor:pointer;font-weight:bold;font-size:12px}
 .btn-blue{background:#2a5bd7}
+.btn-logout{background:#f6465d;color:#fff;border:none;padding:6px 14px;border-radius:4px;cursor:pointer;font-weight:bold;font-size:12px;margin-left:10px}
 .modal{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.95);z-index:300}
 .box{background:#1e2329;margin:20px auto;padding:20px;width:95%;max-width:480px;border-radius:10px;text-align:center}
 #tradingPanel{flex:1;display:flex;flex-direction:column;min-height:0}
@@ -40,7 +41,10 @@ table.main{width:100%;border-collapse:collapse;font-size:10px}table.main th,tabl
 </style>
 </head>
 <body>
-<div class="header"><div><b style="color:#f0b90b">Trading Master Pro</b></div><div>Balance: <b id="balance" style="color:#0ecb81">$10000.00</b> <button class="btn btn-blue" style="padding:4px 8px" onclick="showHistory()">History</button></div></div>
+<div class="header">
+<div><b style="color:#f0b90b">Trading Master Pro</b><button class="btn-logout" onclick="doLogout()">Logout</button></div>
+<div>Balance: <b id="balance" style="color:#0ecb81">$10000.00</b> <button class="btn btn-blue" style="padding:4px 8px" onclick="showHistory()">History</button></div>
+</div>
 
 <div id="closeModal" class="modal"><div class="box" style="text-align:left"><h3>Market Close</h3><div style="display:flex;gap:6px;margin:10px 0"><button class="pct-btn" onclick="selClosePct(10,this)">10%</button><button class="pct-btn" onclick="selClosePct(25,this)">25%</button><button class="pct-btn" onclick="selClosePct(50,this)">50%</button><button class="pct-btn" onclick="selClosePct(75,this)">75%</button><button class="pct-btn sel" onclick="selClosePct(100,this)">100%</button></div><button class="btn" style="background:#f0b90b;color:#000" onclick="confirmClose()">Confirm</button> <button class="btn btn-blue" onclick="document.getElementById('closeModal').style.display='none'">Cancel</button></div></div>
 <div id="historyModal" class="modal"><div class="box"><h2>History</h2><div id="histMenu"><button class="btn btn-blue" onclick="openHistView('all')">History</button> <button class="btn" onclick="openHistView('profit')">Profit</button><br><br><button onclick="document.getElementById('historyModal').style.display='none'">Close</button></div><div id="histView" style="display:none"><button onclick="backToMenu()">Back</button><p><b id="viewTotal"></b></p><table class="main"><tbody id="histBody"></tbody></table></div></div></div>
@@ -85,22 +89,35 @@ table.main{width:100%;border-collapse:collapse;font-size:10px}table.main th,tabl
 
 <script>
 let balance=parseFloat(localStorage.getItem('tm_balance')||'10000'),myTrades=JSON.parse(localStorage.getItem('tm_trades')||'[]'),tradeHistory=JSON.parse(localStorage.getItem('tm_history')||'[]');
-let price=0.019227,candles=[],volumes=[],tick=0,offset=0,activeTool='cross',drawings=[],isDrawing=false,startPos=null,mousePos=null,zoomLevel=1,closeIndex=-1,closePct=100;
-function saveState(){try{localStorage.setItem('tm_balance',balance);localStorage.setItem('tm_trades',JSON.stringify(myTrades));localStorage.setItem('tm_history',JSON.stringify(tradeHistory));}catch(e){}}
+let candles=JSON.parse(localStorage.getItem('tm_candles')||'[]');
+let volumes=JSON.parse(localStorage.getItem('tm_volumes')||'[]');
+let price=0.019227,tick=0,offset=0,activeTool='cross',drawings=[],isDrawing=false,startPos=null,mousePos=null,zoomLevel=1,closeIndex=-1,closePct=100;
+
+function doLogout(){if(confirm('Logout?')){localStorage.removeItem('tm_balance');localStorage.removeItem('tm_trades');localStorage.removeItem('tm_history');location.reload();}}
+
+function saveState(){try{localStorage.setItem('tm_balance',balance);localStorage.setItem('tm_trades',JSON.stringify(myTrades));localStorage.setItem('tm_history',JSON.stringify(tradeHistory));localStorage.setItem('tm_candles',JSON.stringify(candles.slice(-120)));localStorage.setItem('tm_volumes',JSON.stringify(volumes.slice(-120)));}catch(e){}}
 function getQty(){return parseFloat(document.getElementById('orderQty').value)||10;}
 function doBuySell(s){let q=getQty();myTrades.push({sym:document.getElementById('symbol').value,side:s,qty:q,entry:price});saveState();updatePos();updVal();}
 function swTab(t){document.getElementById('tO').classList.toggle('active',t==='O');document.getElementById('tC').classList.toggle('active',t==='C');if(t==='C'&&myTrades.length)openCloseModal(myTrades.length-1);}
 function setTy(el){[...el.parentElement.children].forEach(c=>{c.style.color='#888';c.style.fontWeight='normal'});el.style.color='#f0b90b';el.style.fontWeight='bold';}
 function setQtyPct(p,el){let base=balance/price*0.5;let q=Math.max(10,base*p/100);document.getElementById('orderQty').value=Math.floor(q);updVal();}
 function updVal(){let q=getQty();let v=q*price;document.getElementById('valV').innerText=v.toFixed(2)+' USDT';document.getElementById('costV').innerText=(v/20).toFixed(2)+' USDT';document.getElementById('availV').innerText='$'+balance.toFixed(2);}
-for(let i=0;i<80;i++){let o=price,c=o+(Math.random()-0.5)*0.0002;candles.push({o:o,h:Math.max(o,c)+0.00005,l:Math.min(o,c)-0.00005,c:c});volumes.push(Math.random()*100+20);price=c;}offset=candles.length-50;price=candles[candles.length-1].c;
+
+if(!candles.length){
+  for(let i=0;i<80;i++){let o=price,c=o+(Math.random()-0.5)*0.0002;candles.push({o:o,h:Math.max(o,c)+0.00005,l:Math.min(o,c)-0.00005,c:c});volumes.push(Math.random()*100+20);price=c;}
+  saveState();
+} else {
+  price=candles[candles.length-1].c;
+}
+offset=Math.max(0,candles.length-50);
+
 function setTool(t){if(t==='zoom'){zoomLevel=zoomLevel===1?1.6:1;drawChart();return;}if(t==='text'){let x=prompt('Text:');if(x&&mousePos)drawings.push({type:'text',x:mousePos.x,y:mousePos.y,txt:x});drawChart();return;}activeTool=t;}
 function undoDraw(){drawings.pop();drawChart();}
 function clearDrawings(){drawings=[];drawChart();}
 function drawChart(){let cv=document.getElementById('chart'),ctx=cv.getContext('2d');ctx.clearRect(0,0,cv.width,cv.height);let all=candles.flatMap(k=>[k.h,k.l]),mn=Math.min(...all),mx=Math.max(...all),rg=(mx-mn||1)/zoomLevel;let cw=(cv.width*0.78)/50,vis=candles.slice(offset,offset+50);vis.forEach((k,i)=>{let x=i*cw,y=v=>cv.height-20-((v-mn)/rg)*(cv.height-40),col=k.c>=k.o?'#0ecb81':'#f6465d';ctx.strokeStyle=col;ctx.fillStyle=col;ctx.beginPath();ctx.moveTo(x+cw/2,y(k.h));ctx.lineTo(x+cw/2,y(k.l));ctx.stroke();let yo=y(k.o),yc=y(k.c);ctx.fillRect(x+1,Math.min(yo,yc),cw-2,Math.abs(yc-yo)||2);});ctx.strokeStyle='#f0e68c';ctx.lineWidth=2;drawings.forEach(d=>{if(d.type==='trend'){ctx.beginPath();ctx.moveTo(d.x1,d.y1);ctx.lineTo(d.x2,d.y2);ctx.stroke();}if(d.type==='hline'){ctx.beginPath();ctx.moveTo(0,d.y1);ctx.lineTo(cv.width,d.y1);ctx.stroke();}if(d.type==='box'){ctx.strokeRect(Math.min(d.x1,d.x2),Math.min(d.y1,d.y2),Math.abs(d.x2-d.x1),Math.abs(d.y2-d.y1));}if(d.type==='pen'){ctx.beginPath();d.points.forEach((p,i)=>{i==0?ctx.moveTo(p.x,p.y):ctx.lineTo(p.x,p.y);});ctx.stroke();}});ctx.lineWidth=1;
 let vc=document.getElementById('volChart'),vctx=vc.getContext('2d');vctx.clearRect(0,0,vc.width,vc.height);let vv=volumes.slice(offset,offset+50),vmx=Math.max(...vv),bw=vc.width/50;vv.forEach((v,i)=>{let h=(v/vmx)*45;vctx.fillStyle='#555';vctx.fillRect(i*bw,vc.height-h,bw-2,h);});}
 function updateOB(){let h1='',h2='';for(let i=0;i<7;i++){let p=(price+0.00001*(7-i)).toFixed(6);let q=Math.floor(Math.random()*90000+30000);h1+='<div style="display:flex;justify-content:space-between"><span style="color:#f6465d">'+p+'</span><span>'+q.toLocaleString()+'</span><span style="color:#888">'+(q*p).toFixed(0)+'</span></div>';}for(let i=0;i<7;i++){let p=(price-0.000001*(i+1)).toFixed(6);let q=Math.floor(Math.random()*90000+2000);h2+='<div style="display:flex;justify-content:space-between"><span style="color:#0ecb81">'+p+'</span><span>'+q.toLocaleString()+'</span><span style="color:#888">'+(q*p).toFixed(0)+'</span></div>';}document.getElementById('orderBook').innerHTML=h1;document.getElementById('orderBook2').innerHTML=h2;document.getElementById('midPrice').innerText=price.toFixed(6);}
-function startFeed(){drawChart();updatePos();updateOB();updVal();setInterval(()=>{tick++;let last=candles[candles.length-1];price=last.c+(Math.random()-0.49)*0.00008;last.c=price;if(price>last.h)last.h=price;if(price<last.l)last.l=price;if(tick%6===0){candles.push({o:last.c,h:last.c,l:last.c,c:last.c});volumes.push(Math.random()*100+20);offset=candles.length-50;}document.getElementById('livePrice').innerText='$'+price.toFixed(6);drawChart();updatePos();updateOB();if(tick%10===0)saveState();},400);}
+function startFeed(){drawChart();updatePos();updateOB();updVal();setInterval(()=>{tick++;let last=candles[candles.length-1];price=last.c+(Math.random()-0.49)*0.00008;last.c=price;if(price>last.h)last.h=price;if(price<last.l)last.l=price;if(tick%6===0){candles.push({o:last.c,h:last.c,l:last.c,c:last.c});volumes.push(Math.random()*100+20);if(candles.length>200){candles.shift();volumes.shift();}offset=candles.length-50;saveState();}document.getElementById('livePrice').innerText='$'+price.toFixed(6);drawChart();updatePos();updateOB();if(tick%10===0)saveState();},400);}
 function updatePos(){let tb=document.getElementById('posBody');document.getElementById('posCount').innerText=myTrades.length;if(!myTrades.length){tb.innerHTML='<tr><td colspan="7" style="text-align:center;color:#666">No Active Positions</td></tr>';return;}let h='';myTrades.forEach((t,i)=>{let pnl=t.side=='BUY'?(price-t.entry)*t.qty:-(price-t.entry)*t.qty;let col=pnl>=0?'#0ecb81':'#f6465d';h+='<tr><td>'+t.sym+'</td><td style="color:'+col+'">'+t.side+'</td><td>'+t.qty+'</td><td style="color:'+col+'">'+pnl.toFixed(2)+'</td><td><button class="mini-btn" onclick="addQty('+i+')">Add</button></td><td><button class="mini-btn" onclick="reversePos('+i+')">Reverse</button></td><td><button class="mini-btn" style="background:#f0b90b;color:#000" onclick="openCloseModal('+i+')">Close</button></td></tr>';});tb.innerHTML=h;}
 function addQty(i){myTrades[i].qty+=10;saveState();updatePos();}
 function reversePos(i){myTrades[i].side=myTrades[i].side=='BUY'?'SELL':'BUY';myTrades[i].entry=price;saveState();updatePos();}
