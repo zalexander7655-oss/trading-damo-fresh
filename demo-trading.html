@@ -3,182 +3,92 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Trading Master - Demo</title>
+<title>Trading Master Pro - Final</title>
 <style>
-body{background:#0e1117;color:#fff;font-family:Arial;margin:0;text-align:center}
-.header{background:#161b22;padding:12px;display:flex;justify-content:space-between;align-items:center}
-.btn{background:#00c853;color:#fff;border:none;padding:12px 25px;border-radius:6px;cursor:pointer;font-weight:bold;font-size:16px;margin:5px}
-.btn-red{background:#ff3d00}
-.btn-hist{background:#1e88e5;color:#fff;border:none;padding:8px 15px;border-radius:5px;cursor:pointer}
-.card{background:#161b22;margin:15px;padding:20px;border-radius:10px}
-#chart{width:100%;height:350px;background:#0e1117}
-#historyModal{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.9);z-index:100}
-.hist-box{background:#161b22;margin:50px auto;padding:20px;width:90%;max-width:500px;border-radius:10px;max-height:70%;overflow:auto}
-table{width:100%;border-collapse:collapse;font-size:14px}
-th,td{border:1px solid #333;padding:8px}
-th{background:#222}
-#purchaseModal{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.92);z-index:200}
-.purchase-box{background:#161b22;margin:40px auto;padding:25px;width:92%;max-width:480px;border-radius:12px;max-height:80%;overflow:auto}
-.plan-btn{background:#2962ff;color:#fff;border:none;padding:12px;width:100%;margin:6px 0;border-radius:6px;cursor:pointer;font-weight:bold;font-size:15px}
-.plan-btn:hover{background:#1e4fd1}
+body{background:#0b0e11;color:#fff;font-family:Arial;margin:0;font-size:14px}
+.header{background:#12161c;padding:10px;display:flex;justify-content:space-between;align-items:center}
+.btn{background:#0ecb81;color:#fff;border:none;padding:10px 20px;border-radius:4px;cursor:pointer;font-weight:bold}
+.btn-red{background:#f6465d}.btn-blue{background:#2a5bd7}
+.card{background:#12161c;margin:10px;padding:15px;border-radius:8px}
+#chart{width:100%;height:320px;background:#0b0e11}
+table{width:100%;border-collapse:collapse;font-size:12px;margin-top:10px}
+th,td{border-bottom:1px solid #222;padding:8px;text-align:left}th{color:#888}
+.pos-table{background:#12161c;margin:10px;padding:10px;border-radius:8px;overflow:auto}
+#purchaseModal,#closeModal{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.95);z-index:200}
+.purchase-box,.close-box{background:#1e2329;margin:60px auto;padding:25px;width:92%;max-width:450px;border-radius:10px;text-align:center}
+.plan-btn{background:#2a5bd7;color:#fff;border:none;padding:12px;width:100%;margin:6px 0;border-radius:6px;cursor:pointer;font-weight:bold}
+.qty-btn{background:#2d333b;color:#fff;border:1px solid #444;padding:6px 10px;margin:3px;border-radius:4px;cursor:pointer}
+.qty-btn.active{background:#f0b90b;color:#000}
 </style>
 </head>
 <body>
 <div class="header">
-<div><b>Trading Master</b></div>
-<div>
-<span>Balance: <b id="balance" style="color:#00c853;">$0.00</b></span>
-<button class="btn-hist" onclick="showHistory()">History</button>
-</div>
+<div><b style="color:#f0b90b">Trading Master Pro</b> <span id="modeLabel" style="background:#2a5bd7;padding:3px 8px;border-radius:4px;font-size:12px">DEMO</span></div>
+<div>Balance: <b id="balance" style="color:#0ecb81;">$0.00</b> <button class="btn btn-blue" style="padding:6px 10px" onclick="toggleMode()">Switch to Real Learning</button></div>
 </div>
 
-<div id="welcomeCard" class="card">
-<h1>Welcome to Trading Master</h1>
-<p>Welcome ishrat</p>
+<div id="welcomeCard" class="card" style="text-align:center">
+<h1>Welcome to Trading Master</h1><p>Welcome ishrat - Pro Trading Learning</p>
 <button class="btn" id="startBtn">Start Now Trading</button>
 </div>
 
-<div id="purchaseModal">
-<div class="purchase-box">
+<div id="purchaseModal"><div class="purchase-box">
 <h2>Purchase Demo Now</h2>
-<p>Select your demo plan to start trading:</p>
-<button class="plan-btn" onclick="buyDemo(20,1)">1st Demo $1 - Get $20 Demo</button>
-<button class="plan-btn" onclick="buyDemo(10000,12)">2nd Demo $12 - Get $10000 Demo</button>
-<button class="plan-btn" onclick="buyDemo(30000,25)">3rd Demo $25 - Get $30000 Demo</button>
-<button class="plan-btn" onclick="buyDemo(60000,40)">4th Demo $40 - Get $60000 Demo</button>
-<button class="plan-btn" onclick="buyDemo(80000,50)">5th Demo $50 - Get $80000 Demo</button>
-<button class="plan-btn" onclick="buyDemo(100000,60)">6th Demo $60 - Get $100000 Demo</button>
-<p style="font-size:12px;color:#aaa;margin-top:10px">Demo is for learning only. Not real trading.</p>
-</div>
-</div>
+<button class="plan-btn" onclick="buyDemo(20,1)">1st Demo $1 - Get $20</button>
+<button class="plan-btn" onclick="buyDemo(10000,12)">2nd Demo $12 - Get $10000</button>
+<button class="plan-btn" onclick="buyDemo(30000,25)">3rd Demo $25 - Get $30000</button>
+<button class="plan-btn" onclick="buyDemo(60000,40)">4th Demo $40 - Get $60000</button>
+<button class="plan-btn" onclick="buyDemo(80000,50)">5th Demo $50 - Get $80000</button>
+<button class="plan-btn" onclick="buyDemo(100000,60)">6th Demo $60 - Get $100000</button>
+</div></div>
 
-<div id="tradingPanel" class="card" style="display:none;">
-<h3><select id="symbol"><option>EUR/USD</option><option>BTC/USD</option><option>ETH/USD</option><option>AAPL</option><option>GOLD</option></select>
-<span id="livePrice" style="color:#00c853;">$50000.00</span></h3>
-<canvas id="chart" width="800" height="350"></canvas><br><br>
-Lot: <input type="number" id="lot" value="1" min="1" style="width:60px;padding:5px">
-<button class="btn" onclick="openTrade('BUY')">BUY</button>
-<button class="btn btn-red" onclick="openTrade('SELL')">SELL</button>
-<div id="openPos"></div>
-</div>
+<div id="closeModal"><div class="close-box">
+<h3>Market Close</h3><p>Closed Qty</p>
+<input type="number" id="closeQty" value="0.01" step="0.01" style="width:100%;padding:8px;background:#0b0e11;color:#fff;border:1px solid #333"><br><br>
+<button class="qty-btn" onclick="setPct(10)">10%</button>
+<button class="qty-btn" onclick="setPct(25)">25%</button>
+<button class="qty-btn" onclick="setPct(50)">50%</button>
+<button class="qty-btn" onclick="setPct(75)">75%</button>
+<button class="qty-btn active" onclick="setPct(100)">100%</button><br><br>
+<button class="btn" style="background:#f0b90b;color:#000;width:100%" onclick="confirmClose()">Confirm</button><br><br>
+<button class="btn-blue btn" style="width:100%" onclick="document.getElementById('closeModal').style.display='none'">Cancel</button>
+</div></div>
 
-<div id="historyModal">
-<div class="hist-box">
-<h3>Trading History</h3>
-<button class="btn-hist" onclick="hideHistory()">Close</button>
-<table><thead><tr><th>Symbol</th><th>Type</th><th>Lot</th><th>PnL</th></tr></thead><tbody id="histBody"></tbody></table>
+<div id="tradingPanel" style="display:none;">
+<div class="card">
+<div style="display:flex;gap:10px;align-items:center;justify-content:space-between;flex-wrap:wrap">
+<select id="symbol" style="padding:8px;background:#1e2329;color:#fff"><option>BTCUSDT</option><option>ETHUSDT</option><option>BNBUSDT</option><option>SOLUSDT</option><option>GOLD</option></select>
+<span id="livePrice" style="color:#0ecb81;font-weight:bold;font-size:18px">$50000.00</span>
+<select id="leverage" style="padding:8px;background:#1e2329;color:#fff"><option>1x</option><option>5x</option><option>10x</option><option>20x</option><option>50x</option><option>100x</option></select>
+</div>
+<canvas id="chart" width="800" height="320"></canvas>
+<div style="display:flex;gap:8px;justify-content:center;margin-top:10px;flex-wrap:wrap">
+Qty: <input type="number" id="lot" value="0.01" step="0.01" style="width:70px;padding:8px;background:#1e2329;color:#fff;border:1px solid #333">
+TP%: <input type="number" id="tp" value="5" style="width:50px;padding:8px;background:#1e2329;color:#fff;border:1px solid #333">
+SL%: <input type="number" id="sl" value="5" style="width:50px;padding:8px;background:#1e2329;color:#fff;border:1px solid #333">
+<button class="btn" onclick="openTrade('BUY')">Buy / Long</button>
+<button class="btn btn-red" onclick="openTrade('SELL')">Sell / Short</button>
+</div>
+</div>
+<div class="pos-table">
+<h4 style="color:#f0b90b;margin:5px 0">Trade (Demo Trading) | Positions (<span id="posCount">0</span>) | PNL | Open Orders | Order History</h4>
+<table><thead><tr><th>Symbol</th><th>Side</th><th>Qty</th><th>Entry</th><th>Mark</th><th>PNL (USDT)</th><th>TP/SL</th><th>Close</th></tr></thead><tbody id="posBody"><tr><td colspan="8" style="text-align:center;color:#666">No Active Positions</td></tr></tbody></table>
 </div>
 </div>
 
 <script>
-let balance = 0;
-let price = 50000;
-let candles = [];
-let history = [];
-let myTrades = [];
-let tickCount = 0;
-let demoPurchased = false;
-
-for(let i=0;i<40;i++){
-  let o = price;
-  let c = o + (Math.random()-0.5)*150;
-  let h = Math.max(o,c)+Math.random()*40;
-  let l = Math.min(o,c)-Math.random()*40;
-  candles.push({o,h,l,c});
-  price=c;
-}
-
-function drawChart(){
-  let cv=document.getElementById('chart');
-  let ctx=cv.getContext('2d');
-  ctx.clearRect(0,0,cv.width,cv.height);
-  let all=candles.flatMap(k=>[k.h,k.l]);
-  let mn=Math.min(...all), mx=Math.max(...all);
-  let range=mx-mn||1;
-  let totalSlots = Math.floor(candles.length / 0.6);
-  let cw = cv.width / totalSlots;
-  candles.forEach((k,i)=>{
-    let x=i*cw+cw*0.2;
-    let y = (v)=> cv.height-20 - ((v-mn)/range)*(cv.height-40);
-    let col = k.c>=k.o ? '#00c853' : '#ff3d00';
-    ctx.strokeStyle=col; ctx.fillStyle=col; ctx.lineWidth=1;
-    ctx.beginPath(); ctx.moveTo(x+cw*0.3, y(k.h)); ctx.lineTo(x+cw*0.3, y(k.l)); ctx.stroke();
-    let yo=y(k.o), yc=y(k.c);
-    ctx.fillRect(x, Math.min(yo,yc), cw*0.6, Math.abs(yc-yo)||2);
-  });
-}
-
-function buyDemo(demoAmount, pricePaid){
-  alert('You selected $'+pricePaid+' plan. After payment you will get $'+demoAmount+' demo.');
-  balance = demoAmount;
-  demoPurchased = true;
-  document.getElementById('balance').innerText='$'+balance.toFixed(2);
-  document.getElementById('purchaseModal').style.display='none';
-  document.getElementById('tradingPanel').style.display='block';
-  startLive();
-}
-
-document.getElementById('startBtn').addEventListener('click',function(){
-  document.getElementById('welcomeCard').style.display='none';
-  document.getElementById('purchaseModal').style.display='block';
-});
-
-function startLive(){
-  drawChart();
-  setInterval(()=>{
-    tickCount++;
-    let last = candles[candles.length-1];
-    let move = (Math.random()-0.49)*60;
-    price = last.c + move;
-    last.c = price;
-    if(price > last.h) last.h = price;
-    if(price < last.l) last.l = price;
-    if(tickCount % 15 === 0){
-      candles.push({o:last.c, h:last.c, l:last.c, c:last.c});
-      if(candles.length>50) candles.shift();
-    }
-    document.getElementById('livePrice').innerText='$'+price.toFixed(2);
-    drawChart();
-    checkTrades();
-  },400);
-}
-
-function openTrade(type){
-  if(!demoPurchased || balance <= 0){
-    alert('Please purchase demo first!');
-    document.getElementById('purchaseModal').style.display='block';
-    return;
-  }
-  let lot=parseFloat(document.getElementById('lot').value);
-  let sym=document.getElementById('symbol').value;
-  let tr={sym,type,lot,entry:price,time:new Date().toLocaleTimeString()};
-  myTrades.push(tr);
-  document.getElementById('openPos').innerHTML+='<p>'+type+' '+lot+' '+sym+' @ $'+price.toFixed(2)+' - Running...</p>';
-}
-
-function checkTrades(){
-  if(myTrades.length>0 && Math.random()>0.85){
-    let tr=myTrades.shift();
-    let diff = price - tr.entry;
-    let pnl = tr.type==='BUY' ? diff*tr.lot*0.5 : -diff*tr.lot*0.5;
-    balance+=pnl;
-    if(balance<0) balance=0;
-    document.getElementById('balance').innerText='$'+balance.toFixed(2);
-    document.getElementById('balance').style.color=balance>0?'#00c853':'#ff3d00';
-    history.push({...tr,pnl:pnl.toFixed(2)});
-    updateHist();
-    document.getElementById('openPos').innerHTML+='<p>Closed '+tr.type+' PnL: $'+pnl.toFixed(2)+'</p>';
-  }
-}
-function updateHist(){
-  let b=document.getElementById('histBody');
-  b.innerHTML='';
-  history.forEach(h=>{
-    b.innerHTML+='<tr><td>'+h.sym+'</td><td>'+h.type+'</td><td>'+h.lot+'</td><td style="color:'+(h.pnl>=0?'#00c853':'#ff3d00')+'">$'+h.pnl+'</td></tr>';
-  });
-}
-function showHistory(){document.getElementById('historyModal').style.display='block';}
-function hideHistory(){document.getElementById('historyModal').style.display='none';}
+let balance=0, price=50000, candles=[], myTrades=[], tick=0, demoOn=false, isReal=false, closeIndex=-1;
+for(let i=0;i<50;i++){let o=price,c=o+(Math.random()-0.5)*200;candles.push({o,h:Math.max(o,c)+50,l:Math.min(o,c)-50,c});price=c;}
+function drawChart(){let cv=document.getElementById('chart'),ctx=cv.getContext('2d');ctx.clearRect(0,0,cv.width,cv.height);let all=candles.flatMap(k=>[k.h,k.l]),mn=Math.min(...all),mx=Math.max(...all),rg=mx-mn||1;let cw=cv.width/candles.length;candles.forEach((k,i)=>{let x=i*cw;let y=v=>cv.height-20-((v-mn)/rg)*(cv.height-40);let col=k.c>=k.o?'#0ecb81':'#f6465d';ctx.strokeStyle=col;ctx.fillStyle=col;ctx.beginPath();ctx.moveTo(x+cw/2,y(k.h));ctx.lineTo(x+cw/2,y(k.l));ctx.stroke();ctx.fillRect(x+1,Math.min(y(k.o),y(k.c)),cw-2,Math.abs(y(k.c)-y(k.o))||2);});}
+function buyDemo(amt,paid){balance=amt;demoOn=true;document.getElementById('balance').innerText='$'+balance.toFixed(2);document.getElementById('purchaseModal').style.display='none';document.getElementById('tradingPanel').style.display='block';startFeed();}
+document.getElementById('startBtn').onclick=()=>{document.getElementById('welcomeCard').style.display='none';document.getElementById('purchaseModal').style.display='block';};
+function toggleMode(){isReal=!isReal;document.getElementById('modeLabel').innerText=isReal?'REAL LEARNING':'DEMO';document.getElementById('modeLabel').style.background=isReal?'#f6465d':'#2a5bd7';}
+function startFeed(){drawChart();setInterval(()=>{tick++;let last=candles[candles.length-1];price=last.c+(Math.random()-0.49)*90;last.c=price;if(price>last.h)last.h=price;if(price<last.l)last.l=price;if(tick%12==0){candles.push({o:last.c,h:last.c,l:last.c,c:last.c});if(candles.length>60)candles.shift();}document.getElementById('livePrice').innerText='$'+price.toFixed(2);drawChart();updatePos();},500);}
+function openTrade(side){if(!demoOn){document.getElementById('purchaseModal').style.display='block';return;}let qty=parseFloat(document.getElementById('lot').value);let lev=document.getElementById('leverage').value;let sym=document.getElementById('symbol').value;let tp=document.getElementById('tp').value;let sl=document.getElementById('sl').value;myTrades.push({sym,side,qty,entry:price,lev,tp,sl});}
+function updatePos(){let tb=document.getElementById('posBody');document.getElementById('posCount').innerText=myTrades.length;if(!myTrades.length){tb.innerHTML='<tr><td colspan="8" style="text-align:center;color:#666">No Active Positions</td></tr>';return;}let h='';myTrades.forEach((t,i)=>{let pnl=t.side=='BUY'?(price-t.entry)*t.qty*10:-(price-t.entry)*t.qty*10;let col=pnl>=0?'#0ecb81':'#f6465d';h+='<tr><td>'+t.sym+'</td><td style="color:'+col+'">'+t.side+'</td><td>'+t.qty+'</td><td>'+t.entry.toFixed(1)+'</td><td>'+price.toFixed(1)+'</td><td style="color:'+col+'">'+pnl.toFixed(2)+'</td><td>'+t.tp+'% / '+t.sl+'%</td><td><button onclick="openCloseModal('+i+')" style="background:#f0b90b;border:none;padding:5px 8px;border-radius:4px;cursor:pointer">Market Close</button></td></tr>';});tb.innerHTML=h;}
+function openCloseModal(i){closeIndex=i;document.getElementById('closeQty').value=myTrades[i].qty;document.getElementById('closeModal').style.display='block';}
+function setPct(p){let t=myTrades[closeIndex];if(t)document.getElementById('closeQty').value=(t.qty*p/100).toFixed(3);}
+function confirmClose(){let t=myTrades[closeIndex];if(!t)return;let q=parseFloat(document.getElementById('closeQty').value);let pnl=t.side=='BUY'?(price-t.entry)*q*10:-(price-t.entry)*q*10;balance+=pnl;if(balance<0)balance=0;document.getElementById('balance').innerText='$'+balance.toFixed(2);t.qty-=q;if(t.qty<=0.0001)myTrades.splice(closeIndex,1);document.getElementById('closeModal').style.display='none';updatePos();}
 </script>
 </body>
 </html>
