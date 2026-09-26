@@ -9,23 +9,22 @@ body{background:#0b0e11;color:#fff;font-family:Arial;margin:0;font-size:14px}
 .btn{background:#0ecb81;color:#fff;border:none;padding:8px 16px;border-radius:4px;cursor:pointer;font-weight:bold}
 .btn-blue{background:#2a5bd7}
 .modal{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.95);z-index:300}
-.box{background:#1e2329;margin:20px auto;padding:20px;width:95%;max-width:480px;border-radius:10px;text-align:center;max-height:90%;overflow:auto}
+.box{background:#1e2329;margin:20px auto;padding:20px;width:95%;max-width:480px;border-radius:10px;text-align:center}
 .plan-btn{background:#2a5bd7;color:#fff;border:none;padding:13px;width:100%;margin:6px 0;border-radius:6px;cursor:pointer;font-weight:bold}
 .already-btn{background:#0ecb81;color:#fff;border:none;padding:13px;width:100%;margin:12px 0;border-radius:6px;cursor:pointer;font-weight:bold}
 .trade-layout{display:flex;height:560px;background:#0b0e11;margin:8px;border-radius:8px;overflow:hidden;border:1px solid #1e2329}
 .left-tools{width:52px;background:#12161c;display:flex;flex-direction:column;align-items:center;padding-top:8px;gap:10px;border-right:1px solid #1e2329}
 .left-tools span{font-size:18px;opacity:0.6;cursor:pointer;padding:7px;border-radius:6px;min-width:32px;text-align:center}.left-tools span.active{opacity:1;background:#2a5bd7}
 .chart-wrap{flex:1;display:flex;flex-direction:column;min-width:0}
-.chart-area{flex:1;position:relative;min-width:0}#chart{width:100%;height:100%;display:block;cursor:crosshair}
-#volChart{width:100%;height:80px;display:block;background:#0b0e11}
+.chart-area{flex:1;position:relative}#chart{width:100%;height:100%;display:block;cursor:crosshair}
+#volChart{width:100%;height:70px;display:block}
 .time-bar{display:flex;gap:8px;padding:6px 8px;background:#12161c;font-size:12px;color:#888;overflow:auto}
-.time-bar span{cursor:pointer;padding:4px 6px;border-radius:4px}.time-bar span.active{color:#f0b90b;font-weight:bold;background:#1e2329}
+.time-bar span{cursor:pointer;padding:4px 6px}.time-bar span.active{color:#f0b90b;background:#1e2329;border-radius:4px}
+.ma-bar{display:flex;gap:15px;padding:6px 10px;background:#12161c;font-size:12px;align-items:center;border-top:1px solid #1e2329}
+.ma-dot{width:18px;height:3px;display:inline-block;margin-right:5px;vertical-align:middle}
 .bottom-tools{display:flex;gap:6px;padding:6px 8px;background:#12161c;border-top:1px solid #1e2329;overflow:auto}
-.bottom-tools button{background:#1e2329;color:#aaa;border:1px solid #333;padding:6px 8px;border-radius:4px;cursor:pointer;font-size:12px}
-.bottom-tools button.active{background:#2a5bd7;color:#fff}
+.bottom-tools button{background:#1e2329;color:#aaa;border:1px solid #333;padding:6px 8px;border-radius:4px;cursor:pointer}
 .right-panel{width:260px;min-width:260px;background:#0e1116;border-left:1px solid #1e2329;padding:8px;overflow:auto;font-size:12px}
-.tab{padding:8px;cursor:pointer;font-weight:bold;color:#888}.tab.active{color:#fff;border-bottom:2px solid #f0b90b}
-.type-btn{padding:6px 8px;font-size:12px;color:#888;cursor:pointer}.type-btn.active{color:#f0b90b;font-weight:bold}
 .open-long{background:#0ecb81;color:#fff;border:none;padding:12px;border-radius:6px;width:48%;font-weight:bold;cursor:pointer}
 .open-short{background:#f6465d;color:#fff;border:none;padding:12px;border-radius:6px;width:48%;font-weight:bold;cursor:pointer}
 .qty-pct{background:#1e2329;border:none;color:#aaa;padding:6px 4px;border-radius:4px;font-size:11px;cursor:pointer;flex:1}
@@ -56,45 +55,32 @@ table.main{width:100%;border-collapse:collapse;font-size:11px}table.main th,tabl
 <div style="display:flex;gap:6px;margin:10px 0"><button class="pct-btn" onclick="selClosePct(10,this)">10%</button><button class="pct-btn" onclick="selClosePct(25,this)">25%</button><button class="pct-btn" onclick="selClosePct(50,this)">50%</button><button class="pct-btn" onclick="selClosePct(75,this)">75%</button><button class="pct-btn sel" onclick="selClosePct(100,this)">100%</button></div>
 <button class="btn" style="background:#f0b90b;color:#000" onclick="confirmClose()">Confirm</button>
 <button class="btn btn-blue" onclick="document.getElementById('closeModal').style.display='none'">Cancel</button></div></div>
-<div id="historyModal" class="modal"><div class="box"><h2>History</h2><div id="histMenu"><button class="btn btn-blue" onclick="openHistView('all')">History</button> <button class="btn" onclick="openHistView('profit')">Profit</button> <button class="btn" style="background:#f6465d" onclick="openHistView('loss')">Loss</button><br><br><button onclick="document.getElementById('historyModal').style.display='none'">Close</button></div><div id="histView" style="display:none"><button onclick="backToMenu()">Back</button><p><b id="viewTotal"></b></p><table class="main"><tbody id="histBody"></tbody></table></div></div></div>
+<div id="historyModal" class="modal"><div class="box"><h2>History</h2><div id="histMenu"><button class="btn btn-blue" onclick="openHistView('all')">History</button> <button class="btn" onclick="openHistView('profit')">Profit</button><br><br><button onclick="document.getElementById('historyModal').style.display='none'">Close</button></div><div id="histView" style="display:none"><button onclick="backToMenu()">Back</button><p><b id="viewTotal"></b></p><table class="main"><tbody id="histBody"></tbody></table></div></div></div>
 
 <div id="tradingPanel">
-<div style="padding:8px;display:flex;gap:10px;align-items:center"><select id="symbol" style="padding:8px;background:#1e2329;color:#fff"><option>BTCUSDT</option><option>ETHUSDT</option><option>JASMYUSDT</option></select><span id="livePrice" style="color:#0ecb81;font-weight:bold">$50000</span></div>
+<div style="padding:8px;display:flex;gap:10px"><select id="symbol" style="padding:8px;background:#1e2329;color:#fff"><option>BTCUSDT</option><option>ETHUSDT</option><option>JASMYUSDT</option></select><span id="livePrice" style="color:#0ecb81;font-weight:bold">$50000</span></div>
 <div class="trade-layout">
 <div class="left-tools">
-<span id="tool-cross" class="active" onclick="setTool('cross')">✛</span>
-<span id="tool-trend" onclick="setTool('trend')">📈</span>
-<span id="tool-hline" onclick="setTool('hline')">➖</span>
-<span id="tool-box" onclick="setTool('box')">▭</span>
-<span id="tool-pen" onclick="setTool('pen')">✎</span>
-<span id="tool-text" onclick="setTool('text')">T</span>
-<span id="tool-zoom" onclick="setTool('zoom')">🔍</span>
-<span onclick="undoDraw()">↩</span><span onclick="clearDrawings()">🗑</span>
+<span id="tool-cross" class="active" onclick="setTool('cross')">✛</span><span id="tool-trend" onclick="setTool('trend')">📈</span><span id="tool-hline" onclick="setTool('hline')">➖</span><span id="tool-box" onclick="setTool('box')">▭</span><span id="tool-pen" onclick="setTool('pen')">✎</span><span id="tool-text" onclick="setTool('text')">T</span><span id="tool-zoom" onclick="setTool('zoom')">🔍</span><span onclick="undoDraw()">↩</span><span onclick="clearDrawings()">🗑</span>
 </div>
 <div class="chart-wrap">
-<div class="time-bar" id="timeBar"><span onclick="setTF('1s',this)">1s</span><span onclick="setTF('1m',this)">1m</span><span onclick="setTF('5m',this)">5m</span><span onclick="setTF('15m',this)">15m</span><span onclick="setTF('30m',this)">30m</span><span onclick="setTF('1h',this)">1h</span><span onclick="setTF('4h',this)">4h</span><span class="active" onclick="setTF('1d',this)">1d</span><span onclick="setTF('1w',this)">1w</span></div>
-<div class="chart-area"><canvas id="chart" width="800" height="420"></canvas></div>
-<canvas id="volChart" width="800" height="80"></canvas>
+<div class="time-bar"><span>1s</span><span>1m</span><span>5m</span><span>15m</span><span>30m</span><span>1h</span><span>4h</span><span class="active">1d</span><span>1w</span></div>
+<div class="ma-bar">
+<label><input type="checkbox" id="ma7chk" checked onchange="drawChart()"> <span class="ma-dot" style="background:#f0b90b"></span>MA 7</label>
+<label><input type="checkbox" id="ma25chk" checked onchange="drawChart()"> <span class="ma-dot" style="background:#9c59ff"></span>MA 25</label>
+<label style="margin-left:auto;color:#888">✓ Lines Working</label>
+</div>
+<div class="chart-area"><canvas id="chart" width="800" height="400"></canvas></div>
+<canvas id="volChart" width="800" height="70"></canvas>
 <div class="bottom-tools">
-<button class="active" onclick="bottomTool('cross',this)">✛ Cross</button>
-<button onclick="bottomTool('trend',this)">📈 Trend</button>
-<button onclick="bottomTool('hline',this)">➖ H-Line</button>
-<button onclick="bottomTool('box',this)">▭ Box</button>
-<button onclick="bottomTool('pen',this)">✎ Brush</button>
-<button onclick="bottomTool('text',this)">T Text</button>
-<button onclick="toggleVolume(this)">📊 Volume</button>
-<button onclick="clearDrawings()">🗑 Clear</button>
+<button onclick="setTool('cross')">✛ Cross</button><button onclick="setTool('trend')">📈 Trend</button><button onclick="setTool('hline')">➖ H-Line</button><button onclick="setTool('box')">▭ Box</button><button onclick="setTool('pen')">✎ Brush</button><button onclick="clearDrawings()">🗑 Clear</button>
 </div>
 </div>
 <div class="right-panel">
-<div style="display:flex;border-bottom:1px solid #222"><div class="tab active">Open</div><div class="tab" onclick="if(myTrades.length)openCloseModal(myTrades.length-1)">Close</div><div style="margin-left:auto;color:#888;font-size:11px;padding:8px">Cross 20.00x</div></div>
-<div style="display:flex;gap:8px;margin:8px 0"><span class="type-btn" onclick="setType(this)">Limit</span><span class="type-btn active" onclick="setType(this)">Market</span><span class="type-btn" onclick="setType(this)">Conditional</span></div>
-<div style="color:#888;font-size:11px">Order by Qty</div>
-<input id="orderQty" type="number" value="0.01" step="0.01" style="width:100%;padding:10px;background:#1e2329;border:1px solid #333;color:#fff;border-radius:6px;margin-top:6px">
-<div style="display:flex;gap:4px;margin:8px 0">
-<button class="qty-pct" onclick="setQtyPct(10,this)">10%</button><button class="qty-pct" onclick="setQtyPct(25,this)">25%</button><button class="qty-pct" onclick="setQtyPct(50,this)">50%</button><button class="qty-pct" onclick="setQtyPct(75,this)">75%</button><button class="qty-pct" onclick="setQtyPct(100,this)">100%</button>
-</div>
-<label style="font-size:11px"><input type="checkbox"> Take Profit / Stop Loss</label>
+<div style="display:flex;border-bottom:1px solid #222"><div style="padding:8px;font-weight:bold;border-bottom:2px solid #f0b90b">Open</div><div style="padding:8px;color:#888" onclick="if(myTrades.length)openCloseModal(myTrades.length-1)">Close</div></div>
+<div style="margin:8px 0;color:#888">Order by Qty</div>
+<input id="orderQty" type="number" value="0.01" step="0.01" style="width:100%;padding:10px;background:#1e2329;border:1px solid #333;color:#fff;border-radius:6px">
+<div style="display:flex;gap:4px;margin:8px 0"><button class="qty-pct" onclick="setQtyPct(10,this)">10%</button><button class="qty-pct" onclick="setQtyPct(25,this)">25%</button><button class="qty-pct" onclick="setQtyPct(50,this)">50%</button><button class="qty-pct" onclick="setQtyPct(75,this)">75%</button><button class="qty-pct" onclick="setQtyPct(100,this)">100%</button></div>
 <div style="display:flex;gap:8px;margin-top:10px"><button class="open-long" onclick="doBuySell('BUY')">Open Long</button><button class="open-short" onclick="doBuySell('SELL')">Open Short</button></div>
 <div id="orderBook" style="font-size:11px;margin-top:8px"></div>
 <input id="lot" type="number" value="0.01" style="display:none">
@@ -107,42 +93,43 @@ table.main{width:100%;border-collapse:collapse;font-size:11px}table.main th,tabl
 
 <script>
 let balance=parseFloat(localStorage.getItem('tm_balance')||'0'),demoOn=localStorage.getItem('tm_demoOn')==='1',myTrades=JSON.parse(localStorage.getItem('tm_trades')||'[]'),tradeHistory=JSON.parse(localStorage.getItem('tm_history')||'[]');
-let price=50000,candles=[],volumes=[],tick=0,offset=0,activeTool='cross',drawings=[],isDrawing=false,startPos=null,mousePos=null,zoomLevel=1,closeIndex=-1,closePct=100,showVol=true,tf='1d';
+let price=50000,candles=[],volumes=[],tick=0,offset=0,activeTool='cross',drawings=[],isDrawing=false,startPos=null,mousePos=null,zoomLevel=1,closeIndex=-1,closePct=100;
 function saveState(){try{localStorage.setItem('tm_balance',balance);localStorage.setItem('tm_demoOn',demoOn?'1':'0');localStorage.setItem('tm_trades',JSON.stringify(myTrades));localStorage.setItem('tm_history',JSON.stringify(tradeHistory));}catch(e){}}
 function alreadyPurchased(){if(!demoOn){alert('Buy first');return;}document.getElementById('purchaseModal').style.display='none';}
 function buyDemo(a){balance=a;demoOn=true;document.getElementById('balance').innerText='$'+balance.toFixed(2);saveState();document.getElementById('purchaseModal').style.display='none';}
 function getQty(){return parseFloat(document.getElementById('orderQty').value)||0.01;}
 function doBuySell(s){if(!demoOn||balance<=0){document.getElementById('purchaseModal').style.display='block';return;}let q=getQty();document.getElementById('lot').value=q;myTrades.push({sym:document.getElementById('symbol').value,side:s,qty:q,entry:price});saveState();updatePos();}
-function setTF(t,el){tf=t;document.querySelectorAll('#timeBar span').forEach(s=>s.classList.remove('active'));el.classList.add('active');drawChart();drawVol();}
-function setType(el){document.querySelectorAll('.type-btn').forEach(b=>b.classList.remove('active'));el.classList.add('active');}
-function setQtyPct(p,el){document.querySelectorAll('.qty-pct').forEach(b=>b.style.background='');let base=balance>0?balance/price:0.01;let q=Math.max(0.01,base*p/100);document.getElementById('orderQty').value=q.toFixed(2);document.getElementById('lot').value=q.toFixed(2);}
-function bottomTool(t,el){document.querySelectorAll('.bottom-tools button').forEach(b=>b.classList.remove('active'));el.classList.add('active');setTool(t);}
-function toggleVolume(el){showVol=!showVol;document.getElementById('volChart').style.display=showVol?'block':'none';}
+function setQtyPct(p,el){let base=balance>0?balance/price:0.01;let q=Math.max(0.01,base*p/100);document.getElementById('orderQty').value=q.toFixed(2);}
 for(let i=0;i<80;i++){let o=price,c=o+(Math.random()-0.5)*200;candles.push({o:o,h:Math.max(o,c)+50,l:Math.min(o,c)-50,c:c});volumes.push(Math.random()*100+20);price=c;}offset=candles.length-50;
-function setTool(t){if(t==='zoom'){zoomLevel=zoomLevel===1?1.6:1;drawChart();return;}if(t==='text'){let x=prompt('Enter text:');if(x&&mousePos)drawings.push({type:'text',x:mousePos.x,y:mousePos.y,txt:x});drawChart();return;}activeTool=t;document.querySelectorAll('.left-tools span').forEach(s=>s.classList.remove('active'));let e=document.getElementById('tool-'+t);if(e)e.classList.add('active');}
+function setTool(t){if(t==='zoom'){zoomLevel=zoomLevel===1?1.6:1;drawChart();return;}if(t==='text'){let x=prompt('Enter text:');if(x&&mousePos)drawings.push({type:'text',x:mousePos.x,y:mousePos.y,txt:x});drawChart();return;}activeTool=t;}
 function undoDraw(){drawings.pop();drawChart();}
 function clearDrawings(){drawings=[];drawChart();}
-function drawChart(){let cv=document.getElementById('chart'),ctx=cv.getContext('2d');ctx.clearRect(0,0,cv.width,cv.height);let all=candles.flatMap(k=>[k.h,k.l]),mn=Math.min(...all),mx=Math.max(...all),rg=(mx-mn||1)/zoomLevel;let cw=(cv.width*0.78)/50,vis=candles.slice(offset,offset+50);vis.forEach((k,i)=>{let x=i*cw,y=v=>cv.height-20-((v-mn)/rg)*(cv.height-40),col=k.c>=k.o?'#0ecb81':'#f6465d';ctx.strokeStyle=col;ctx.fillStyle=col;ctx.beginPath();ctx.moveTo(x+cw/2,y(k.h));ctx.lineTo(x+cw/2,y(k.l));ctx.stroke();let yo=y(k.o),yc=y(k.c);ctx.fillRect(x+1,Math.min(yo,yc),cw-2,Math.abs(yc-yo)||2);});ctx.strokeStyle='#f0e68c';ctx.lineWidth=2;drawings.forEach(d=>{if(d.type==='trend'){ctx.beginPath();ctx.moveTo(d.x1,d.y1);ctx.lineTo(d.x2,d.y2);ctx.stroke();}if(d.type==='hline'){ctx.beginPath();ctx.moveTo(0,d.y1);ctx.lineTo(cv.width,d.y1);ctx.stroke();}if(d.type==='box'){ctx.strokeRect(Math.min(d.x1,d.x2),Math.min(d.y1,d.y2),Math.abs(d.x2-d.x1),Math.abs(d.y2-d.y1));}if(d.type==='pen'){ctx.beginPath();d.points.forEach((p,i)=>{i==0?ctx.moveTo(p.x,p.y):ctx.lineTo(p.x,p.y);});ctx.stroke();}if(d.type==='text'){ctx.fillStyle='#fff';ctx.font='14px Arial';ctx.fillText(d.txt,d.x,d.y);}});ctx.lineWidth=1;}
-function drawVol(){let cv=document.getElementById('volChart'),ctx=cv.getContext('2d');ctx.clearRect(0,0,cv.width,cv.height);if(!showVol)return;let vis=volumes.slice(offset,offset+50),mx=Math.max(...vis);let bw=cv.width/50;vis.forEach((v,i)=>{let h=(v/mx)*70;let col=candles[offset+i]&&candles[offset+i].c>=candles[offset+i].o?'#0ecb81':'#f6465d';ctx.fillStyle=col;ctx.fillRect(i*bw,cv.height-h,bw-2,h);});}
-function startFeed(){drawChart();drawVol();updatePos();setInterval(()=>{tick++;let last=candles[candles.length-1];price=last.c+(Math.random()-0.49)*80;last.c=price;if(price>last.h)last.h=price;if(price<last.l)last.l=price;if(tick%8===0){candles.push({o:last.c,h:last.c,l:last.c,c:last.c});volumes.push(Math.random()*100+20);if(candles.length>200){candles.shift();volumes.shift();}offset=candles.length-50;}document.getElementById('livePrice').innerText='$'+price.toFixed(2);drawChart();drawVol();updatePos();if(tick%4===0)updateBook();if(tick%10===0)saveState();},400);}
-function updateBook(){let h='';for(let i=0;i<8;i++){let p=(price+(Math.random()-0.5)*5).toFixed(2);h+='<div style="display:flex;justify-content:space-between"><span style="color:#f6465d">'+p+'</span><span>'+(Math.random()*50).toFixed(0)+'</span></div>';}document.getElementById('orderBook').innerHTML=h;}
+function ma(arr,p){let r=[];for(let i=0;i<arr.length;i++){if(i<p-1){r.push(null);continue;}let s=0;for(let j=0;j<p;j++)s+=arr[i-j].c;r.push(s/p);}return r;}
+function drawChart(){let cv=document.getElementById('chart'),ctx=cv.getContext('2d');ctx.clearRect(0,0,cv.width,cv.height);let all=candles.flatMap(k=>[k.h,k.l]),mn=Math.min(...all),mx=Math.max(...all),rg=(mx-mn||1)/zoomLevel;let cw=(cv.width*0.78)/50,vis=candles.slice(offset,offset+50);vis.forEach((k,i)=>{let x=i*cw,y=v=>cv.height-20-((v-mn)/rg)*(cv.height-40),col=k.c>=k.o?'#0ecb81':'#f6465d';ctx.strokeStyle=col;ctx.fillStyle=col;ctx.beginPath();ctx.moveTo(x+cw/2,y(k.h));ctx.lineTo(x+cw/2,y(k.l));ctx.stroke();let yo=y(k.o),yc=y(k.c);ctx.fillRect(x+1,Math.min(yo,yc),cw-2,Math.abs(yc-yo)||2);});
+let show7=document.getElementById('ma7chk').checked,show25=document.getElementById('ma25chk').checked;
+let m7=ma(candles,7).slice(offset,offset+50),m25=ma(candles,25).slice(offset,offset+50);
+let y=v=>cv.height-20-((v-mn)/rg)*(cv.height-40);
+if(show7){ctx.strokeStyle='#f0b90b';ctx.lineWidth=2;ctx.beginPath();m7.forEach((v,i)=>{if(v==null)return;let x=i*cw+cw/2;i==0||m7[i-1]==null?ctx.moveTo(x,y(v)):ctx.lineTo(x,y(v));});ctx.stroke();}
+if(show25){ctx.strokeStyle='#9c59ff';ctx.lineWidth=2;ctx.beginPath();m25.forEach((v,i)=>{if(v==null)return;let x=i*cw+cw/2;i==0||m25[i-1]==null?ctx.moveTo(x,y(v)):ctx.lineTo(x,y(v));});ctx.stroke();}
+ctx.lineWidth=2;ctx.strokeStyle='#f0e68c';drawings.forEach(d=>{if(d.type==='trend'){ctx.beginPath();ctx.moveTo(d.x1,d.y1);ctx.lineTo(d.x2,d.y2);ctx.stroke();}if(d.type==='hline'){ctx.beginPath();ctx.moveTo(0,d.y1);ctx.lineTo(cv.width,d.y1);ctx.stroke();}if(d.type==='box'){ctx.strokeRect(Math.min(d.x1,d.x2),Math.min(d.y1,d.y2),Math.abs(d.x2-d.x1),Math.abs(d.y2-d.y1));}if(d.type==='pen'){ctx.beginPath();d.points.forEach((p,i)=>{i==0?ctx.moveTo(p.x,p.y):ctx.lineTo(p.x,p.y);});ctx.stroke();}});ctx.lineWidth=1;
+let vc=document.getElementById('volChart'),vctx=vc.getContext('2d');vctx.clearRect(0,0,vc.width,vc.height);let vv=volumes.slice(offset,offset+50),vmx=Math.max(...vv),bw=vc.width/50;vv.forEach((v,i)=>{let h=(v/vmx)*60;vctx.fillStyle=candles[offset+i].c>=candles[offset+i].o?'#0ecb81':'#f6465d';vctx.fillRect(i*bw,vc.height-h,bw-2,h);});}
+function startFeed(){drawChart();updatePos();setInterval(()=>{tick++;let last=candles[candles.length-1];price=last.c+(Math.random()-0.49)*80;last.c=price;if(price>last.h)last.h=price;if(price<last.l)last.l=price;if(tick%8===0){candles.push({o:last.c,h:last.c,l:last.c,c:last.c});volumes.push(Math.random()*100+20);offset=candles.length-50;}document.getElementById('livePrice').innerText='$'+price.toFixed(2);drawChart();updatePos();if(tick%4===0)updateBook();if(tick%10===0)saveState();},400);}
+function updateBook(){let h='';for(let i=0;i<8;i++){h+='<div style="display:flex;justify-content:space-between"><span style="color:#f6465d">'+(price+i).toFixed(2)+'</span><span>'+(Math.random()*50).toFixed(0)+'</span></div>';}document.getElementById('orderBook').innerHTML=h;}
 function updatePos(){let tb=document.getElementById('posBody');document.getElementById('posCount').innerText=myTrades.length;if(!myTrades.length){tb.innerHTML='<tr><td colspan="7" style="text-align:center;color:#666">No Active Positions</td></tr>';return;}let h='';myTrades.forEach((t,i)=>{let pnl=t.side=='BUY'?(price-t.entry)*t.qty*10:-(price-t.entry)*t.qty*10;let col=pnl>=0?'#0ecb81':'#f6465d';h+='<tr><td>'+t.sym+'</td><td style="color:'+col+'">'+t.side+'</td><td>'+t.qty+'</td><td style="color:'+col+'">'+pnl.toFixed(2)+'</td><td><button class="mini-btn" onclick="addQty('+i+')">Add</button></td><td><button class="mini-btn" onclick="reversePos('+i+')">Reverse</button></td><td><button class="mini-btn" style="background:#f0b90b;color:#000" onclick="openCloseModal('+i+')">Close</button></td></tr>';});tb.innerHTML=h;}
-function addQty(i){myTrades[i].qty=parseFloat((myTrades[i].qty+0.01).toFixed(2));saveState();updatePos();}
-function reversePos(i){let t=myTrades[i];t.side=t.side=='BUY'?'SELL':'BUY';t.entry=price;saveState();updatePos();}
+function addQty(i){myTrades[i].qty+=0.01;saveState();updatePos();}
+function reversePos(i){myTrades[i].side=myTrades[i].side=='BUY'?'SELL':'BUY';myTrades[i].entry=price;saveState();updatePos();}
 function closeAll(){myTrades.forEach(t=>{let pnl=t.side=='BUY'?(price-t.entry)*t.qty*10:-(price-t.entry)*t.qty*10;balance+=pnl;tradeHistory.push({date:new Date().toISOString().slice(0,10),sym:t.sym,pnl:pnl});});myTrades=[];if(balance<0)balance=0;document.getElementById('balance').innerText='$'+balance.toFixed(2);saveState();updatePos();}
 function openCloseModal(i){closeIndex=i;closePct=100;document.getElementById('closeModal').style.display='block';}
 function selClosePct(p,el){closePct=p;document.querySelectorAll('#closeModal.pct-btn').forEach(b=>b.classList.remove('sel'));el.classList.add('sel');}
-function confirmClose(){let t=myTrades[closeIndex];let pnl=t.side=='BUY'?(price-t.entry)*t.qty*10:-(price-t.entry)*t.qty*10;let pp=pnl*closePct/100;balance+=pp;if(balance<0)balance=0;tradeHistory.push({date:new Date().toISOString().slice(0,10),sym:t.sym,pnl:pp});if(closePct>=100)myTrades.splice(closeIndex,1);else t.qty=t.qty*(100-closePct)/100;document.getElementById('closeModal').style.display='none';document.getElementById('balance').innerText='$'+balance.toFixed(2);saveState();updatePos();}
+function confirmClose(){let t=myTrades[closeIndex];let pnl=t.side=='BUY'?(price-t.entry)*t.qty*10:-(price-t.entry)*t.qty*10;balance+=pnl*closePct/100;tradeHistory.push({date:new Date().toISOString().slice(0,10),sym:t.sym,pnl:pnl*closePct/100});if(closePct>=100)myTrades.splice(closeIndex,1);document.getElementById('closeModal').style.display='none';document.getElementById('balance').innerText='$'+balance.toFixed(2);saveState();updatePos();}
 function showHistory(){document.getElementById('historyModal').style.display='block';}
-function openHistView(v){document.getElementById('histMenu').style.display='none';document.getElementById('histView').style.display='block';let h='',tot=0;tradeHistory.forEach(tr=>{if(v=='profit'&&tr.pnl<0)return;if(v=='loss'&&tr.pnl>=0)return;tot+=tr.pnl;h+='<tr><td>'+tr.date+'</td><td>'+tr.sym+'</td><td>$'+tr.pnl.toFixed(2)+'</td></tr>';});document.getElementById('histBody').innerHTML=h||'<tr><td colspan="3">No data</td></tr>';document.getElementById('viewTotal').innerText='Total $'+tot.toFixed(2);}
+function openHistView(v){document.getElementById('histMenu').style.display='none';document.getElementById('histView').style.display='block';let h='',tot=0;tradeHistory.forEach(tr=>{h+='<tr><td>'+tr.date+'</td><td>$'+tr.pnl.toFixed(2)+'</td></tr>';tot+=tr.pnl;});document.getElementById('histBody').innerHTML=h;document.getElementById('viewTotal').innerText='Total $'+tot.toFixed(2);}
 function backToMenu(){document.getElementById('histMenu').style.display='block';document.getElementById('histView').style.display='none';}
-let cvEl=document.getElementById('chart');
-function getPos(e){let r=cvEl.getBoundingClientRect();return{x:(e.clientX-r.left)*(cvEl.width/r.width),y:(e.clientY-r.top)*(cvEl.height/r.height)};}
-cvEl.addEventListener('mousemove',e=>{let p=getPos(e);mousePos={x:p.x,y:p.y};if(isDrawing&&activeTool==='pen'&&startPos){startPos.points.push({x:p.x,y:p.y});drawChart();}});
-cvEl.addEventListener('mousedown',e=>{let p=getPos(e);if(activeTool==='trend'||activeTool==='box'){isDrawing=true;startPos={x1:p.x,y1:p.y,x2:p.x,y2:p.y,type:activeTool};}else if(activeTool==='hline'){drawings.push({type:'hline',y1:p.y});drawChart();}else if(activeTool==='pen'){isDrawing=true;startPos={type:'pen',points:[{x:p.x,y:p.y}]};}});
-window.addEventListener('mouseup',()=>{if(isDrawing&&startPos){if(startPos.x1!==undefined){startPos.x2=mousePos.x;startPos.y2=mousePos.y;}drawings.push(startPos);isDrawing=false;startPos=null;drawChart();}});
+let cvEl=document.getElementById('chart');function getPos(e){let r=cvEl.getBoundingClientRect();return{x:(e.clientX-r.left)*(cvEl.width/r.width),y:(e.clientY-r.top)*(cvEl.height/r.height)};}
+cvEl.addEventListener('mousedown',e=>{let p=getPos(e);mousePos=p;if(activeTool==='trend'||activeTool==='box'){isDrawing=true;startPos={x1:p.x,y1:p.y,x2:p.x,y2:p.y,type:activeTool};}else if(activeTool==='hline'){drawings.push({type:'hline',y1:p.y});drawChart();}else if(activeTool==='pen'){isDrawing=true;startPos={type:'pen',points:[{x:p.x,y:p.y}]};}});
+cvEl.addEventListener('mousemove',e=>{let p=getPos(e);mousePos=p;if(isDrawing&&activeTool==='pen'&&startPos){startPos.points.push({x:p.x,y:p.y});drawChart();}});
+window.addEventListener('mouseup',()=>{if(isDrawing&&startPos){if(startPos.x1!==undefined){startPos.x2=mousePos.x;startPos.y2=mousePos.y;}drawings.push(startPos);isDrawing=false;drawChart();}});
 window.addEventListener('load',()=>{document.getElementById('balance').innerText='$'+balance.toFixed(2);startFeed();if(demoOn)document.getElementById('purchaseModal').style.display='none';});
-window.addEventListener('beforeunload',saveState);
 </script>
 </body>
 </html>
