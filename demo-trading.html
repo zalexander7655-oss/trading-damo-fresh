@@ -2,102 +2,104 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Trading Master Pro - Final</title>
+<title>Trading Master Pro - One Page Final</title>
 <style>
-body{background:#0b0e11;color:#fff;font-family:Arial;margin:0;font-size:13px}
-.header{background:#12161c;padding:8px 10px;display:flex;justify-content:space-between;align-items:center}
-.btn{background:#0ecb81;color:#fff;border:none;padding:8px 16px;border-radius:4px;cursor:pointer;font-weight:bold}
+*{box-sizing:border-box}
+html,body{height:100%;overflow:hidden}
+body{background:#0b0e11;color:#fff;font-family:Arial;margin:0;font-size:12px;display:flex;flex-direction:column}
+.header{background:#12161c;padding:6px 10px;display:flex;justify-content:space-between;align-items:center;height:38px;flex-shrink:0}
+.btn{background:#0ecb81;color:#fff;border:none;padding:6px 12px;border-radius:4px;cursor:pointer;font-weight:bold;font-size:12px}
 .btn-blue{background:#2a5bd7}
 .modal{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.95);z-index:300}
 .box{background:#1e2329;margin:20px auto;padding:20px;width:95%;max-width:480px;border-radius:10px;text-align:center}
-.trade-layout{display:flex;height:620px;background:#0b0e11;margin:8px;border-radius:8px;overflow:hidden;border:1px solid #1e2329}
-.left-tools{width:52px;background:#12161c;display:flex;flex-direction:column;align-items:center;padding-top:8px;gap:10px;border-right:1px solid #1e2329}
-.left-tools span{font-size:18px;opacity:0.6;cursor:pointer;padding:7px;border-radius:6px;min-width:32px;text-align:center}
-.chart-wrap{flex:1;display:flex;flex-direction:column;min-width:0}
-.chart-area{flex:1;position:relative}#chart{width:100%;height:100%;display:block;cursor:crosshair}
-#volChart{width:100%;height:70px;display:block}
-.time-bar{display:flex;gap:8px;padding:6px 8px;background:#12161c;font-size:12px;color:#888;overflow:auto}
-.bottom-tools{display:flex;gap:6px;padding:6px 8px;background:#12161c;border-top:1px solid #1e2329;overflow:auto}
-.bottom-tools button{background:#1e2329;color:#aaa;border:1px solid #333;padding:6px 8px;border-radius:4px;cursor:pointer;font-size:12px}
-.right-panel{width:300px;min-width:300px;background:#12161c;border-left:1px solid #1e2329;display:flex;overflow:hidden}
-.ob{width:48%;padding:6px;border-right:1px solid #1e2329;overflow:auto}
-.op{width:52%;padding:8px;overflow:auto}
-.ob-head{font-weight:bold;margin-bottom:6px;font-size:12px;color:#fff}
-.tab{padding:8px;cursor:pointer;font-weight:bold;color:#888;flex:1;text-align:center}.tab.active{color:#fff;border-bottom:2px solid #f0b90b}
-.open-long{background:#0ecb81;color:#fff;border:none;padding:11px;border-radius:6px;width:48%;font-weight:bold;cursor:pointer}
-.open-short{background:#f6465d;color:#fff;border:none;padding:11px;border-radius:6px;width:48%;font-weight:bold;cursor:pointer}
-.qty-pct{background:#1e2329;border:none;color:#aaa;padding:6px 2px;border-radius:4px;font-size:10px;cursor:pointer;flex:1}
-.bottom-trade-bar{display:flex;justify-content:center;gap:20px;padding:12px;background:#12161c;margin:0 8px;border-radius:8px}
-.bottom-buy{background:#0ecb81;color:#fff;border:none;padding:14px 50px;border-radius:8px;font-weight:bold;font-size:16px;cursor:pointer}
-.bottom-sell{background:#f6465d;color:#fff;border:none;padding:14px 50px;border-radius:8px;font-weight:bold;font-size:16px;cursor:pointer}
-.pos-table{background:#12161c;margin:8px;padding:8px;border-radius:8px}
-table.main{width:100%;border-collapse:collapse;font-size:11px}table.main th,table.main td{border-bottom:1px solid #222;padding:6px;text-align:left}
+#tradingPanel{flex:1;display:flex;flex-direction:column;min-height:0}
+.top-bar{padding:4px 8px;display:flex;gap:10px;align-items:center;flex-shrink:0}
+.trade-layout{flex:1;display:flex;background:#0b0e11;margin:0 6px;border-radius:8px;overflow:hidden;border:1px solid #1e2329;min-height:0}
+.left-tools{width:44px;background:#12161c;display:flex;flex-direction:column;align-items:center;padding-top:6px;gap:6px;border-right:1px solid #1e2329;flex-shrink:0}
+.left-tools span{font-size:15px;opacity:0.6;cursor:pointer;padding:5px;border-radius:6px;min-width:28px;text-align:center}
+.chart-wrap{flex:1;display:flex;flex-direction:column;min-width:0;min-height:0}
+.chart-area{flex:1;position:relative;min-height:0}#chart{width:100%;height:100%;display:block;cursor:crosshair}
+#volChart{width:100%;height:50px;display:block;flex-shrink:0}
+.time-bar{display:flex;gap:6px;padding:3px 8px;background:#12161c;font-size:11px;color:#888;flex-shrink:0}
+.bottom-tools{display:flex;gap:4px;padding:4px 8px;background:#12161c;border-top:1px solid #1e2329;flex-shrink:0}
+.bottom-tools button{background:#1e2329;color:#aaa;border:1px solid #333;padding:4px 6px;border-radius:4px;cursor:pointer;font-size:11px}
+.right-panel{width:290px;min-width:290px;background:#12161c;border-left:1px solid #1e2329;display:flex;overflow:hidden;flex-shrink:0}
+.ob{width:46%;padding:4px;border-right:1px solid #1e2329;overflow:auto}
+.op{width:54%;padding:6px;overflow:auto}
+.tab{padding:6px;cursor:pointer;font-weight:bold;color:#888;flex:1;text-align:center;font-size:12px}.tab.active{color:#fff;border-bottom:2px solid #f0b90b}
+.open-long{background:#0ecb81;color:#fff;border:none;padding:9px;border-radius:6px;width:48%;font-weight:bold;cursor:pointer;font-size:12px}
+.open-short{background:#f6465d;color:#fff;border:none;padding:9px;border-radius:6px;width:48%;font-weight:bold;cursor:pointer;font-size:12px}
+.qty-pct{background:#1e2329;border:none;color:#aaa;padding:4px 2px;border-radius:4px;font-size:10px;cursor:pointer;flex:1}
+.bottom-trade-bar{display:flex;justify-content:center;gap:16px;padding:6px;background:#12161c;margin:4px 6px;border-radius:8px;flex-shrink:0}
+.bottom-buy{background:#0ecb81;color:#fff;border:none;padding:10px 44px;border-radius:8px;font-weight:bold;font-size:14px;cursor:pointer}
+.bottom-sell{background:#f6465d;color:#fff;border:none;padding:10px 44px;border-radius:8px;font-weight:bold;font-size:14px;cursor:pointer}
+.pos-table{background:#12161c;margin:0 6px 6px 6px;padding:6px;border-radius:8px;flex-shrink:0;max-height:140px;overflow:auto}
+table.main{width:100%;border-collapse:collapse;font-size:10px}table.main th,table.main td{border-bottom:1px solid #222;padding:4px;text-align:left}
 .pct-btn{background:#1e2329;border:1px solid #333;color:#aaa;padding:5px 8px;border-radius:4px;font-size:11px;cursor:pointer}.pct-btn.sel{background:#f0b90b;color:#000}
-.mini-btn{background:#2a2e35;color:#fff;border:1px solid #444;padding:5px 8px;border-radius:4px;font-size:11px;cursor:pointer}
+.mini-btn{background:#2a2e35;color:#fff;border:1px solid #444;padding:4px 6px;border-radius:4px;font-size:10px;cursor:pointer}
 </style>
 </head>
 <body>
-<div class="header"><div><b style="color:#f0b90b">Trading Master Pro</b></div><div>Balance: <b id="balance" style="color:#0ecb81">$10000.00</b> <button class="btn btn-blue" style="padding:6px 10px" onclick="showHistory()">History</button></div></div>
+<div class="header"><div><b style="color:#f0b90b">Trading Master Pro</b></div><div>Balance: <b id="balance" style="color:#0ecb81">$10000.00</b> <button class="btn btn-blue" style="padding:4px 8px" onclick="showHistory()">History</button></div></div>
 
 <div id="closeModal" class="modal"><div class="box" style="text-align:left"><h3>Market Close</h3><div style="display:flex;gap:6px;margin:10px 0"><button class="pct-btn" onclick="selClosePct(10,this)">10%</button><button class="pct-btn" onclick="selClosePct(25,this)">25%</button><button class="pct-btn" onclick="selClosePct(50,this)">50%</button><button class="pct-btn" onclick="selClosePct(75,this)">75%</button><button class="pct-btn sel" onclick="selClosePct(100,this)">100%</button></div><button class="btn" style="background:#f0b90b;color:#000" onclick="confirmClose()">Confirm</button> <button class="btn btn-blue" onclick="document.getElementById('closeModal').style.display='none'">Cancel</button></div></div>
 <div id="historyModal" class="modal"><div class="box"><h2>History</h2><div id="histMenu"><button class="btn btn-blue" onclick="openHistView('all')">History</button> <button class="btn" onclick="openHistView('profit')">Profit</button><br><br><button onclick="document.getElementById('historyModal').style.display='none'">Close</button></div><div id="histView" style="display:none"><button onclick="backToMenu()">Back</button><p><b id="viewTotal"></b></p><table class="main"><tbody id="histBody"></tbody></table></div></div></div>
 
 <div id="tradingPanel">
-<div style="padding:8px;display:flex;gap:10px"><select id="symbol" style="padding:8px;background:#1e2329;color:#fff"><option>BTCUSDT</option><option>JASMYUSDT</option><option>ETHUSDT</option></select><span id="livePrice" style="color:#0ecb81;font-weight:bold">$0.019227</span></div>
+<div class="top-bar"><select id="symbol" style="padding:6px;background:#1e2329;color:#fff"><option>BTCUSDT</option><option>JASMYUSDT</option><option>ETHUSDT</option></select><span id="livePrice" style="color:#0ecb81;font-weight:bold">$0.019227</span></div>
 <div class="trade-layout">
 <div class="left-tools"><span onclick="setTool('cross')">✛</span><span onclick="setTool('trend')">📈</span><span onclick="setTool('hline')">➖</span><span onclick="setTool('box')">▭</span><span onclick="setTool('pen')">✎</span><span onclick="setTool('text')">T</span><span onclick="setTool('zoom')">🔍</span><span onclick="undoDraw()">↩</span><span onclick="clearDrawings()">🗑</span></div>
 <div class="chart-wrap">
 <div class="time-bar"><span>1s</span><span>1m</span><span>5m</span><span>15m</span><span>30m</span><span>1h</span><span>4h</span><span>1d</span></div>
-<div class="chart-area"><canvas id="chart" width="800" height="420"></canvas></div>
-<canvas id="volChart" width="800" height="70"></canvas>
+<div class="chart-area"><canvas id="chart" width="800" height="400"></canvas></div>
+<canvas id="volChart" width="800" height="50"></canvas>
 <div class="bottom-tools"><button onclick="setTool('cross')">✛ Cross</button><button onclick="setTool('trend')">📈 Trend</button><button onclick="setTool('hline')">➖ H-Line</button><button onclick="setTool('box')">▭ Box</button><button onclick="setTool('pen')">✎ Brush</button><button onclick="clearDrawings()">🗑 Clear</button></div>
 </div>
 <div class="right-panel">
 <div class="ob">
-<div class="ob-head">Order Book <span style="color:#888;font-weight:normal">Recent Trades</span></div>
-<div style="display:flex;justify-content:space-between;color:#888;font-size:10px;margin:6px 0"><span>Price(USDT)</span><span>Qty</span><span>Total</span></div>
-<div id="orderBook" style="font-size:10px"></div>
-<div id="midPrice" style="text-align:center;padding:6px;color:#f6465d;font-weight:bold">↓ 0.019227</div>
-<div id="orderBook2" style="font-size:10px"></div>
+<div style="font-weight:bold;font-size:11px">Order Book</div>
+<div style="display:flex;justify-content:space-between;color:#888;font-size:9px;margin:4px 0"><span>Price</span><span>Qty</span><span>Total</span></div>
+<div id="orderBook" style="font-size:9px"></div>
+<div id="midPrice" style="text-align:center;padding:4px;font-weight:bold">0.019227</div>
+<div id="orderBook2" style="font-size:9px"></div>
 </div>
 <div class="op">
-<div style="display:flex;gap:6px;margin-bottom:6px"><div style="background:#1e2329;padding:6px 10px;border-radius:6px;flex:1">Cross ▾</div><div style="color:#f0b90b;padding:6px">20.00x</div></div>
+<div style="display:flex;gap:6px;margin-bottom:4px"><div style="background:#1e2329;padding:5px 8px;border-radius:6px;flex:1;font-size:11px">Cross ▾</div><div style="color:#f0b90b;padding:5px;font-size:11px">20.00x</div></div>
 <div style="display:flex"><div class="tab active" id="tO" onclick="swTab('O')">Open</div><div class="tab" id="tC" onclick="swTab('C')">Close</div></div>
-<div style="display:flex;gap:10px;margin:8px 0;font-size:12px"><span style="color:#888" onclick="setTy(this)">Limit</span><span style="color:#f0b90b;font-weight:bold" onclick="setTy(this)">Market</span><span style="color:#888" onclick="setTy(this)">Conditional ▾</span></div>
-<div style="color:#888;font-size:11px">Order by Qty ▾</div>
-<div style="position:relative;margin-top:6px"><input id="orderQty" type="number" value="0.01" step="0.01" style="width:100%;padding:10px;background:#1e2329;border:none;color:#fff;border-radius:6px;text-align:left"><span style="position:absolute;right:8px;top:10px;color:#888;font-size:11px">JASMY</span></div>
-<div style="display:flex;gap:4px;margin:8px 0"><button class="qty-pct" onclick="setQtyPct(10,this)">10%</button><button class="qty-pct" onclick="setQtyPct(25,this)">25%</button><button class="qty-pct" onclick="setQtyPct(50,this)">50%</button><button class="qty-pct" onclick="setQtyPct(75,this)">75%</button><button class="qty-pct" onclick="setQtyPct(100,this)">100%</button></div>
-<div style="display:flex;justify-content:space-between;color:#888;font-size:11px"><span>Value</span><span id="valV">-- / -- USDT</span></div>
-<div style="display:flex;justify-content:space-between;color:#888;font-size:11px;margin:4px 0"><span>Cost</span><span id="costV">-- / -- USDT</span></div>
-<label style="font-size:11px;color:#aaa"><input type="checkbox" id="tpsl"> Take Profit / Stop Loss</label>
-<div style="display:flex;gap:8px;margin-top:10px"><button class="open-long" onclick="doBuySell('BUY')">Open Long</button><button class="open-short" onclick="doBuySell('SELL')">Open Short</button></div>
-<div style="background:#1e2329;padding:8px;border-radius:6px;margin-top:8px;font-size:11px;color:#f0b90b">Deposit or buy crypto to start trading for real. ></div>
-<div style="font-size:11px;margin-top:8px"><b>Unified Trading Account</b><br><span style="color:#888">Margin Mode</span><span style="float:right;color:#888">Cross Margin</span><br><span style="color:#888">Available</span><span style="float:right" id="availV">$10000.00</span></div>
+<div style="display:flex;gap:8px;margin:6px 0;font-size:11px"><span style="color:#888" onclick="setTy(this)">Limit</span><span style="color:#f0b90b;font-weight:bold" onclick="setTy(this)">Market</span><span style="color:#888" onclick="setTy(this)">Conditional</span></div>
+<div style="color:#888;font-size:10px">Order by Qty ▾</div>
+<div style="position:relative;margin-top:4px"><input id="orderQty" type="number" value="10" step="1" style="width:100%;padding:8px;background:#1e2329;border:none;color:#fff;border-radius:6px"><span style="position:absolute;right:8px;top:8px;color:#888;font-size:10px">JASMY</span></div>
+<div style="display:flex;gap:3px;margin:6px 0"><button class="qty-pct" onclick="setQtyPct(10,this)">10%</button><button class="qty-pct" onclick="setQtyPct(25,this)">25%</button><button class="qty-pct" onclick="setQtyPct(50,this)">50%</button><button class="qty-pct" onclick="setQtyPct(75,this)">75%</button><button class="qty-pct" onclick="setQtyPct(100,this)">100%</button></div>
+<div style="display:flex;justify-content:space-between;color:#888;font-size:10px"><span>Value</span><span id="valV">-- USDT</span></div>
+<div style="display:flex;justify-content:space-between;color:#888;font-size:10px"><span>Cost</span><span id="costV">-- USDT</span></div>
+<label style="font-size:10px;color:#aaa"><input type="checkbox"> Take Profit / Stop Loss</label>
+<div style="display:flex;gap:6px;margin-top:6px"><button class="open-long" onclick="doBuySell('BUY')">Open Long</button><button class="open-short" onclick="doBuySell('SELL')">Open Short</button></div>
+<div style="font-size:10px;margin-top:6px;color:#888">Available <span style="float:right" id="availV">$10000</span></div>
 <input id="lot" style="display:none" value="0.01">
 </div>
 </div>
 </div>
 <div class="bottom-trade-bar"><button class="bottom-buy" onclick="doBuySell('BUY')">Buy</button><button class="bottom-sell" onclick="doBuySell('SELL')">Sell</button></div>
-<div class="pos-table"><h4 style="color:#f0b90b">Positions (<span id="posCount">0</span>) <button class="mini-btn" style="float:right" onclick="closeAll()">Close All</button></h4><table class="main"><thead><tr><th>Symbol</th><th>Side</th><th>Size</th><th>PNL</th><th>Add</th><th>Reverse</th><th>Close</th></tr></thead><tbody id="posBody"></tbody></table></div>
+<div class="pos-table"><div style="color:#f0b90b;font-weight:bold">Positions (<span id="posCount">0</span>) <button class="mini-btn" style="float:right" onclick="closeAll()">Close All</button></div><table class="main"><thead><tr><th>Symbol</th><th>Side</th><th>Size</th><th>PNL</th><th>Add</th><th>Reverse</th><th>Close</th></tr></thead><tbody id="posBody"></tbody></table></div>
 </div>
 
 <script>
 let balance=parseFloat(localStorage.getItem('tm_balance')||'10000'),myTrades=JSON.parse(localStorage.getItem('tm_trades')||'[]'),tradeHistory=JSON.parse(localStorage.getItem('tm_history')||'[]');
 let price=0.019227,candles=[],volumes=[],tick=0,offset=0,activeTool='cross',drawings=[],isDrawing=false,startPos=null,mousePos=null,zoomLevel=1,closeIndex=-1,closePct=100;
 function saveState(){try{localStorage.setItem('tm_balance',balance);localStorage.setItem('tm_trades',JSON.stringify(myTrades));localStorage.setItem('tm_history',JSON.stringify(tradeHistory));}catch(e){}}
-function getQty(){return parseFloat(document.getElementById('orderQty').value)||0.01;}
+function getQty(){return parseFloat(document.getElementById('orderQty').value)||10;}
 function doBuySell(s){let q=getQty();myTrades.push({sym:document.getElementById('symbol').value,side:s,qty:q,entry:price});saveState();updatePos();updVal();}
 function swTab(t){document.getElementById('tO').classList.toggle('active',t==='O');document.getElementById('tC').classList.toggle('active',t==='C');if(t==='C'&&myTrades.length)openCloseModal(myTrades.length-1);}
 function setTy(el){[...el.parentElement.children].forEach(c=>{c.style.color='#888';c.style.fontWeight='normal'});el.style.color='#f0b90b';el.style.fontWeight='bold';}
-function setQtyPct(p,el){let base=balance/price*0.5;let q=Math.max(1,base*p/100);document.getElementById('orderQty').value=Math.floor(q);updVal();}
+function setQtyPct(p,el){let base=balance/price*0.5;let q=Math.max(10,base*p/100);document.getElementById('orderQty').value=Math.floor(q);updVal();}
 function updVal(){let q=getQty();let v=q*price;document.getElementById('valV').innerText=v.toFixed(2)+' USDT';document.getElementById('costV').innerText=(v/20).toFixed(2)+' USDT';document.getElementById('availV').innerText='$'+balance.toFixed(2);}
 for(let i=0;i<80;i++){let o=price,c=o+(Math.random()-0.5)*0.0002;candles.push({o:o,h:Math.max(o,c)+0.00005,l:Math.min(o,c)-0.00005,c:c});volumes.push(Math.random()*100+20);price=c;}offset=candles.length-50;price=candles[candles.length-1].c;
 function setTool(t){if(t==='zoom'){zoomLevel=zoomLevel===1?1.6:1;drawChart();return;}if(t==='text'){let x=prompt('Text:');if(x&&mousePos)drawings.push({type:'text',x:mousePos.x,y:mousePos.y,txt:x});drawChart();return;}activeTool=t;}
 function undoDraw(){drawings.pop();drawChart();}
 function clearDrawings(){drawings=[];drawChart();}
 function drawChart(){let cv=document.getElementById('chart'),ctx=cv.getContext('2d');ctx.clearRect(0,0,cv.width,cv.height);let all=candles.flatMap(k=>[k.h,k.l]),mn=Math.min(...all),mx=Math.max(...all),rg=(mx-mn||1)/zoomLevel;let cw=(cv.width*0.78)/50,vis=candles.slice(offset,offset+50);vis.forEach((k,i)=>{let x=i*cw,y=v=>cv.height-20-((v-mn)/rg)*(cv.height-40),col=k.c>=k.o?'#0ecb81':'#f6465d';ctx.strokeStyle=col;ctx.fillStyle=col;ctx.beginPath();ctx.moveTo(x+cw/2,y(k.h));ctx.lineTo(x+cw/2,y(k.l));ctx.stroke();let yo=y(k.o),yc=y(k.c);ctx.fillRect(x+1,Math.min(yo,yc),cw-2,Math.abs(yc-yo)||2);});ctx.strokeStyle='#f0e68c';ctx.lineWidth=2;drawings.forEach(d=>{if(d.type==='trend'){ctx.beginPath();ctx.moveTo(d.x1,d.y1);ctx.lineTo(d.x2,d.y2);ctx.stroke();}if(d.type==='hline'){ctx.beginPath();ctx.moveTo(0,d.y1);ctx.lineTo(cv.width,d.y1);ctx.stroke();}if(d.type==='box'){ctx.strokeRect(Math.min(d.x1,d.x2),Math.min(d.y1,d.y2),Math.abs(d.x2-d.x1),Math.abs(d.y2-d.y1));}if(d.type==='pen'){ctx.beginPath();d.points.forEach((p,i)=>{i==0?ctx.moveTo(p.x,p.y):ctx.lineTo(p.x,p.y);});ctx.stroke();}});ctx.lineWidth=1;
-let vc=document.getElementById('volChart'),vctx=vc.getContext('2d');vctx.clearRect(0,0,vc.width,vc.height);let vv=volumes.slice(offset,offset+50),vmx=Math.max(...vv),bw=vc.width/50;vv.forEach((v,i)=>{let h=(v/vmx)*60;vctx.fillStyle='#555';vctx.fillRect(i*bw,vc.height-h,bw-2,h);});}
-function updateOB(){let h1='',h2='';for(let i=0;i<9;i++){let p=(price+0.00001*(9-i)).toFixed(6);let q=Math.floor(Math.random()*90000+30000);let t=(q*p).toFixed(0);h1+='<div style="display:flex;justify-content:space-between;padding:2px 0"><span style="color:#f6465d">'+p+'</span><span>'+q.toLocaleString()+'</span><span style="color:#888">'+t+'</span></div>';}for(let i=0;i<9;i++){let p=(price-0.000001*(i+1)).toFixed(6);let q=Math.floor(Math.random()*90000+2000);let t=(q*p).toFixed(0);h2+='<div style="display:flex;justify-content:space-between;padding:2px 0"><span style="color:#0ecb81">'+p+'</span><span>'+q.toLocaleString()+'</span><span style="color:#888">'+t+'</span></div>';}document.getElementById('orderBook').innerHTML=h1;document.getElementById('orderBook2').innerHTML=h2;document.getElementById('midPrice').innerText='↓ '+price.toFixed(6);document.getElementById('midPrice').style.color=Math.random()>0.5?'#f6465d':'#0ecb81';}
+let vc=document.getElementById('volChart'),vctx=vc.getContext('2d');vctx.clearRect(0,0,vc.width,vc.height);let vv=volumes.slice(offset,offset+50),vmx=Math.max(...vv),bw=vc.width/50;vv.forEach((v,i)=>{let h=(v/vmx)*45;vctx.fillStyle='#555';vctx.fillRect(i*bw,vc.height-h,bw-2,h);});}
+function updateOB(){let h1='',h2='';for(let i=0;i<7;i++){let p=(price+0.00001*(7-i)).toFixed(6);let q=Math.floor(Math.random()*90000+30000);h1+='<div style="display:flex;justify-content:space-between"><span style="color:#f6465d">'+p+'</span><span>'+q.toLocaleString()+'</span><span style="color:#888">'+(q*p).toFixed(0)+'</span></div>';}for(let i=0;i<7;i++){let p=(price-0.000001*(i+1)).toFixed(6);let q=Math.floor(Math.random()*90000+2000);h2+='<div style="display:flex;justify-content:space-between"><span style="color:#0ecb81">'+p+'</span><span>'+q.toLocaleString()+'</span><span style="color:#888">'+(q*p).toFixed(0)+'</span></div>';}document.getElementById('orderBook').innerHTML=h1;document.getElementById('orderBook2').innerHTML=h2;document.getElementById('midPrice').innerText=price.toFixed(6);}
 function startFeed(){drawChart();updatePos();updateOB();updVal();setInterval(()=>{tick++;let last=candles[candles.length-1];price=last.c+(Math.random()-0.49)*0.00008;last.c=price;if(price>last.h)last.h=price;if(price<last.l)last.l=price;if(tick%6===0){candles.push({o:last.c,h:last.c,l:last.c,c:last.c});volumes.push(Math.random()*100+20);offset=candles.length-50;}document.getElementById('livePrice').innerText='$'+price.toFixed(6);drawChart();updatePos();updateOB();if(tick%10===0)saveState();},400);}
 function updatePos(){let tb=document.getElementById('posBody');document.getElementById('posCount').innerText=myTrades.length;if(!myTrades.length){tb.innerHTML='<tr><td colspan="7" style="text-align:center;color:#666">No Active Positions</td></tr>';return;}let h='';myTrades.forEach((t,i)=>{let pnl=t.side=='BUY'?(price-t.entry)*t.qty:-(price-t.entry)*t.qty;let col=pnl>=0?'#0ecb81':'#f6465d';h+='<tr><td>'+t.sym+'</td><td style="color:'+col+'">'+t.side+'</td><td>'+t.qty+'</td><td style="color:'+col+'">'+pnl.toFixed(2)+'</td><td><button class="mini-btn" onclick="addQty('+i+')">Add</button></td><td><button class="mini-btn" onclick="reversePos('+i+')">Reverse</button></td><td><button class="mini-btn" style="background:#f0b90b;color:#000" onclick="openCloseModal('+i+')">Close</button></td></tr>';});tb.innerHTML=h;}
 function addQty(i){myTrades[i].qty+=10;saveState();updatePos();}
@@ -114,6 +116,8 @@ cvEl.addEventListener('mousedown',e=>{let p=getPos(e);mousePos=p;if(activeTool==
 window.addEventListener('mouseup',()=>{if(isDrawing&&startPos){if(startPos.x1!==undefined){startPos.x2=mousePos.x;startPos.y2=mousePos.y;}drawings.push(startPos);isDrawing=false;drawChart();}});
 document.getElementById('orderQty').addEventListener('input',updVal);
 window.addEventListener('load',()=>{document.getElementById('balance').innerText='$'+balance.toFixed(2);startFeed();});
+function resize(){let ca=document.querySelector('.chart-area');let cv=document.getElementById('chart');cv.width=ca.clientWidth;cv.height=ca.clientHeight;drawChart();}
+window.addEventListener('resize',resize);
 </script>
 </body>
 </html>
