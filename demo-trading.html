@@ -3,113 +3,182 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Trading Master - Paid Demo</title>
+<title>Trading Master - Demo</title>
 <style>
-body{margin:0;font-family:Arial;background:#0e0e14;color:#fff}
-.header{background:#1a1a2e;padding:15px;display:flex;justify-content:space-between;align-items:center}
-.balance{color:#00ff88;font-weight:bold}
-.container{display:flex;height:82vh}
-.chart-area{flex:3;background:#13131f}
-.sidebar{flex:1;background:#1a1a2e;padding:12px;overflow:auto}
-canvas{width:100%;height:100%}
-button{padding:10px 18px;margin:5px;border:none;cursor:pointer;font-weight:bold;border-radius:4px}
-.buy{background:#00c853;color:#fff}.sell{background:#ff3d00;color:#fff}.plan{background:#2962ff;color:#fff;width:100%;margin:8px 0}
-input,select{padding:8px;margin:5px;width:92%;background:#222;color:#fff;border:1px solid #444}
-.modal{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.85);display:flex;justify-content:center;align-items:center;z-index:100}
-.modal-box{background:#1e1e2f;padding:25px;border-radius:8px;width:340px;text-align:center}
-.locked{opacity:0.4;pointer-events:none}
+body{background:#0e1117;color:#fff;font-family:Arial;margin:0;text-align:center}
+.header{background:#161b22;padding:12px;display:flex;justify-content:space-between;align-items:center}
+.btn{background:#00c853;color:#fff;border:none;padding:12px 25px;border-radius:6px;cursor:pointer;font-weight:bold;font-size:16px;margin:5px}
+.btn-red{background:#ff3d00}
+.btn-hist{background:#1e88e5;color:#fff;border:none;padding:8px 15px;border-radius:5px;cursor:pointer}
+.card{background:#161b22;margin:15px;padding:20px;border-radius:10px}
+#chart{width:100%;height:350px;background:#0e1117}
+#historyModal{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.9);z-index:100}
+.hist-box{background:#161b22;margin:50px auto;padding:20px;width:90%;max-width:500px;border-radius:10px;max-height:70%;overflow:auto}
+table{width:100%;border-collapse:collapse;font-size:14px}
+th,td{border:1px solid #333;padding:8px}
+th{background:#222}
+#purchaseModal{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.92);z-index:200}
+.purchase-box{background:#161b22;margin:40px auto;padding:25px;width:92%;max-width:480px;border-radius:12px;max-height:80%;overflow:auto}
+.plan-btn{background:#2962ff;color:#fff;border:none;padding:12px;width:100%;margin:6px 0;border-radius:6px;cursor:pointer;font-weight:bold;font-size:15px}
+.plan-btn:hover{background:#1e4fd1}
 </style>
 </head>
 <body>
 <div class="header">
-<div><h2>Trading Master</h2></div>
-<div>Demo Balance: $<span id="balance" class="balance">0</span> | <button onclick="showPlans()">Buy Demo</button></div>
-</div>
-
-<div id="buyModal" class="modal">
-<div class="modal-box">
-<h3>Purchase Demo Balance to Start Learning</h3>
-<p>Select a plan to activate demo trading:</p>
-<button class="plan" onclick="buyDemo(10000,'Basic - $12')">Basic: $10,000 Demo - $12</button>
-<button class="plan" onclick="buyDemo(50000,'Pro - $25')">Pro: $50,000 Demo - $25</button>
-<button class="plan" onclick="buyDemo(100000,'Master - $40')">Master: $100,000 Demo - $40</button>
-<p style="font-size:12px;color:#aaa">Demo is for learning only. Not real money trading.</p>
+<div><b>Trading Master</b></div>
+<div>
+<span>Balance: <b id="balance" style="color:#00c853;">$0.00</b></span>
+<button class="btn-hist" onclick="showHistory()">History</button>
 </div>
 </div>
 
-<div class="container" id="mainApp">
-<div class="chart-area"><canvas id="chart"></canvas></div>
-<div class="sidebar">
-<h3>Trade Panel</h3>
-<div id="tradeControls" class="locked">
-<label>Amount ($):</label><input type="number" id="amount" value="1000">
-<label>Leverage:</label><select id="leverage"><option>1x</option><option>5x</option><option>10x</option><option>20x</option><option>50x</option><option>100x</option></select>
-<label>Take Profit %:</label><input type="number" id="tp" value="5">
-<label>Stop Loss %:</label><input type="number" id="sl" value="5"><br>
-<button class="buy" onclick="openTrade('long')">BUY / LONG</button>
-<button class="sell" onclick="openTrade('short')">SELL / SHORT</button>
+<div id="welcomeCard" class="card">
+<h1>Welcome to Trading Master</h1>
+<p>Welcome ishrat</p>
+<button class="btn" id="startBtn">Start Now Trading</button>
 </div>
-<h3>Open Positions</h3><div id="positions">Buy demo to start</div>
-<h3>Order Book (Live)</h3><div id="orderbook"></div>
+
+<div id="purchaseModal">
+<div class="purchase-box">
+<h2>Purchase Demo Now</h2>
+<p>Select your demo plan to start trading:</p>
+<button class="plan-btn" onclick="buyDemo(20,1)">1st Demo $1 - Get $20 Demo</button>
+<button class="plan-btn" onclick="buyDemo(10000,12)">2nd Demo $12 - Get $10000 Demo</button>
+<button class="plan-btn" onclick="buyDemo(30000,25)">3rd Demo $25 - Get $30000 Demo</button>
+<button class="plan-btn" onclick="buyDemo(60000,40)">4th Demo $40 - Get $60000 Demo</button>
+<button class="plan-btn" onclick="buyDemo(80000,50)">5th Demo $50 - Get $80000 Demo</button>
+<button class="plan-btn" onclick="buyDemo(100000,60)">6th Demo $60 - Get $100000 Demo</button>
+<p style="font-size:12px;color:#aaa;margin-top:10px">Demo is for learning only. Not real trading.</p>
+</div>
+</div>
+
+<div id="tradingPanel" class="card" style="display:none;">
+<h3><select id="symbol"><option>EUR/USD</option><option>BTC/USD</option><option>ETH/USD</option><option>AAPL</option><option>GOLD</option></select>
+<span id="livePrice" style="color:#00c853;">$50000.00</span></h3>
+<canvas id="chart" width="800" height="350"></canvas><br><br>
+Lot: <input type="number" id="lot" value="1" min="1" style="width:60px;padding:5px">
+<button class="btn" onclick="openTrade('BUY')">BUY</button>
+<button class="btn btn-red" onclick="openTrade('SELL')">SELL</button>
+<div id="openPos"></div>
+</div>
+
+<div id="historyModal">
+<div class="hist-box">
+<h3>Trading History</h3>
+<button class="btn-hist" onclick="hideHistory()">Close</button>
+<table><thead><tr><th>Symbol</th><th>Type</th><th>Lot</th><th>PnL</th></tr></thead><tbody id="histBody"></tbody></table>
 </div>
 </div>
 
 <script>
-let balance=0; let demoActive=false; let price=65000; let candles=[]; let positions=[];
-for(let i=0;i<80;i++){let o=price;let c=o+(Math.random()-0.48)*400;let h=Math.max(o,c)+Math.random()*150;let l=Math.min(o,c)-Math.random()*150;candles.push({o,h,l,c});price=c;}
-function showPlans(){document.getElementById('buyModal').style.display='flex';}
-function buyDemo(amount,planName){
-alert('You selected '+planName+'. Complete payment to activate.');
-balance=amount; demoActive=true;
-document.getElementById('buyModal').style.display='none';
-document.getElementById('tradeControls').classList.remove('locked');
-document.getElementById('balance').innerText=balance.toFixed(2);
-document.getElementById('positions').innerText='No open trades';
+let balance = 0;
+let price = 50000;
+let candles = [];
+let history = [];
+let myTrades = [];
+let tickCount = 0;
+let demoPurchased = false;
+
+for(let i=0;i<40;i++){
+  let o = price;
+  let c = o + (Math.random()-0.5)*150;
+  let h = Math.max(o,c)+Math.random()*40;
+  let l = Math.min(o,c)-Math.random()*40;
+  candles.push({o,h,l,c});
+  price=c;
 }
-const canvas=document.getElementById('chart'); const ctx=canvas.getContext('2d');
-function resize(){canvas.width=canvas.offsetWidth;canvas.height=canvas.offsetHeight;}
-window.onresize=resize; resize();
+
 function drawChart(){
-ctx.clearRect(0,0,canvas.width,canvas.height);
-let w=canvas.width/100; let data=candles.slice(-70);
-let min=Math.min(...data.map(c=>c.l)); let max=Math.max(...data.map(c=>c.h)); let range=max-min||1;
-data.forEach((c,i)=>{let x=i*w;
-let yO=canvas.height-((c.o-min)/range)*canvas.height*0.9-20;
-let yC=canvas.height-((c.c-min)/range)*canvas.height*0.9-20;
-let yH=canvas.height-((c.h-min)/range)*canvas.height*0.9-20;
-let yL=canvas.height-((c.l-min)/range)*canvas.height*0.9-20;
-ctx.strokeStyle=c.c>=c.o?'#00c853':'#ff3d00'; ctx.fillStyle=ctx.strokeStyle;
-ctx.beginPath();ctx.moveTo(x+w/2,yH);ctx.lineTo(x+w/2,yL);ctx.stroke();
-ctx.fillRect(x+2,Math.min(yO,yC),w-4,Math.abs(yC-yO)||2);});
+  let cv=document.getElementById('chart');
+  let ctx=cv.getContext('2d');
+  ctx.clearRect(0,0,cv.width,cv.height);
+  let all=candles.flatMap(k=>[k.h,k.l]);
+  let mn=Math.min(...all), mx=Math.max(...all);
+  let range=mx-mn||1;
+  let totalSlots = Math.floor(candles.length / 0.6);
+  let cw = cv.width / totalSlots;
+  candles.forEach((k,i)=>{
+    let x=i*cw+cw*0.2;
+    let y = (v)=> cv.height-20 - ((v-mn)/range)*(cv.height-40);
+    let col = k.c>=k.o ? '#00c853' : '#ff3d00';
+    ctx.strokeStyle=col; ctx.fillStyle=col; ctx.lineWidth=1;
+    ctx.beginPath(); ctx.moveTo(x+cw*0.3, y(k.h)); ctx.lineTo(x+cw*0.3, y(k.l)); ctx.stroke();
+    let yo=y(k.o), yc=y(k.c);
+    ctx.fillRect(x, Math.min(yo,yc), cw*0.6, Math.abs(yc-yo)||2);
+  });
 }
+
+function buyDemo(demoAmount, pricePaid){
+  alert('You selected $'+pricePaid+' plan. After payment you will get $'+demoAmount+' demo.');
+  balance = demoAmount;
+  demoPurchased = true;
+  document.getElementById('balance').innerText='$'+balance.toFixed(2);
+  document.getElementById('purchaseModal').style.display='none';
+  document.getElementById('tradingPanel').style.display='block';
+  startLive();
+}
+
+document.getElementById('startBtn').addEventListener('click',function(){
+  document.getElementById('welcomeCard').style.display='none';
+  document.getElementById('purchaseModal').style.display='block';
+});
+
+function startLive(){
+  drawChart();
+  setInterval(()=>{
+    tickCount++;
+    let last = candles[candles.length-1];
+    let move = (Math.random()-0.49)*60;
+    price = last.c + move;
+    last.c = price;
+    if(price > last.h) last.h = price;
+    if(price < last.l) last.l = price;
+    if(tickCount % 15 === 0){
+      candles.push({o:last.c, h:last.c, l:last.c, c:last.c});
+      if(candles.length>50) candles.shift();
+    }
+    document.getElementById('livePrice').innerText='$'+price.toFixed(2);
+    drawChart();
+    checkTrades();
+  },400);
+}
+
 function openTrade(type){
-if(!demoActive){showPlans();return;}
-let amt=parseFloat(document.getElementById('amount').value);
-let lev=parseInt(document.getElementById('leverage').value);
-let tp=parseFloat(document.getElementById('tp').value);
-let sl=parseFloat(document.getElementById('sl').value);
-if(amt>balance){alert('Insufficient demo balance');return;}
-positions.push({type,entry:price,amount:amt,lev,tp,sl});
+  if(!demoPurchased || balance <= 0){
+    alert('Please purchase demo first!');
+    document.getElementById('purchaseModal').style.display='block';
+    return;
+  }
+  let lot=parseFloat(document.getElementById('lot').value);
+  let sym=document.getElementById('symbol').value;
+  let tr={sym,type,lot,entry:price,time:new Date().toLocaleTimeString()};
+  myTrades.push(tr);
+  document.getElementById('openPos').innerHTML+='<p>'+type+' '+lot+' '+sym+' @ $'+price.toFixed(2)+' - Running...</p>';
 }
-function updatePositions(){
-if(!demoActive) return;
-let html='';
-positions=positions.filter(p=>{
-let ch=(price-p.entry)/p.entry*100*p.lev; if(p.type==='short') ch=-ch;
-let pnl=p.amount*ch/100;
-if(ch>=p.tp||ch<=-p.sl){balance+=p.amount+pnl;return false;}
-html+=`<div>${p.type.toUpperCase()} ${p.lev}x PnL:$${pnl.toFixed(2)}</div>`; return true;});
-document.getElementById('positions').innerHTML=html||'No open trades';
-document.getElementById('balance').innerText=balance.toFixed(2);
+
+function checkTrades(){
+  if(myTrades.length>0 && Math.random()>0.85){
+    let tr=myTrades.shift();
+    let diff = price - tr.entry;
+    let pnl = tr.type==='BUY' ? diff*tr.lot*0.5 : -diff*tr.lot*0.5;
+    balance+=pnl;
+    if(balance<0) balance=0;
+    document.getElementById('balance').innerText='$'+balance.toFixed(2);
+    document.getElementById('balance').style.color=balance>0?'#00c853':'#ff3d00';
+    history.push({...tr,pnl:pnl.toFixed(2)});
+    updateHist();
+    document.getElementById('openPos').innerHTML+='<p>Closed '+tr.type+' PnL: $'+pnl.toFixed(2)+'</p>';
+  }
 }
-setInterval(()=>{
-let c=price+(Math.random()-0.48)*200;
-if(Math.random()>0.7){candles.push({o:price,h:Math.max(price,c)+50,l:Math.min(price,c)-50,c});}
-price=c; drawChart(); updatePositions();
-let ob=''; for(let i=0;i<8;i++){ob+=`<div style="color:#00c853">Bid:${(price-Math.random()*40).toFixed(1)}</div><div style="color:#ff3d00">Ask:${(price+Math.random()*40).toFixed(1)}</div>`;}
-document.getElementById('orderbook').innerHTML=ob;
-},1000);
-drawChart();
+function updateHist(){
+  let b=document.getElementById('histBody');
+  b.innerHTML='';
+  history.forEach(h=>{
+    b.innerHTML+='<tr><td>'+h.sym+'</td><td>'+h.type+'</td><td>'+h.lot+'</td><td style="color:'+(h.pnl>=0?'#00c853':'#ff3d00')+'">$'+h.pnl+'</td></tr>';
+  });
+}
+function showHistory(){document.getElementById('historyModal').style.display='block';}
+function hideHistory(){document.getElementById('historyModal').style.display='none';}
 </script>
 </body>
 </html>
