@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Real Trading Purchase - Tron Payment</title>
+<script src="https://cdn.jsdelivr.net/npm/tronweb@5.3.0/dist/TronWeb.js"></script>
+<style>
+body{font-family:Arial; background:#0f0f0f; color:white; text-align:center}
+.box{background:#1a1a1a; padding:20px; border-radius:10px; width:90%; max-width:400px; margin:30px auto; border:1px solid #333}
+button{width:100%; padding:12px; margin:8px 0; background:#00ff88; border:none; border-radius:6px; font-weight:bold; cursor:pointer}
+button:nth-child(2){background:#ffaa00}
+#status{color:#00ff88; margin-top:15px; word-break:break-all}
+</style>
+</head>
+<body>
+
+<div class="box">
+  <h2>Real Trading - Buy Now</h2>
+  <p>Trust Wallet (Tron) se payment karen</p>
+  
+  <p>Wallet: <span id="walletAddr">Not Connected</span></p>
+  
+  <button onclick="connectWallet()">1. Trust Wallet Connect</button>
+  <button onclick="buyWithTron(10)">2. 10 TRX se Purchase Karo</button>
+  <button onclick="withdrawToTrustWallet()">3. Wapas Trust Wallet Bhejo</button>
+  
+  <p id="status"></p>
+</div>
+
+<script>
+const MERCHANT_ADDRESS = "TQXXXX_APNA_TRON_ADDRESS_YAHAN_DALAIN_XXXX"; // <-- Yahan apna address dalen
+
+let tronWebInstance;
+let userAddress = "";
+
+async function connectWallet(){
+  if(window.tronWeb && window.tronWeb.ready){
+    tronWebInstance = window.tronWeb;
+    userAddress = tronWebInstance.defaultAddress.base58;
+    document.getElementById("walletAddr").innerText = userAddress.substring(0,6) + "..." + userAddress.slice(-4);
+    document.getElementById("status").innerText = "Connected: " + userAddress;
+  } else {
+    alert("Trust Wallet Browser ya TronLink se open karen");
+  }
+}
+
+async function buyWithTron(amount){
+  if(!userAddress){ alert("Pehle Connect karen"); return; }
+  try{
+    document.getElementById("status").innerText = "Payment ho rahi hai... Trust Wallet ma Approve karen";
+    const tx = await tronWebInstance.transactionBuilder.sendTrx(MERCHANT_ADDRESS, tronWebInstance.toSun(amount), userAddress);
+    const signed = await tronWebInstance.trx.sign(tx);
+    const res = await tronWebInstance.trx.sendRawTransaction(signed);
+    
+    if(res.result){
+      document.getElementById("status").innerText = "SUCCESS! Purchase Complete. TX: " + res.txid + " | Ab aap real-trading.html par redirect ho jayen ge";
+      // Yahan purchase active kar den
+      localStorage.setItem("isPurchased", "true");
+      setTimeout(()=>{ window.location.href = "real-trading.html"; }, 3000);
+    }
+  } catch(e){
+    document.getElementById("status").innerText = "Error: " + e.message;
+  }
+}
+
+async function withdrawToTrustWallet(){
+  let amount = prompt("Kitna wapas bhejna hai?");
+  if(!amount) return;
+  buyWithTron(amount); // Same logic, MERCHANT ko apna wallet samjhen, ulta karna ho to backend chahiye
+  document.getElementById("status").innerText = "Ye Damo ma Website se Trust Wallet bhejne ka function hai. Real ma ye admin backend se hoga";
+}
+</script>
+
+</body>
+</html>
