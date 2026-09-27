@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Buy Demo - Trading Master</title>
+<style>
+body{font-family: Arial; background:#0f172a; color:white; text-align:center; padding:15px;}
+.plan{background:#1e293b; padding:15px; margin:10px 0; border-radius:12px; cursor:pointer; border:2px solid transparent; font-weight:bold; display:flex; justify-content:space-between;}
+.plan.selected{border-color:#22c55e; background:#14532d;}
+.box{background:#1e293b; padding:20px; border-radius:12px; margin-top:20px; text-align:left;}
+.pay-option{background:#0f172a; padding:15px; border-radius:10px; margin:12px 0; cursor:pointer; border:2px solid #334155;}
+.pay-option.selected{border-color:#38bdf8; background:#1e3a5f;}
+button{padding:14px 25px; background:#22c55e; color:white; border:none; border-radius:8px; font-size:16px; cursor:pointer; width:100%; font-weight:bold; margin-top:15px;}
+input{padding:12px; width:92%; margin:10px 0; border-radius:6px; border:none;}
+.highlight{color:#38bdf8; font-weight:bold; word-break:break-all; font-size:16px;}
+.copy-btn{background:#334155; font-size:12px; padding:6px 12px; width:auto; margin-left:10px; border-radius:5px;}
+.qr-box{text-align:center; background:white; padding:10px; border-radius:10px; margin:15px auto; width:220px;}
+.qr-box img{width:200px; height:200px;}
+</style>
+</head>
+<body>
+
+<h2>Buy Demo Trading Balance</h2>
+<p>Logged in as: <b id="userEmail"></b></p>
+
+<div id="plans"></div>
+
+<div id="paymentBox" class="box" style="display:none;">
+<h3 style="text-align:center;">Pay $<span id="payUSD"></span> = Get $<span id="demoUSD"></span> Demo</h3>
+<p style="text-align:center; color:#22c55e;">PKR Amount: <b id="payPKR"></b></p>
+
+<h4>Select Payment Method:</h4>
+
+<div class="pay-option" id="optJazz" onclick="selectMethod('jazz')">
+<b>1. For Pakistan - JazzCash Till ID</b><br><br>
+Till ID: <span class="highlight">981149773</span> <button class="copy-btn" onclick="copyText('981149773')">Copy</button><br>
+Title: <span class="highlight">Trading Master</span><br>
+Amount: <b id="jazzAmount" style="color:#22c55e;"></b>
+</div>
+
+<div class="pay-option" id="optUsdt" onclick="selectMethod('usdt')">
+<b>2. For Out of Country - USDT TRC20</b><br><br>
+<div class="qr-box">
+<img id="qrImage" src="" alt="QR Code" />
+</div>
+Address: <span class="highlight">T9yimC9YJdVtCQbgfHdj8bDh1c8uNGKDmu</span> <button class="copy-btn" onclick="copyText('T9yimC9YJdVtCQbgfHdj8bDh1c8uNGKDmu')">Copy</button><br>
+Network: <b>TRON (TRC20)</b><br>
+Title: <span class="highlight">Trading Master</span><br>
+Amount: <b id="usdtAmount" style="color:#22c55e;"></b> USDT<br>
+<span style="font-size:11px; color:#94a3b8;">Send exact amount. If you send less, admin will not approve.</span>
+</div>
+
+<div style="margin-top:20px;">
+<input type="text" id="emailInput" placeholder="Confirm your login email" />
+<input type="file" id="screenshot" accept="image/*" />
+<p style="font-size:12px; color:#94a3b8; text-align:center;">Upload payment screenshot proof</p>
+<button onclick="submitRequest()">Submit Payment Proof</button>
+<p id="status" style="text-align:center; color:yellow; margin-top:15px;"></p>
+</div>
+</div>
+
+<script>
+const TILL_ID = "981149773";
+const MERCHANT_NAME = "Trading Master";
+const USDT_ADDRESS = "T9yimC9YJdVtCQbgfHdj8bDh1c8uNGKDmu";
+const USD_TO_PKR_RATE = 280;
+
+const plansData = [
+  { pay: 1, demo: 20 },
+  { pay: 12, demo: 10000 },
+  { pay: 25, demo: 30000 },
+  { pay: 30, demo: 40000 },
+  { pay: 40, demo: 60000 },
+  { pay: 50, demo: 80000 },
+  { pay: 60, demo: 100000 }
+];
+
+let selectedPay = 0, selectedDemo = 0, selectedMethod = "";
+
+let loggedEmail = localStorage.getItem('userEmail') || localStorage.getItem('email') || "";
+document.getElementById('userEmail').innerText = loggedEmail || "Guest";
+
+let plansHtml = "";
+plansData.forEach(p=>{
+  plansHtml += `<div class="plan" onclick="selectPlan(${p.pay}, ${p.demo}, this)"><span>Pay $${p.pay} = ${p.pay*USD_TO_PKR_RATE} PKR</span><span>Get $${p.demo}</span></div>`;
+});
+document.getElementById('plans').innerHTML = plansHtml;
+
+function selectPlan(pay, demo, el){
+  selectedPay = pay; selectedDemo = demo;
+  document.querySelectorAll('.plan').forEach(p=>p.classList.remove('selected'));
+  el.classList.add('selected');
+  document.getElementById('paymentBox').style.display = 'block';
+  document.getElementById('payUSD').innerText = pay;
+  document.getElementById('demoUSD').innerText = demo;
+  document.getElementById('payPKR').innerText = (pay * USD_TO_PKR_RATE) + " PKR";
+  document.getElementById('jazzAmount').innerText = (pay * USD_TO_PKR_RATE) + " PKR";
+  document.getElementById('usdtAmount').innerText = pay;
+  document.getElementById('qrImage').src = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${USDT_ADDRESS}`;
+  document.getElementById('emailInput').value = loggedEmail;
+  selectMethod('jazz');
+  window.scrollTo(0, document.body.scrollHeight);
+}
+
+function selectMethod(method){
+  selectedMethod = method;
+  document.querySelectorAll('.pay-option').forEach(p=>p.classList.remove('selected'));
+  if(method=='jazz') document.getElementById('optJazz').classList.add('selected');
+  if(method=='usdt') document.getElementById('optUsdt').classList.add('selected');
+}
+
+function copyText(text){
+  navigator.clipboard.writeText(text);
+  alert("Copied: " + text);
+}
+
+function submitRequest(){
+  let email = document.getElementById('emailInput').value.trim().toLowerCase();
+  let file = document.getElementById('screenshot').files[0];
+  if(!selectedPay){ alert("Please select plan"); return; }
+  if(!selectedMethod){ alert("Please select payment method"); return; }
+  if(!email || !file){ alert("Email and screenshot required"); return; }
+
+  let reader = new FileReader();
+  reader.onload = function(e){
+    let requests = JSON.parse(localStorage.getItem('purchaseRequests') || "[]");
+    requests.push({
+      id: Date.now(),
+      email: email,
+      payUSD: selectedPay,
+      payPKR: selectedPay * USD_TO_PKR_RATE,
+      demoAmount: selectedDemo,
+      method: selectedMethod === 'jazz' ? `JazzCash Till ${TILL_ID} (${MERCHANT_NAME})` : `USDT TRC20 ${USDT_ADDRESS} (${MERCHANT_NAME})`,
+      paymentMethod: selectedMethod,
+      requiredAmount: selectedMethod === 'jazz' ? (selectedPay * USD_TO_PKR_RATE) + " PKR" : selectedPay + " USDT",
+      screenshot: e.target.result,
+      status: "pending",
+      date: new Date().toLocaleString()
+    });
+    localStorage.setItem('purchaseRequests', JSON.stringify(requests));
+    localStorage.setItem('userEmail', email);
+    document.getElementById('status').innerText = `Request sent! You paid for $${selectedPay} (${selectedMethod}). Admin will check screenshot and add $${selectedDemo} Demo to your wallet: ${email}`;
+    alert("Request Sent! Admin will approve and add balance to your trading wallet.");
+  };
+  reader.readAsDataURL(file);
+}
+</script>
+</body>
+</html>
