@@ -2,77 +2,109 @@
 <html>
 <head>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Buy Demo Balance</title>
+<title>Admin Panel - Final</title>
 <style>
-body{font-family: Arial; background:#0f172a; color:white; text-align:center; padding:15px;}
-.plan{background:#1e293b; padding:18px; margin:10px 0; border-radius:12px; cursor:pointer; border:2px solid transparent; font-weight:bold;}
-.plan.selected{border-color:#22c55e; background:#14532d;}
-button{padding:12px 25px; background:#22c55e; color:white; border:none; border-radius:8px; font-size:16px; cursor:pointer; width:100%;}
-input{padding:12px; width:90%; margin:10px 0; border-radius:6px; border:none;}
-.box{background:#1e293b; padding:20px; border-radius:12px; margin-top:20px;}
+body{font-family: Arial; background:#020617; color:white; padding:15px;}
+.card{background:#1e293b; padding:15px; border-radius:10px; margin-bottom:15px; border:1px solid #334155;}
+img{max-width:100%; border-radius:8px; margin-top:10px; border:1px solid #475569;}
+button{padding:10px 15px; border:none; border-radius:6px; cursor:pointer; margin:5px; font-weight:bold;}
+.approve{background:#22c55e; color:white;}
+.reject{background:#ef4444; color:white;}
+.delete{background:#334155; color:white;}
+.pending{color:orange; font-weight:bold;}
+.approved{color:#22c55e; font-weight:bold;}
+.rejected{color:#ef4444; font-weight:bold;}
+.top-bar{display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;}
 </style>
 </head>
 <body>
-<h2>Select Demo Plan</h2>
-<p>Login as: <b id="userEmail"></b></p>
 
-<div class="plan" onclick="selectPlan(20, 1, this)">Pay $1 - Get $20 Demo</div>
-<div class="plan" onclick="selectPlan(10000, 12, this)">Pay $12 - Get $10,000 Demo</div>
-<div class="plan" onclick="selectPlan(30000, 25, this)">Pay $25 - Get $30,000 Demo</div>
-<div class="plan" onclick="selectPlan(40000, 30, this)">Pay $30 - Get $40,000 Demo</div>
-<div class="plan" onclick="selectPlan(60000, 40, this)">Pay $40 - Get $60,000 Demo</div>
-<div class="plan" onclick="selectPlan(80000, 50, this)">Pay $50 - Get $80,000 Demo</div>
-<div class="plan" onclick="selectPlan(100000, 60, this)">Pay $60 - Get $100,000 Demo</div>
-
-<div id="paymentBox" class="box" style="display:none;">
-<h3>Pay $<span id="payAmount"></span> to get $<span id="demoAmount"></span></h3>
-<p>Send to: <b style="color:#38bdf8;">YOUR_EASYPAISA_NUMBER</b></p>
-<input type="text" id="emailInput" placeholder="Confirm your login email" />
-<input type="file" id="screenshot" accept="image/*" />
-<button onclick="submitRequest()">I Have Paid - Submit</button>
-<p id="status" style="color:yellow;"></p>
+<div class="top-bar">
+  <h2>Admin Panel</h2>
+  <button onclick="clearAll()" class="delete">Clear All History</button>
 </div>
 
+<div id="stats" style="background:#1e293b; padding:10px; border-radius:8px; margin-bottom:15px;"></div>
+<div id="list"></div>
+
 <script>
-let selectedDemo=0, selectedPay=0;
-let loggedEmail = localStorage.getItem('userEmail') || localStorage.getItem('email') || "demo@gmail.com";
-document.getElementById('userEmail').innerText = loggedEmail;
-document.getElementById('emailInput').value = loggedEmail;
+function loadRequests(){
+  let requests = JSON.parse(localStorage.getItem('purchaseRequests') || "[]");
+  let userBalances = JSON.parse(localStorage.getItem('userBalances') || "{}");
+  
+  // Stats
+  let pendingCount = requests.filter(r=>r.status=='pending').length;
+  document.getElementById('stats').innerHTML = `Total Requests: ${requests.length} | Pending: ${pendingCount} | Total Users with Balance: ${Object.keys(userBalances).length}`;
 
-function selectPlan(demo, pay, el){
-  selectedDemo=demo; selectedPay=pay;
-  document.querySelectorAll('.plan').forEach(p=>p.classList.remove('selected'));
-  el.classList.add('selected');
-  document.getElementById('paymentBox').style.display='block';
-  document.getElementById('payAmount').innerText=pay;
-  document.getElementById('demoAmount').innerText=demo;
-  window.scrollTo(0, document.body.scrollHeight);
+  let html = "";
+  if(requests.length==0) html="<p style='text-align:center; color:#94a3b8;'>No requests yet. When user pays, request will appear here.</p>";
+
+  requests.slice().reverse().forEach(req=>{
+    html+=`
+    <div class="card">
+      <p><b>Email:</b> ${req.email}</p>
+      <p><b>Pay:</b> $${req.payAmount} | <b>Demo:</b> $${req.demoAmount}</p>
+      <p><b>Date:</b> ${req.date}</p>
+      <p><b>Status:</b> <span class="${req.status}">${req.status.toUpperCase()}</span></p>
+      <p><b>Current Balance of this user:</b> $${userBalances[req.email.toLowerCase()] || 0}</p>
+      ${req.screenshot ? `<img src="${req.screenshot}" />` : '<p>No Screenshot</p>'}
+      <br><br>
+      ${req.status=='pending'? `<button class="approve" onclick="approve(${req.id})">Approve & Add $${req.demoAmount}</button><button class="reject" onclick="reject(${req.id})">Reject</button>` : ''}
+      <button class="delete" onclick="deleteOne(${req.id})">Delete</button>
+    </div>`;
+  });
+  document.getElementById('list').innerHTML=html;
 }
 
-function submitRequest(){
-  let email=document.getElementById('emailInput').value.trim();
-  let file=document.getElementById('screenshot').files[0];
-  if(!email ||!file){ alert("Email and Screenshot required"); return; }
+function approve(id){
+  let requests = JSON.parse(localStorage.getItem('purchaseRequests') || "[]");
+  let userBalances = JSON.parse(localStorage.getItem('userBalances') || "{}");
+  let req = requests.find(r=>r.id==id);
+  if(!req) return;
 
-  let reader=new FileReader();
-  reader.onload=function(e){
-    let requests=JSON.parse(localStorage.getItem('purchaseRequests')||"[]");
-    requests.push({
-      id: Date.now(),
-      email: email,
-      payAmount: selectedPay,
-      demoAmount: selectedDemo,
-      screenshot: e.target.result,
-      status: "pending",
-      date: new Date().toLocaleString()
-    });
-    localStorage.setItem('purchaseRequests', JSON.stringify(requests));
-    localStorage.setItem('userEmail', email);
-    document.getElementById('status').innerText="Request Sent! Status: Pending. After Admin Approval, balance will be added to your trading account.";
-    alert("Success! Request sent.");
-  };
-  reader.readAsDataURL(file);
+  // Safety: Don't approve twice
+  if(req.status === 'approved'){
+    alert("Already approved before!");
+    return;
+  }
+
+  let emailKey = req.email.toLowerCase().trim();
+  
+  // Main Logic: Add balance instantly
+  userBalances[emailKey] = (Number(userBalances[emailKey]) || 0) + Number(req.demoAmount);
+  req.status = "approved";
+
+  localStorage.setItem('userBalances', JSON.stringify(userBalances));
+  localStorage.setItem('purchaseRequests', JSON.stringify(requests));
+  
+  alert("SUCCESS! $" + req.demoAmount + " added to " + emailKey);
+  loadRequests();
 }
+
+function reject(id){
+  let requests = JSON.parse(localStorage.getItem('purchaseRequests') || "[]");
+  let req = requests.find(r=>r.id==id);
+  if(req){ req.status="rejected"; }
+  localStorage.setItem('purchaseRequests', JSON.stringify(requests));
+  loadRequests();
+}
+
+function deleteOne(id){
+  if(!confirm("Delete this request?")) return;
+  let requests = JSON.parse(localStorage.getItem('purchaseRequests') || "[]");
+  requests = requests.filter(r=>r.id!=id);
+  localStorage.setItem('purchaseRequests', JSON.stringify(requests));
+  loadRequests();
+}
+
+function clearAll(){
+  if(!confirm("Are you sure to delete ALL requests and balances?")) return;
+  localStorage.removeItem('purchaseRequests');
+  localStorage.removeItem('userBalances');
+  loadRequests();
+}
+
+loadRequests();
 </script>
 </body>
 </html>
