@@ -1,74 +1,116 @@
 <!DOCTYPE html>
 <html>
 <head>
-<title>Real Trading Purchase - Tron Payment</title>
+<title>Real Trading - Tron Payment</title>
 <script src="https://cdn.jsdelivr.net/npm/tronweb@5.3.0/dist/TronWeb.js"></script>
 <style>
-body{font-family:Arial; background:#0f0f0f; color:white; text-align:center}
-.box{background:#1a1a1a; padding:20px; border-radius:10px; width:90%; max-width:400px; margin:30px auto; border:1px solid #333}
-button{width:100%; padding:12px; margin:8px 0; background:#00ff88; border:none; border-radius:6px; font-weight:bold; cursor:pointer}
-button:nth-child(2){background:#ffaa00}
-#status{color:#00ff88; margin-top:15px; word-break:break-all}
+body{font-family:Arial; background:#0f0f0f; color:white; text-align:center; margin:0}
+.box{background:#1a1a1a; padding:20px; border-radius:12px; width:92%; max-width:450px; margin:20px auto; border:1px solid #333}
+input{width:90%; padding:12px; margin:8px 0; border-radius:6px; border:1px solid #333; background:#222; color:white}
+button{width:95%; padding:12px; margin:8px 0; background:#00ff88; border:none; border-radius:6px; font-weight:bold; cursor:pointer}
+.btn2{background:#ffaa00}
+.btn3{background:#00aaff; color:white}
+#status{color:#00ff88; margin-top:15px; word-break:break-all; font-size:13px}
+label{font-size:13px; color:#aaa; display:block; margin-top:10px; text-align:left; margin-left:15px}
 </style>
 </head>
 <body>
 
 <div class="box">
   <h2>Real Trading - Buy Now</h2>
-  <p>Trust Wallet (Tron) se payment karen</p>
-  
-  <p>Wallet: <span id="walletAddr">Not Connected</span></p>
-  
-  <button onclick="connectWallet()">1. Trust Wallet Connect</button>
-  <button onclick="buyWithTron(10)">2. 10 TRX se Purchase Karo</button>
-  <button onclick="withdrawToTrustWallet()">3. Wapas Trust Wallet Bhejo</button>
-  
+  <p>Connected: <span id="walletAddr">Not Connected</span></p>
+  <button onclick="connectWallet()">Connect Trust Wallet</button>
+  <hr style="border-color:#333; margin:20px 0">
+
+  <!-- SEND TO TRUST WALLET -->
+  <h3>1. Send to Trust Wallet</h3>
+  <label>Enter Trust Wallet Tron Address (TRC20)</label>
+  <input id="sendToAddress" placeholder="T... Trust Wallet Address">
+  <label>Enter Amount to Send</label>
+  <input id="sendAmount" type="number" placeholder="e.g. 10">
+  <button class="btn2" onclick="sendToTrustWallet()">Continue - Send to Trust Wallet</button>
+
+  <hr style="border-color:#333; margin:20px 0">
+
+  <!-- DEPOSIT TO WEBSITE -->
+  <h3>2. Deposit to Website</h3>
+  <label>Enter Website Deposit Address</label>
+  <input id="websiteAddress" value="TQ...YOUR_MERCHANT_ADDRESS_HERE" placeholder="Website Tron Address">
+  <label>Enter Amount to Deposit to Website</label>
+  <input id="depositAmount" type="number" placeholder="e.g. 50">
+  <button class="btn3" onclick="depositToWebsite()">Continue - Deposit to Website</button>
+
   <p id="status"></p>
 </div>
 
 <script>
-const MERCHANT_ADDRESS = "TQXXXX_APNA_TRON_ADDRESS_YAHAN_DALAIN_XXXX"; // <-- Yahan apna address dalen
+// CONFIG
+const USDT_CONTRACT = "TR7NHqjeKQxGTCi8q8ZY4pL8otSzgjLj6t"; // USDT TRC20 Mainnet
 
-let tronWebInstance;
+let tronWeb;
 let userAddress = "";
 
 async function connectWallet(){
   if(window.tronWeb && window.tronWeb.ready){
-    tronWebInstance = window.tronWeb;
-    userAddress = tronWebInstance.defaultAddress.base58;
-    document.getElementById("walletAddr").innerText = userAddress.substring(0,6) + "..." + userAddress.slice(-4);
-    document.getElementById("status").innerText = "Connected: " + userAddress;
+    tronWeb = window.tronWeb;
+    userAddress = tronWeb.defaultAddress.base58;
+    document.getElementById("walletAddr").innerText = userAddress;
+    document.getElementById("status").innerText = "Wallet Connected: " + userAddress;
   } else {
-    alert("Trust Wallet Browser ya TronLink se open karen");
+    alert("Please open in Trust Wallet DApp Browser or TronLink");
   }
 }
 
-async function buyWithTron(amount){
-  if(!userAddress){ alert("Pehle Connect karen"); return; }
+// Feature 1: Website -> Trust Wallet (TRX)
+async function sendToTrustWallet(){
+  let to = document.getElementById("sendToAddress").value.trim();
+  let amount = document.getElementById("sendAmount").value.trim();
+  if(!userAddress){ alert("First Connect Wallet"); return; }
+  if(!to || !amount){ alert("Enter Address and Amount"); return; }
+
   try{
-    document.getElementById("status").innerText = "Payment ho rahi hai... Trust Wallet ma Approve karen";
-    const tx = await tronWebInstance.transactionBuilder.sendTrx(MERCHANT_ADDRESS, tronWebInstance.toSun(amount), userAddress);
-    const signed = await tronWebInstance.trx.sign(tx);
-    const res = await tronWebInstance.trx.sendRawTransaction(signed);
+    document.getElementById("status").innerText = "Sending " + amount + " TRX to Trust Wallet... Approve in wallet";
+    
+    // For TRC20 USDT use below commented function
+    const tx = await tronWeb.transactionBuilder.sendTrx(to, tronWeb.toSun(amount), userAddress);
+    const signed = await tronWeb.trx.sign(tx);
+    const res = await tronWeb.trx.sendRawTransaction(signed);
     
     if(res.result){
-      document.getElementById("status").innerText = "SUCCESS! Purchase Complete. TX: " + res.txid + " | Ab aap real-trading.html par redirect ho jayen ge";
-      // Yahan purchase active kar den
-      localStorage.setItem("isPurchased", "true");
-      setTimeout(()=>{ window.location.href = "real-trading.html"; }, 3000);
+      document.getElementById("status").innerText = "Sent to Trust Wallet Successfully! TX: " + res.txid;
     }
   } catch(e){
     document.getElementById("status").innerText = "Error: " + e.message;
   }
 }
 
-async function withdrawToTrustWallet(){
-  let amount = prompt("Kitna wapas bhejna hai?");
-  if(!amount) return;
-  buyWithTron(amount); // Same logic, MERCHANT ko apna wallet samjhen, ulta karna ho to backend chahiye
-  document.getElementById("status").innerText = "Ye Damo ma Website se Trust Wallet bhejne ka function hai. Real ma ye admin backend se hoga";
+// Feature 2: Trust Wallet -> Website (TRC20 / TRX)
+async function depositToWebsite(){
+  let to = document.getElementById("websiteAddress").value.trim();
+  let amount = document.getElementById("depositAmount").value.trim();
+  if(!userAddress){ alert("First Connect Wallet"); return; }
+  if(!to || !amount){ alert("Enter Website Address and Amount"); return; }
+
+  try{
+    document.getElementById("status").innerText = "Depositing " + amount + " to Website... Approve in Trust Wallet";
+    
+    // --- FOR TRX DEPOSIT (Current) ---
+    const tx = await tronWeb.transactionBuilder.sendTrx(to, tronWeb.toSun(amount), userAddress);
+    const signed = await tronWeb.trx.sign(tx);
+    const res = await tronWeb.trx.sendRawTransaction(signed);
+
+    // --- FOR USDT TRC20 DEPOSIT (Uncomment to use TRC20) ---
+    // let contract = await tronWeb.contract().at(USDT_CONTRACT);
+    // let res = await contract.transfer(to, tronWeb.toSun(amount) * 1).send();
+
+    if(res.result || res.txid || res){
+      document.getElementById("status").innerText = "Deposit to Website Successful! Amount moved from Trust Wallet to Website. TX: " + (res.txid || res);
+      localStorage.setItem("isPurchased","true");
+    }
+  } catch(e){
+    document.getElementById("status").innerText = "Error: " + e.message;
+  }
 }
 </script>
-
 </body>
 </html>
