@@ -3,64 +3,98 @@
 <head>
 <title>Website to Trust Wallet - Pure HTML</title>
 <script src="https://cdn.jsdelivr.net/npm/tronweb@5.3.0/dist/TronWeb.js"></script>
-<style>body{background:#111;color:#fff;font-family:Arial;text-align:center}.box{background:#222;padding:20px;width:92%;max-width:400px;margin:20px auto;border-radius:12px}input{width:90%;padding:12px;margin:8px;background:#333;color:#fff;border:1px solid #444}button{width:95%;padding:14px;margin:6px;border:none;border-radius:8px;font-weight:bold;cursor:pointer}.red{background:#ff3333;color:#fff}.blue{background:#0099ff;color:#fff}#status{color:#0f0;margin-top:10px;word-break:break-all}</style>
+<style>
+body{background:#111;color:#fff;font-family:Arial;text-align:center}
+.box{background:#222;padding:20px;width:92%;max-width:420px;margin:20px auto;border-radius:12px}
+input{width:90%;padding:12px;margin:8px;background:#333;color:#fff;border:1px solid #444;border-radius:6px}
+button{width:95%;padding:14px;margin:6px;border:none;border-radius:8px;font-weight:bold;cursor:pointer}
+.red{background:#ff3333;color:#fff}.blue{background:#0099ff;color:#fff}
+#status{color:#0f0;margin-top:12px;word-break:break-all;font-size:13px}
+.warn{font-size:12px;color:#ff0}
+</style>
 </head>
 <body>
 <div class="box">
 <h3>Website -> Wallet (Pure HTML)</h3>
-<p style="font-size:12px;color:#ff0">WARNING: Private Key html main hai, sirf test ke liye</p>
-<input id="vaultPK" type="password" placeholder="Paste Website Vault Private Key here">
-<input id="toAddr" value="TPX5mKd6hd69KjaehravSvRdR6mFg3cGQN" placeholder="User ka T... Address">
-<input id="amt" type="number" value="0.5" placeholder="Amount TRX">
-<button class="red" onclick="sendFromWebsite()">1. WEBSITE SE TRUST WALLET BHEJO - Zero par bhi jayega</button>
+<p class="warn">WARNING: Private Key is in HTML, only for testing. Delete after test.</p>
+
+<input id="vaultPK" type="password" placeholder="Paste Website Vault Private Key (64 chars)">
+<input id="toAddr" value="TMTZNybRrrcCRqgSFRHCC3X2JuQAiweKA8" placeholder="User T... Address">
+<input id="amt" type="number" value="1" placeholder="Amount TRX">
+
+<button class="red" onclick="sendFromWebsite()">1. SEND FROM WEBSITE TO TRUST WALLET</button>
 <hr>
 <button class="blue" onclick="connectUser()">2. Connect User Wallet (for return)</button>
-<button class="blue" onclick="sendBack()">3. Wapas Website par bhejo (Gas Fee lagegi)</button>
+<button class="blue" onclick="sendBack()">3. Send Back to Website (Gas Fee will apply)</button>
+
 <p id="status"></p>
 </div>
 
 <script>
 let userTronWeb = null;
-// 1. Website Vault se bhejna - User ka balance 0 bhi ho to jayega
+
+// 1. Send from Website Vault - This wallet MUST have TRX balance on Mainnet
 async function sendFromWebsite(){
   let pk = document.getElementById("vaultPK").value.trim();
+  if(pk.startsWith('0x')) pk = pk.slice(2); // remove 0x if present
   let to = document.getElementById("toAddr").value.trim();
   let amount = document.getElementById("amt").value.trim();
-  if(!pk){ alert("Pehle Vault ka Private Key dalo"); return; }
+  
+  if(!pk || pk.length < 64){ alert("Invalid Private Key - must be 64 chars"); return; }
+  
   try{
-    document.getElementById("status").innerText = "Website Vault se bhej raha hun...";
+    document.getElementById("status").innerText = "Sending from Website Vault... please wait";
     const tronWebVault = new TronWeb({ fullHost: 'https://api.trongrid.io', privateKey: pk });
+    
+    // Check balance first
+    const balance = await tronWebVault.trx.getBalance(tronWebVault.defaultAddress.base58);
+    console.log("Vault Balance:", balance / 1000000 + " TRX");
+    if(balance < 2000000){
+      throw new Error("Website Vault has 0 or low balance. Send 15-20 TRX to " + tronWebVault.defaultAddress.base58 + " first. Zero balance send is NOT possible on Mainnet.");
+    }
+
     let tx = await tronWebVault.transactionBuilder.sendTrx(to, tronWebVault.toSun(amount));
     let signed = await tronWebVault.trx.sign(tx);
     let res = await tronWebVault.trx.sendRawTransaction(signed);
-    document.getElementById("status").innerHTML = "✅ Website se chala gaya User ke wallet main!<br>TX: "+res.txid;
+    
+    if(res.result){
+      document.getElementById("status").innerHTML = "✅ SUCCESS! Sent to user wallet<br>TXID: "+res.txid+"<br>Check on tronscan.org";
+    } else {
+      throw new Error(JSON.stringify(res));
+    }
   }catch(e){
-    document.getElementById("status").innerText = "Error: "+e.message;
+    console.error(e);
+    document.getElementById("status").innerText = "Error: " + (e.message || JSON.stringify(e));
   }
 }
 
-// 2. User wallet connect - wapas ke liye
+// 2. Connect User Wallet (TronLink / Trust Wallet Browser)
 async function connectUser(){
   if(window.tronWeb && window.tronWeb.ready){
     userTronWeb = window.tronWeb;
     document.getElementById("status").innerText = "User Connected: "+userTronWeb.defaultAddress.base58;
   }else{
-    alert("Trust Wallet Browser main open karo");
+    alert("Open this page in Trust Wallet Browser or TronLink enabled browser");
   }
 }
-// 3. User se wapas website par
+
+// 3. Send Back to Website
 async function sendBack(){
-  if(!userTronWeb){ alert("Pehle User Connect karo"); return; }
-  let vaultAddr = userTronWeb.address.fromPrivateKey(document.getElementById("vaultPK").value.trim());
+  if(!userTronWeb){ alert("First Click 2. Connect User Wallet"); return; }
+  let pkInput = document.getElementById("vaultPK").value.trim();
+  if(pkInput.startsWith('0x')) pkInput = pkInput.slice(2);
+  let vaultAddr = userTronWeb.address.fromPrivateKey(pkInput);
   let amount = document.getElementById("amt").value.trim();
+  
   try{
-    document.getElementById("status").innerText = "Wapas bhej raha hun, gas fee lagegi...";
+    document.getElementById("status").innerText = "Sending back... Gas fee will apply";
     let tx = await userTronWeb.transactionBuilder.sendTrx(vaultAddr, userTronWeb.toSun(amount));
     let signed = await userTronWeb.trx.sign(tx);
     let res = await userTronWeb.trx.sendRawTransaction(signed);
-    document.getElementById("status").innerHTML = "✅ Wapas Website Vault main aa gaya<br>TX: "+res.txid;
+    document.getElementById("status").innerHTML = "✅ Returned to Website Vault<br>TX: "+res.txid;
   }catch(e){
-    document.getElementById("status").innerText = "Error: "+e.message;
+    console.error(e);
+    document.getElementById("status").innerText = "Error: " + (e.message || JSON.stringify(e));
   }
 }
 </script>
