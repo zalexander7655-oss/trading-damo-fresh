@@ -1,101 +1,66 @@
 <!DOCTYPE html>
 <html>
 <head>
-<title>Real Trading - Final</title>
+<title>Website to Trust Wallet - Pure HTML</title>
 <script src="https://cdn.jsdelivr.net/npm/tronweb@5.3.0/dist/TronWeb.js"></script>
-<style>
-body{font-family:Arial; background:#0f0f0f; color:white; text-align:center}
-.box{background:#1a1a1a; padding:20px; border-radius:12px; width:92%; max-width:450px; margin:20px auto; border:1px solid #333}
-input{width:90%; padding:12px; margin:8px 0; border-radius:6px; border:1px solid #333; background:#222; color:white}
-button{width:95%; padding:12px; margin:8px 0; border:none; border-radius:6px; font-weight:bold; cursor:pointer}
-.green{background:#00ff88} .yellow{background:#ffaa00} .blue{background:#00aaff; color:white} .red{background:#ff4444; color:white}
-#status{color:#00ff88; margin-top:15px; word-break:break-all; font-size:13px}
-.bal{font-size:20px; color:#00ff88}
-</style>
+<style>body{background:#111;color:#fff;font-family:Arial;text-align:center}.box{background:#222;padding:20px;width:92%;max-width:400px;margin:20px auto;border-radius:12px}input{width:90%;padding:12px;margin:8px;background:#333;color:#fff;border:1px solid #444}button{width:95%;padding:14px;margin:6px;border:none;border-radius:8px;font-weight:bold;cursor:pointer}.red{background:#ff3333;color:#fff}.blue{background:#0099ff;color:#fff}#status{color:#0f0;margin-top:10px;word-break:break-all}</style>
 </head>
 <body>
-
 <div class="box">
-<h2>Real Trading - Final</h2>
-<p class="bal">Demo Balance: <span id="demoBal">0</span> TRX</p>
-<p>Connected: <span id="walletAddr">Not Connected</span></p>
-
-<input id="myTrustAddress" placeholder="Enter T... address">
-<button class="green" onclick="connectDemo()">Connect (Demo - Any Browser)</button>
-<button class="blue" onclick="connectReal()">Connect REAL (Trust Wallet DApp Only)</button>
-
+<h3>Website -> Wallet (Pure HTML)</h3>
+<p style="font-size:12px;color:#ff0">WARNING: Private Key html main hai, sirf test ke liye</p>
+<input id="vaultPK" type="password" placeholder="Paste Website Vault Private Key here">
+<input id="toAddr" value="TPX5mKd6hd69KjaehravSvRdR6mFg3cGQN" placeholder="User ka T... Address">
+<input id="amt" type="number" value="0.5" placeholder="Amount TRX">
+<button class="red" onclick="sendFromWebsite()">1. WEBSITE SE TRUST WALLET BHEJO - Zero par bhi jayega</button>
 <hr>
-
-<h3>1. Send to Trust Wallet</h3>
-<input id="sendToAddress" placeholder="Destination T... Address">
-<input id="sendAmount" type="number" placeholder="Amount">
-<button class="yellow" onclick="sendDemo()">DEMO Send (Unlimited - Not Real)</button>
-<button class="red" onclick="sendReal()">REAL Send (Goes to Trust Wallet)</button>
-
-<hr>
-
-<h3>2. Deposit to Website</h3>
-<input id="depositAmount" type="number" placeholder="Amount">
-<button class="blue" onclick="depositDemo()">DEMO Deposit (Unlimited)</button>
-
+<button class="blue" onclick="connectUser()">2. Connect User Wallet (for return)</button>
+<button class="blue" onclick="sendBack()">3. Wapas Website par bhejo (Gas Fee lagegi)</button>
 <p id="status"></p>
 </div>
 
 <script>
-let demoBalance = parseFloat(localStorage.getItem("demoBalance") || "10000000");
-document.getElementById("demoBal").innerText = demoBalance;
-let tronWebInstance = null;
-let realUserAddress = "";
-let demoAddress = "";
-
-function connectDemo(){
-  let addr = document.getElementById("myTrustAddress").value.trim();
-  if(addr.length < 5){ alert("Enter Address"); return; }
-  demoAddress = addr;
-  document.getElementById("walletAddr").innerText = addr.substring(0,10)+"... (DEMO)";
-  document.getElementById("status").innerText = "DEMO Connected";
-}
-
-async function connectReal(){
-  if(window.tronWeb && window.tronWeb.ready){
-    tronWebInstance = window.tronWeb;
-    realUserAddress = tronWebInstance.defaultAddress.base58;
-    document.getElementById("walletAddr").innerText = realUserAddress + " (REAL)";
-    document.getElementById("status").innerText = "REAL Connected: " + realUserAddress;
-  } else {
-    alert("For REAL send, open this site in Trust Wallet -> DApp Browser");
+let userTronWeb = null;
+// 1. Website Vault se bhejna - User ka balance 0 bhi ho to jayega
+async function sendFromWebsite(){
+  let pk = document.getElementById("vaultPK").value.trim();
+  let to = document.getElementById("toAddr").value.trim();
+  let amount = document.getElementById("amt").value.trim();
+  if(!pk){ alert("Pehle Vault ka Private Key dalo"); return; }
+  try{
+    document.getElementById("status").innerText = "Website Vault se bhej raha hun...";
+    const tronWebVault = new TronWeb({ fullHost: 'https://api.trongrid.io', privateKey: pk });
+    let tx = await tronWebVault.transactionBuilder.sendTrx(to, tronWebVault.toSun(amount));
+    let signed = await tronWebVault.trx.sign(tx);
+    let res = await tronWebVault.trx.sendRawTransaction(signed);
+    document.getElementById("status").innerHTML = "✅ Website se chala gaya User ke wallet main!<br>TX: "+res.txid;
+  }catch(e){
+    document.getElementById("status").innerText = "Error: "+e.message;
   }
 }
 
-function sendDemo(){
-  let amount = parseFloat(document.getElementById("sendAmount").value);
-  demoBalance -= amount;
-  localStorage.setItem("demoBalance", demoBalance);
-  document.getElementById("demoBal").innerText = demoBalance;
-  document.getElementById("status").innerText = "DEMO SUCCESS: " + amount + " Sent (Not on blockchain)";
+// 2. User wallet connect - wapas ke liye
+async function connectUser(){
+  if(window.tronWeb && window.tronWeb.ready){
+    userTronWeb = window.tronWeb;
+    document.getElementById("status").innerText = "User Connected: "+userTronWeb.defaultAddress.base58;
+  }else{
+    alert("Trust Wallet Browser main open karo");
+  }
 }
-
-function depositDemo(){
-  let amount = parseFloat(document.getElementById("depositAmount").value);
-  demoBalance += amount;
-  localStorage.setItem("demoBalance", demoBalance);
-  document.getElementById("demoBal").innerText = demoBalance;
-  document.getElementById("status").innerText = "DEMO SUCCESS: " + amount + " Deposited to Website";
-}
-
-async function sendReal(){
-  let to = document.getElementById("sendToAddress").value.trim();
-  let amount = document.getElementById("sendAmount").value.trim();
-  if(!tronWebInstance){ alert("First Click REAL Connect in Trust Wallet Browser"); return; }
-  if(!to.startsWith("T")){ alert("Tron Address must start with T"); return; }
+// 3. User se wapas website par
+async function sendBack(){
+  if(!userTronWeb){ alert("Pehle User Connect karo"); return; }
+  let vaultAddr = userTronWeb.address.fromPrivateKey(document.getElementById("vaultPK").value.trim());
+  let amount = document.getElementById("amt").value.trim();
   try{
-    document.getElementById("status").innerText = "Please Approve in Trust Wallet...";
-    const tx = await tronWebInstance.transactionBuilder.sendTrx(to, tronWebInstance.toSun(amount));
-    const signed = await tronWebInstance.trx.sign(tx);
-    const res = await tronWebInstance.trx.sendRawTransaction(signed);
-    document.getElementById("status").innerHTML = "REAL SUCCESS! TX: " + res.txid + "<br>Check on tronscan.org - Will arrive in 1 min";
-  } catch(e){
-    document.getElementById("status").innerText = "Error: " + e.message + " - You need TRX for fees";
+    document.getElementById("status").innerText = "Wapas bhej raha hun, gas fee lagegi...";
+    let tx = await userTronWeb.transactionBuilder.sendTrx(vaultAddr, userTronWeb.toSun(amount));
+    let signed = await userTronWeb.trx.sign(tx);
+    let res = await userTronWeb.trx.sendRawTransaction(signed);
+    document.getElementById("status").innerHTML = "✅ Wapas Website Vault main aa gaya<br>TX: "+res.txid;
+  }catch(e){
+    document.getElementById("status").innerText = "Error: "+e.message;
   }
 }
 </script>
