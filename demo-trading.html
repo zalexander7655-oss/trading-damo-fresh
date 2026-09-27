@@ -42,17 +42,22 @@ let cv=document.getElementById('chart'),ctx=cv.getContext('2d');
 ctx.fillStyle='#ffffff';ctx.fillRect(0,0,cv.width,cv.height);
 let all=candles.flatMap(k=>[k.h,k.l]),mn=Math.min(...all),mx=Math.max(...all);
 let pad=(mx-mn)*0.15; mn-=pad; mx+=pad; let rg=mx-mn||0.0001;
-// Center + 0.5 top bottom empty
-let totalSlots=28, drawSlots=28;
+// FIXED: Candle thin like original trading + 30% empty right side + center
+let totalSlots=36; let visibleCandles=24; // 24/36 = 66% filled, 33% empty right side
 let cw=cv.width/totalSlots;
-let vis=candles.slice(offset,offset+drawSlots);
+let vis=candles.slice(offset,offset+visibleCandles);
 vis.forEach((k,i)=>{
 let x=i*cw;
-let y=v=>{let usable=cv.height*0.88; let topPad=cv.height*0.06; return topPad+usable - ((v-mn)/rg)*usable;};
+let y=v=>{let usable=cv.height*0.80; let topPad=cv.height*0.10; return topPad+usable - ((v-mn)/rg)*usable;};
 let isUp=k.c>=k.o;let col=isUp?'#0ecb81':'#f6465d';
-ctx.fillStyle=col;ctx.strokeStyle=col;ctx.lineWidth=1.2;
+ctx.fillStyle=col;ctx.strokeStyle=col;ctx.lineWidth=1;
 ctx.beginPath();ctx.moveTo(x+cw/2,y(k.h));ctx.lineTo(x+cw/2,y(k.l));ctx.stroke();
-let yo=y(k.o),yc=y(k.c);let diff=Math.abs(yc-yo);let bh=Math.max(diff*4.6,18);let center=(yo+yc)/2;let top=center-bh/2;let bw=cw*0.92;
+// Original thin body - bareek
+let yo=y(k.o),yc=y(k.c);
+let diff=Math.abs(yc-yo);
+let bh=Math.max(diff*1.6,6); // original jaisa thin
+let center=(yo+yc)/2;let top=center-bh/2;
+let bw=cw*0.45; // bareek candle - thin
 ctx.fillRect(x+(cw-bw)/2,top,bw,bh);
 });
 ctx.lineWidth=2;ctx.strokeStyle='#1e2329';
@@ -63,7 +68,7 @@ if(d.type==='hline'){ctx.beginPath();ctx.moveTo(0,d.y1);ctx.lineTo(cv.width,d.y1
 if(d.type==='box'){ctx.strokeRect(Math.min(d.x1,d.x2),Math.min(d.y1,d.y2),Math.abs(d.x2-d.x1),Math.abs(d.y2-d.y1));}
 if(d.type==='pen'){ctx.beginPath();d.points.forEach((p,i)=>{i==0?ctx.moveTo(p.x,p.y):ctx.lineTo(p.x,p.y);});ctx.stroke();}
 });
-let vc=document.getElementById('volChart'),vctx=vc.getContext('2d');vctx.fillStyle='#ffffff';vctx.fillRect(0,0,vc.width,vc.height);let vv=volumes.slice(offset,offset+drawSlots),vmx=Math.max(...vv,1),bw2=cv.width/totalSlots;vv.forEach((v,i)=>{let h=(v/vmx)*45;vctx.fillStyle='#e6e8ea';vctx.fillRect(i*bw2,vc.height-h,bw2-2,h);});
+let vc=document.getElementById('volChart'),vctx=vc.getContext('2d');vctx.fillStyle='#ffffff';vctx.fillRect(0,0,vc.width,vc.height);let vv=volumes.slice(offset,offset+visibleCandles),vmx=Math.max(...vv,1);let bw2=cv.width/totalSlots;vv.forEach((v,i)=>{let h=(v/vmx)*45;vctx.fillStyle='#e6e8ea';vctx.fillRect(i*bw2,vc.height-h,bw2-2,h);});
 }
 function getPos(e){let cv=document.getElementById('chart');let r=cv.getBoundingClientRect();return{x:(e.touches?e.touches[0].clientX:e.clientX)-r.left,y:(e.touches?e.touches[0].clientY:e.clientY)-r.top};}
 function attachDrawEvents(){
