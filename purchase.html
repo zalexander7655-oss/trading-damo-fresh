@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-<title>Real Trading - Buy Now</title>
+<title>Real Trading - Unlimited Demo</title>
 <style>
 body{font-family:Arial; background:#0f0f0f; color:white; text-align:center; margin:0}
 .box{background:#1a1a1a; padding:20px; border-radius:12px; width:92%; max-width:450px; margin:20px auto; border:1px solid #333}
@@ -11,83 +11,88 @@ button{width:95%; padding:12px; margin:8px 0; background:#00ff88; border:none; b
 .btn3{background:#00aaff; color:white}
 #status{color:#00ff88; margin-top:15px; word-break:break-all; font-size:13px}
 label{font-size:13px; color:#aaa; display:block; margin-top:10px; text-align:left; margin-left:15px}
-.bal{font-size:18px; color:#00ff88; font-weight:bold}
+.bal{font-size:20px; color:#00ff88; font-weight:bold}
 </style>
 </head>
 <body>
 
 <div class="box">
-  <h2>Real Trading - Buy Now</h2>
-  <p class="bal">Website Balance: <span id="demoBal">0</span> TRX</p>
+  <h2>Real Trading - Unlimited Demo</h2>
+  <p class="bal">Website Balance: <span id="demoBal">0</span> TRX (DEMO)</p>
   <p>Connected: <span id="walletAddr">Not Connected</span></p>
   
-  <!-- CONNECT SECTION -->
-  <label>Enter Your Trust Wallet Tron Address (T...)</label>
-  <input id="myTrustAddress" placeholder="Enter T... address to connect">
-  <button onclick="connectWallet()">Connect Trust Wallet</button>
+  <label>Enter Any Wallet Address (T... or 0x...)</label>
+  <input id="myTrustAddress" placeholder="0x... or T...">
+  <button onclick="connectWallet()">Connect Wallet</button>
   
   <hr style="border-color:#333; margin:20px 0">
 
-  <!-- SEND TO TRUST WALLET -->
-  <h3>1. Send to Trust Wallet</h3>
-  <label>Send to Address (TRC20)</label>
-  <input id="sendToAddress" placeholder="T... destination address">
-  <label>Amount to Send</label>
-  <input id="sendAmount" type="number" placeholder="e.g. 10">
+  <h3>1. Send to Trust Wallet (Unlimited)</h3>
+  <input id="sendToAddress" placeholder="Send to Address">
+  <input id="sendAmount" type="number" placeholder="Amount e.g. 1000000">
   <button class="btn2" onclick="sendToTrustWallet()">Continue - Send to Trust Wallet</button>
 
   <hr style="border-color:#333; margin:20px 0">
 
-  <!-- DEPOSIT TO WEBSITE -->
-  <h3>2. Deposit to Website</h3>
-  <label>Website Deposit Address</label>
-  <input id="websiteAddress" value="TQ5a6pZx...YourWebsiteAddress" placeholder="Website Address">
-  <label>Amount to Deposit to Website</label>
-  <input id="depositAmount" type="number" placeholder="e.g. 50">
+  <h3>2. Deposit to Website (Unlimited)</h3>
+  <input id="websiteAddress" value="Website Vault" placeholder="Website Address">
+  <input id="depositAmount" type="number" placeholder="Amount e.g. 5000000">
   <button class="btn3" onclick="depositToWebsite()">Continue - Deposit to Website</button>
+  
+  <button style="background:#333; color:white; margin-top:20px" onclick="resetBal()">Reset Balance</button>
 
   <p id="status"></p>
 </div>
 
 <script>
-let demoBalance = parseFloat(localStorage.getItem("demoBalance") || "1000");
+let demoBalance = parseFloat(localStorage.getItem("demoBalance") || "10000000");
 document.getElementById("demoBal").innerText = demoBalance;
-
-let connectedAddress = "";
+let connectedAddress = localStorage.getItem("connectedAddr") || "";
+if(connectedAddress){
+  document.getElementById("walletAddr").innerText = connectedAddress.substring(0,10)+"...";
+  document.getElementById("myTrustAddress").value = connectedAddress;
+}
 
 function connectWallet(){
   let addr = document.getElementById("myTrustAddress").value.trim();
-  if(addr.length < 10){ alert("Please Enter Valid Tron Address T..."); return; }
-  
-  // Manual Connect - No need for TronLink
+  if(addr.length < 5){ alert("Enter Address"); return; }
   connectedAddress = addr;
-  document.getElementById("walletAddr").innerText = addr.substring(0,8) + "..." + addr.slice(-6);
-  document.getElementById("status").innerText = "Connected Successfully (Demo Mode): " + addr;
   localStorage.setItem("connectedAddr", addr);
+  document.getElementById("walletAddr").innerText = addr.substring(0,12)+"...";
+  document.getElementById("status").innerText = "✅ Connected: " + addr + " (DEMO MODE - Unlimited)";
 }
 
 function sendToTrustWallet(){
-  if(!connectedAddress){ alert("First Connect Wallet - Enter address above and press Connect"); return; }
+  if(!connectedAddress){ alert("First Connect"); return; }
   let to = document.getElementById("sendToAddress").value.trim();
   let amount = parseFloat(document.getElementById("sendAmount").value);
   if(!to || !amount){ alert("Enter Address and Amount"); return; }
-  if(demoBalance < amount){ alert("Not enough demo balance"); return; }
 
+  // UNLIMITED - No balance check
   demoBalance -= amount;
   localStorage.setItem("demoBalance", demoBalance);
   document.getElementById("demoBal").innerText = demoBalance;
-  document.getElementById("status").innerHTML = "✅ DEMO SUCCESSFUL<br>" + amount + " TRX Sent to Trust Wallet<br>To: " + to + "<br>New Balance: " + demoBalance;
+  let fakeTx = "0x" + Math.random().toString(16).substr(2, 64);
+  document.getElementById("status").innerHTML = "✅ DEMO SUCCESSFUL<br>Sent " + amount + " TRX to Trust Wallet<br>To: " + to + "<br>TX: " + fakeTx + "<br>Balance: " + demoBalance;
 }
 
 function depositToWebsite(){
-  if(!connectedAddress){ alert("First Connect Wallet"); return; }
+  if(!connectedAddress){ alert("First Connect"); return; }
   let amount = parseFloat(document.getElementById("depositAmount").value);
   if(!amount){ alert("Enter Amount"); return; }
 
   demoBalance += amount;
   localStorage.setItem("demoBalance", demoBalance);
   document.getElementById("demoBal").innerText = demoBalance;
-  document.getElementById("status").innerHTML = "✅ DEMO SUCCESSFUL<br>" + amount + " TRX Deposited to Website<br>Amount deducted from Trust Wallet and added to Website<br>New Balance: " + demoBalance;
+  let fakeTx = "0x" + Math.random().toString(16).substr(2, 64);
+  document.getElementById("status").innerHTML = "✅ DEMO SUCCESSFUL<br>Deposited " + amount + " TRX to Website<br>TX: " + fakeTx + "<br>New Website Balance: " + demoBalance;
+}
+
+function resetBal(){
+  demoBalance = 10000000;
+  localStorage.setItem("demoBalance", demoBalance);
+  document.getElementById("demoBal").innerText = demoBalance;
+  document.getElementById("status").innerText = "Balance Reset to 10,000,000";
 }
 </script>
 </body>
