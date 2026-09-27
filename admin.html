@@ -1,68 +1,80 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Admin Panel - Trading Master</title>
 <style>
-body{font-family: Arial; background:#0f172a; color:white; padding:15px;}
-.box{background:#1e293b; padding:15px; border-radius:12px; margin:10px 0;}
-img{max-width:100%; border-radius:8px; margin-top:10px; border:2px solid white;}
-button{padding:10px 20px; border:none; border-radius:6px; cursor:pointer; font-weight:bold; margin:5px;}
-.approve{background:#22c55e; color:white;}
-.reject{background:#ef4444; color:white;}
-.status-pending{color:orange;}.status-approved{color:#22c55e;}
+body{font-family:Arial;background:#0f172a;color:white;margin:0;padding:15px}
+.email-list{background:#1e293b;padding:12px;border-radius:10px;margin:8px 0;cursor:pointer;border-left:4px solid #f59e0b}
+.email-list:hover{background:#334155}
+.modal{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.8);justify-content:center;align-items:center;z-index:999}
+.modal-content{background:#1e293b;padding:20px;border-radius:12px;width:90%;max-width:400px}
+.modal-content img{width:100%;border-radius:8px;margin:10px 0;border:1px solid #475569}
+.btn{width:100%;padding:12px;border:none;border-radius:8px;font-weight:bold;cursor:pointer;margin-top:8px}
+.approve{background:#22c55e;color:white}.reject{background:#ef4444;color:white}.close{background:#475569;color:white}
 </style>
 </head>
 <body>
 <h2>Admin Panel - Trading Master</h2>
-<p>Till ID: 981149773 | USDT: T9yimC9YJdVtCQbgfHdj8bDh1c8uNGKDmu</p>
-<div id="requests"></div>
+<p style="color:#94a3b8">Till: 981149773 | USDT: T9yimC9YJdVtCQbgfHdj8bDh1c8uNGKDmu</p>
+<div id="emailContainer"></div>
+
+<!-- Popup Modal -->
+<div id="detailModal" class="modal">
+  <div class="modal-content" id="modalData"></div>
+</div>
 
 <script>
-function loadRequests(){
-  let reqs = JSON.parse(localStorage.getItem('purchaseRequests') || "[]");
-  let users = JSON.parse(localStorage.getItem('tradingUsers') || "{}");
+let requests = JSON.parse(localStorage.getItem('purchaseRequests')||"[]");
+let users = JSON.parse(localStorage.getItem('tradingUsers')||"{}");
+
+function showEmails(){
   let html="";
-  if(reqs.length==0) html="<p>No payment requests yet.</p>";
-  reqs.slice().reverse().forEach((r, idx)=>{
-    let realIdx = reqs.length-1-idx;
-    html+=`<div class="box">
-      <b>Email:</b> ${r.email}<br>
-      <b>Package:</b> Pay $${r.payUSD} = ${r.payPKR} PKR = Get $${r.demoAmount} Demo<br>
-      <b>Method:</b> ${r.method}<br>
-      <b>Date:</b> ${r.date}<br>
-      <b>Status:</b> <span class="status-${r.status}">${r.status}</span><br>
-      <img src="${r.screenshot}" /><br><br>
-      ${r.status==='pending'? `<button class="approve" onclick="approveReq(${realIdx})">Approve & Add $${r.demoAmount} Demo</button> <button class="reject" onclick="rejectReq(${realIdx})">Reject</button>` : `<i>Already ${r.status}</i>`}
+  if(requests.length==0){document.getElementById('emailContainer').innerHTML="No Pending Request"; return;}
+  requests.slice().reverse().forEach((r,revIdx)=>{
+    let idx = requests.length-1-revIdx;
+    let color = r.status=='approved'?'#22c55e':r.status=='rejected'?'#ef4444':'#f59e0b';
+    html+=`<div class="email-list" style="border-left-color:${color}" onclick="openDetail(${idx})">
+      <b>${r.email}</b> - <span style="color:${color}">${r.status.toUpperCase()}</span><br>
+      <small>${r.date} | $${r.payUSD} -> $${r.demoAmount}</small>
     </div>`;
   });
-  document.getElementById('requests').innerHTML=html;
+  document.getElementById('emailContainer').innerHTML=html;
 }
 
-function approveReq(i){
-  let reqs = JSON.parse(localStorage.getItem('purchaseRequests') || "[]");
-  let users = JSON.parse(localStorage.getItem('tradingUsers') || "{}");
-  let r = reqs[i];
-  if(!confirm(`Approve? Add $${r.demoAmount} demo to ${r.email}?`)) return;
-
-  if(!users[r.email]) users[r.email] = { balance: 0, demoBalance: 0 };
-  users[r.email].demoBalance = (users[r.email].demoBalance || 0) + r.demoAmount;
-
-  reqs[i].status = "approved";
-  localStorage.setItem('purchaseRequests', JSON.stringify(reqs));
-  localStorage.setItem('tradingUsers', JSON.stringify(users));
-  alert(`Approved! $${r.demoAmount} added to ${r.email}`);
-  loadRequests();
+function openDetail(i){
+  let r=requests[i];
+  document.getElementById('modalData').innerHTML=`
+    <h3>Request Detail</h3>
+    <b>Email:</b> ${r.email}<br>
+    <b>Package:</b> Pay $${r.payUSD} = ${r.payUSD*280} PKR = Get $${r.demoAmount} Demo<br>
+    <b>Payment Method:</b> ${r.method}<br>
+    <b>Date:</b> ${r.date}<br>
+    <b>Status:</b> ${r.status}<br>
+    <b>Time:</b> ${r.date}<br>
+    <b>Screenshot:</b><br><img src="${r.screenshot}">
+    ${r.status=='pending'?`<button class="btn approve" onclick="approveNow(${i})">CHECK & APPROVE - $${r.demoAmount}</button>
+    <button class="btn reject" onclick="rejectNow(${i})">Reject</button>`: `<p>Already ${r.status}</p>`}
+    <button class="btn close" onclick="closeModal()">Close</button>
+  `;
+  document.getElementById('detailModal').style.display='flex';
 }
+function closeModal(){document.getElementById('detailModal').style.display='none'}
 
-function rejectReq(i){
-  let reqs = JSON.parse(localStorage.getItem('purchaseRequests') || "[]");
-  reqs[i].status = "rejected";
-  localStorage.setItem('purchaseRequests', JSON.stringify(reqs));
-  loadRequests();
+function approveNow(i){
+  let r=requests[i];
+  if(!users[r.email]) users[r.email]={balance:0,demoBalance:0,email:r.email};
+  // Final Fix: Balance Add
+  users[r.email].demoBalance = (users[r.email].demoBalance||0) + Number(r.demoAmount);
+  users[r.email].balance = users[r.email].demoBalance; // Main balance for trading board
+  r.status='approved';
+  localStorage.setItem('purchaseRequests',JSON.stringify(requests));
+  localStorage.setItem('tradingUsers',JSON.stringify(users));
+  alert('Approved! '+r.email+' ko $'+r.demoAmount+' mil gaya. Ab uski ID me balance nazar ayega.');
+  closeModal(); showEmails();
 }
-
-loadRequests();
+function rejectNow(i){requests[i].status='rejected';localStorage.setItem('purchaseRequests',JSON.stringify(requests));closeModal();showEmails();}
+showEmails();
 </script>
 </body>
 </html>
