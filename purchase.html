@@ -1,107 +1,78 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Buy Demo Balance</title>
-  <style>
-    body{font-family: Arial; background:#0f172a; color:white; text-align:center; padding:20px;}
-   .plan{background:#1e293b; padding:20px; margin:10px; border-radius:12px; cursor:pointer; border:2px solid transparent;}
-   .plan:hover{border-color:#38bdf8;}
-   .plan.selected{border-color:#22c55e; background:#14532d;}
-    button{padding:12px 25px; background:#22c55e; color:white; border:none; border-radius:8px; font-size:16px; cursor:pointer;}
-    input{padding:10px; width:90%; margin:10px 0; border-radius:6px;}
-  </style>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Buy Demo Balance</title>
+<style>
+body{font-family: Arial; background:#0f172a; color:white; text-align:center; padding:15px;}
+.plan{background:#1e293b; padding:18px; margin:10px 0; border-radius:12px; cursor:pointer; border:2px solid transparent; font-weight:bold;}
+.plan.selected{border-color:#22c55e; background:#14532d;}
+button{padding:12px 25px; background:#22c55e; color:white; border:none; border-radius:8px; font-size:16px; cursor:pointer; width:100%;}
+input{padding:12px; width:90%; margin:10px 0; border-radius:6px; border:none;}
+.box{background:#1e293b; padding:20px; border-radius:12px; margin-top:20px;}
+</style>
 </head>
 <body>
-
 <h2>Select Demo Plan</h2>
-<p>Your Login Email: <span id="userEmail"></span></p>
+<p>Login as: <b id="userEmail"></b></p>
 
-<div id="plans">
-  <div class="plan" onclick="selectPlan(20, 1)">Pay $1 - Get $20 Demo</div>
-  <div class="plan" onclick="selectPlan(10000, 12)">Pay $12 - Get $10,000 Demo</div>
-  <div class="plan" onclick="selectPlan(30000, 25)">Pay $25 - Get $30,000 Demo</div>
-  <div class="plan" onclick="selectPlan(40000, 30)">Pay $30 - Get $40,000 Demo</div>
-  <div class="plan" onclick="selectPlan(60000, 40)">Pay $40 - Get $60,000 Demo</div>
-  <div class="plan" onclick="selectPlan(80000, 50)">Pay $50 - Get $80,000 Demo</div>
-  <div class="plan" onclick="selectPlan(100000, 60)">Pay $60 - Get $100,000 Demo</div>
-</div>
+<div class="plan" onclick="selectPlan(20, 1, this)">Pay $1 - Get $20 Demo</div>
+<div class="plan" onclick="selectPlan(10000, 12, this)">Pay $12 - Get $10,000 Demo</div>
+<div class="plan" onclick="selectPlan(30000, 25, this)">Pay $25 - Get $30,000 Demo</div>
+<div class="plan" onclick="selectPlan(40000, 30, this)">Pay $30 - Get $40,000 Demo</div>
+<div class="plan" onclick="selectPlan(60000, 40, this)">Pay $40 - Get $60,000 Demo</div>
+<div class="plan" onclick="selectPlan(80000, 50, this)">Pay $50 - Get $80,000 Demo</div>
+<div class="plan" onclick="selectPlan(100000, 60, this)">Pay $60 - Get $100,000 Demo</div>
 
-<div id="paymentBox" style="display:none; margin-top:20px; background:#1e293b; padding:20px; border-radius:10px;">
-  <h3>Pay $<span id="payAmount"></span> to get $<span id="demoAmount"></span> Demo</h3>
-  <p>Send payment to: <b>Your Easypaisa / Binance ID Here</b></p>
-  <p>Your Email for approval: <input type="text" id="emailInput" placeholder="Enter login email" /></p>
-  <p>Upload Screenshot Proof:</p>
-  <input type="file" id="screenshot" accept="image/*" />
-  <br><br>
-  <button onclick="submitRequest()">I have Paid - Submit Request</button>
-  <p id="status"></p>
+<div id="paymentBox" class="box" style="display:none;">
+<h3>Pay $<span id="payAmount"></span> to get $<span id="demoAmount"></span></h3>
+<p>Send to: <b style="color:#38bdf8;">YOUR_EASYPAISA_NUMBER</b></p>
+<input type="text" id="emailInput" placeholder="Confirm your login email" />
+<input type="file" id="screenshot" accept="image/*" />
+<button onclick="submitRequest()">I Have Paid - Submit</button>
+<p id="status" style="color:yellow;"></p>
 </div>
 
 <script>
-  let selectedDemo = 0;
-  let selectedPay = 0;
+let selectedDemo=0, selectedPay=0;
+let loggedEmail = localStorage.getItem('userEmail') || localStorage.getItem('email') || "demo@gmail.com";
+document.getElementById('userEmail').innerText = loggedEmail;
+document.getElementById('emailInput').value = loggedEmail;
 
-  // Get user email from login system
-  let loggedEmail = localStorage.getItem('userEmail') || "";
-  document.getElementById('userEmail').innerText = loggedEmail;
-  document.getElementById('emailInput').value = loggedEmail;
+function selectPlan(demo, pay, el){
+  selectedDemo=demo; selectedPay=pay;
+  document.querySelectorAll('.plan').forEach(p=>p.classList.remove('selected'));
+  el.classList.add('selected');
+  document.getElementById('paymentBox').style.display='block';
+  document.getElementById('payAmount').innerText=pay;
+  document.getElementById('demoAmount').innerText=demo;
+  window.scrollTo(0, document.body.scrollHeight);
+}
 
-  function selectPlan(demo, pay){
-    selectedDemo = demo;
-    selectedPay = pay;
-    document.querySelectorAll('.plan').forEach(p=>p.classList.remove('selected'));
-    event.target.classList.add('selected');
+function submitRequest(){
+  let email=document.getElementById('emailInput').value.trim();
+  let file=document.getElementById('screenshot').files[0];
+  if(!email ||!file){ alert("Email and Screenshot required"); return; }
 
-    document.getElementById('paymentBox').style.display = 'block';
-    document.getElementById('payAmount').innerText = pay;
-    document.getElementById('demoAmount').innerText = demo;
-  }
-
-  function submitRequest(){
-    let email = document.getElementById('emailInput').value;
-    let file = document.getElementById('screenshot').files[0];
-
-    if(!email ||!file){
-      alert("Please enter email and upload screenshot");
-      return;
-    }
-
-    // Save request to localStorage (for demo, you will check this in admin panel)
-    let requests = JSON.parse(localStorage.getItem('purchaseRequests') || "[]");
+  let reader=new FileReader();
+  reader.onload=function(e){
+    let requests=JSON.parse(localStorage.getItem('purchaseRequests')||"[]");
     requests.push({
+      id: Date.now(),
       email: email,
       payAmount: selectedPay,
       demoAmount: selectedDemo,
+      screenshot: e.target.result,
       status: "pending",
       date: new Date().toLocaleString()
     });
     localStorage.setItem('purchaseRequests', JSON.stringify(requests));
     localStorage.setItem('userEmail', email);
-
-    document.getElementById('status').innerText = "Request Sent! Waiting for Admin Approval. Your demo will be added after admin checks screenshot.";
-    alert("Request submitted successfully for " + email);
-  }
+    document.getElementById('status').innerText="Request Sent! Status: Pending. After Admin Approval, balance will be added to your trading account.";
+    alert("Success! Request sent.");
+  };
+  reader.readAsDataURL(file);
+}
 </script>
-
-<!-- ===== ADMIN PANEL LOGIC (For you only) ===== -->
-<!-- Create a new file admin.html and paste this -->
-<!--
-<script>
-  let requests = JSON.parse(localStorage.getItem('purchaseRequests') || "[]");
-  // Loop and show
-  // When you click Approve:
-  function approve(email, demoAmount){
-    // This will add demo to that user's account
-    let userBalances = JSON.parse(localStorage.getItem('userBalances') || "{}");
-    userBalances[email] = (userBalances[email] || 0) + demoAmount;
-    localStorage.setItem('userBalances', JSON.stringify(userBalances));
-
-    // Update request status
-    //...
-    alert("Approved! " + demoAmount + " added to " + email);
-  }
-</script>
--->
-
 </body>
 </html>
