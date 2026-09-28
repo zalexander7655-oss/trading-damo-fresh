@@ -25,10 +25,8 @@ table{width:100%;border-collapse:collapse}td,th{padding:5px;border-bottom:1px so
 </style>
 </head>
 <body>
-<div class="hd"><div><b>Trading Master Pro</b> <span id="u" style="color:#848e9c;margin-left:8px"></span></div>
+<div class="hd"><div><b>Trading Master Pro</b></div>
 <div>Balance: <b id="bal" style="color:#0ecb81">$0.00</b> <button class="btn y" onclick="openHist()">History</button> <button class="btn r" onclick="location.reload()">Logout</button></div></div>
-
-<div id="login" class="modal" style="display:block"><div class="box"><h2>Login</h2><input id="uid" placeholder="Enter Gmail / ID"><button class="btn y" onclick="login()">Login</button></div></div>
 
 <div id="buyM" class="modal"><div class="box"><h2>Purchase Demo</h2>
 <div class="pi" onclick="buy(100)">Buy $100</div><div class="pi" onclick="buy(1000)">Buy $1000</div><div class="pi" onclick="buy(10000)">Buy $10000</div><div class="pi" onclick="buy(100000)">Buy $100000</div>
@@ -63,13 +61,10 @@ table{width:100%;border-collapse:collapse}td,th{padding:5px;border-bottom:1px so
 <div class="pos"><b style="color:#f0b90b">Positions (<span id="pc">0</span>)</b><table><thead><tr><th>Sym</th><th>Side</th><th>Qty</th><th>PNL</th><th>Close</th></tr></thead><tbody id="pb"></tbody></table></div>
 
 <script>
-let uid=null,bal=0,trades=[],hist=[],candles=[],price=0,off=0,tool='cross',draws=[],isD=false,sP=null,mP=null,ci=-1;
+let bal=parseFloat(localStorage.getItem('tm_bal')||'0'),trades=JSON.parse(localStorage.getItem('tm_tr')||'[]'),hist=JSON.parse(localStorage.getItem('tm_hi')||'[]'),candles=[],price=0,off=0,tool='cross',draws=[],isD=false,sP=null,mP=null,ci=-1;
 const $=id=>document.getElementById(id);
 function show(i){$(i).style.display='block'}function hide(i){$(i).style.display='none'}
-function login(){let v=$('uid').value.trim();if(!v)return alert('Enter ID');uid=v;$('u').innerText=v;
-let a=JSON.parse(localStorage.getItem('allB')||'{}');if(!(v in a))a[v]=0;localStorage.setItem('allB',JSON.stringify(a));bal=a[v];
-trades=JSON.parse(localStorage.getItem('tr_'+v)||'[]');hist=JSON.parse(localStorage.getItem('hi_'+v)||'[]');hide('login');upd();}
-function save(){let a=JSON.parse(localStorage.getItem('allB')||'{}');a[uid]=bal;localStorage.setItem('allB',JSON.stringify(a));localStorage.setItem('tr_'+uid,JSON.stringify(trades));localStorage.setItem('hi_'+uid,JSON.stringify(hist));}
+function save(){localStorage.setItem('tm_bal',bal);localStorage.setItem('tm_tr',JSON.stringify(trades));localStorage.setItem('tm_hi',JSON.stringify(hist));}
 function upd(){$('bal').innerText='$'+bal.toFixed(2);updPos();}
 function buy(a){bal=a;save();upd();hide('buyM');}
 function cq(d){$('qty').value=Math.max(1,(parseFloat($('qty').value)||10)+d)}
@@ -77,7 +72,7 @@ function trade(s){if(bal<=0){show('buyM');return alert('Purchase first');}let q=
 function setT(t,e){tool=t;document.querySelectorAll('.tools span').forEach(x=>x.classList.remove('on'));e.classList.add('on')}
 function clearD(){draws=[];drawC()}
 function openHist(){show('histM');showH('h')}
-function showH(w){if(w==='h'){let h=hist.map(x=>'<div style="display:flex;justify-content:space-between;padding:5px;border-bottom:1px solid #222"><span>'+x.d+'</span><span style="color:'+(x.pnl>=0?'#0ecb81':'#f6465d')+'">$'+x.pnl.toFixed(2)+'</span></div>').join('')||'No history';$('hBody').innerHTML='<b>20 Days History (oldest auto-delete on 21st)</b><br>'+h;}else{$('hBody').innerHTML='<b>Balance View</b><br><div style="font-size:20px;color:#0ecb81;margin-top:10px">Balance: $'+bal.toFixed(2)+'</div><div style="color:#848e9c">User: '+uid+'</div>';}}
+function showH(w){if(w==='h'){let h=hist.map(x=>'<div style="display:flex;justify-content:space-between;padding:5px;border-bottom:1px solid #222"><span>'+x.d+'</span><span style="color:'+(x.pnl>=0?'#0ecb81':'#f6465d')+'">$'+x.pnl.toFixed(2)+'</span></div>').join('')||'No history';$('hBody').innerHTML='<b>20 Days History (oldest auto-delete on 21st)</b><br>'+h;}else{$('hBody').innerHTML='<b>Balance View</b><br><div style="font-size:20px;color:#0ecb81;margin-top:10px">Balance: $'+bal.toFixed(2)+'</div>';}}
 function updPos(){$('pc').innerText=trades.length;$('pb').innerHTML=trades.map((t,i)=>{let pnl=t.side==='BUY'?(price-t.entry)*t.qty*0.001:-(price-t.entry)*t.qty*0.001;return '<tr><td>'+t.sym+'</td><td style="color:'+(pnl>=0?'#0ecb81':'#f6465d')+'">'+t.side+'</td><td>'+t.qty+'</td><td style="color:'+(pnl>=0?'#0ecb81':'#f6465d')+'">'+pnl.toFixed(2)+'</td><td><button class="btn y" onclick="openC('+i+')">Close</button></td></tr>'}).join('')||'<tr><td colspan=5 style="text-align:center;color:#555">No positions</td></tr>'}
 function openC(i){ci=i;let t=trades[i];let pnl=t.side==='BUY'?(price-t.entry)*t.qty*0.001:-(price-t.entry)*t.qty*0.001;$('cInfo').innerHTML='Sym:'+t.sym+'<br>Side:'+t.side+'<br>PNL:$'+pnl.toFixed(2);show('closeM')}
 function doClose(){let t=trades[ci];let pnl=t.side==='BUY'?(price-t.entry)*t.qty*0.001:-(price-t.entry)*t.qty*0.001;bal+=pnl;hist.push({d:new Date().toLocaleDateString(),pnl:pnl});while(hist.length>20)hist.shift();trades.splice(ci,1);hide('closeM');save();upd();}
@@ -89,7 +84,7 @@ vis.forEach((k,i)=>{let x=i*cw,y=v=>cv.height-10-((v-mn)/rg)*(cv.height-20);let 
 ctx.strokeStyle='#333';draws.forEach(d=>{if(d.type==='trend'){ctx.beginPath();ctx.moveTo(d.x1,d.y1);ctx.lineTo(d.x2,d.y2);ctx.stroke()}if(d.type==='hline'){ctx.beginPath();ctx.moveTo(0,d.y1);ctx.lineTo(cv.width,d.y1);ctx.stroke()}if(d.type==='box')ctx.strokeRect(Math.min(d.x1,d.x2),Math.min(d.y1,d.y2),Math.abs(d.x2-d.x1),Math.abs(d.y2-d.y1));if(d.type==='pen'){ctx.beginPath();d.pts.forEach((p,i)=>i?ctx.lineTo(p.x,p.y):ctx.moveTo(p.x,p.y));ctx.stroke()}});}
 function updOB(){let a='',b='';for(let i=0;i<10;i++){a+='<div style="display:flex;justify-content:space-between"><span style="color:#f6465d">'+(price+(10-i)*5).toFixed(1)+'</span><span>'+(Math.random()*1).toFixed(3)+'</span></div>'}for(let i=0;i<10;i++){b+='<div style="display:flex;justify-content:space-between"><span style="color:#0ecb81">'+(price-(i+1)*5).toFixed(1)+'</span><span>'+(Math.random()*1).toFixed(3)+'</span></div>'}$('oba').innerHTML=a;$('obb').innerHTML=b;$('mid').innerText=price.toFixed(1);$('lp').innerText='$'+price.toFixed(2);}
 async function tick(){try{let s=$('sym').value;let r=await fetch('https://api.binance.com/api/v3/ticker/price?symbol='+s);let j=await r.json();price=parseFloat(j.price);let l=candles[candles.length-1];if(l){l.c=price;if(price>l.h)l.h=price;if(price<l.l)l.l=price}}catch(e){price+=(Math.random()-0.5)*50}drawC();updOB();updPos();}
-loadLive().then(()=>{drawC();setInterval(tick,2000);setInterval(loadLive,60000);});
+upd();loadLive().then(()=>{drawC();setInterval(tick,2000);setInterval(loadLive,60000);});
 let cvE=$('ch');function gp(e){let r=cvE.getBoundingClientRect();return{x:(e.clientX-r.left)*(cvE.width/r.width),y:(e.clientY-r.top)*(cvE.height/r.height)}}
 cvE.addEventListener('mousedown',e=>{let p=gp(e);mP=p;if(tool==='trend'||tool==='box'){isD=true;sP={x1:p.x,y1:p.y,x2:p.x,y2:p.y,type:tool}}else if(tool==='hline'){draws.push({type:'hline',y1:p.y});drawC()}else if(tool==='pen'){isD=true;sP={type:'pen',pts:[p]}}});
 cvE.addEventListener('mousemove',e=>{mP=gp(e);if(isD&&sP&&sP.type==='pen'){sP.pts.push(mP);drawC()}});
