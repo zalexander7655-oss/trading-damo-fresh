@@ -80,7 +80,7 @@ table{width:100%;border-collapse:collapse}td,th{padding:6px;border-bottom:1px so
 <table><thead><tr><th>Sym</th><th>Side</th><th>Qty</th><th>PNL</th><th>Close</th></tr></thead><tbody id="pb"></tbody></table></div>
 
 <script>
-let bal=10000,trades=[],hist=[],candles=[],price=0,tool='cross',draws=[],isD=false,sP=null,mP=null,ci=-1;
+let bal=0000,trades=[],hist=[],candles=[],price=0,tool='cross',draws=[],isD=false,sP=null,mP=null,ci=-1;
 const $=id=>document.getElementById(id);
 function cq(d){$('qty').value=Math.max(1,(parseFloat($('qty').value)||10)+d)}
 function trade(s){let q=parseFloat($('qty').value)||10;trades.push({sym:$('sym').value,side:s,qty:q,entry:price});updPos();}
