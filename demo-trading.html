@@ -2,96 +2,98 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Live Binance Candles</title>
+<title>Trading Master Pro - Live Demo</title>
 <style>
-html,body{margin:0;height:100%;background:#0b0e11;overflow:hidden}
-#wrap{width:100%;height:100vh;position:relative;background:#0b0e11}
+*{box-sizing:border-box}html,body{height:100%;margin:0;font-family:Arial;overflow:hidden;background:#0b0e11;color:#eaecef;font-size:13px}
+.hd{background:#12161c;height:48px;display:flex;align-items:center;justify-content:space-between;padding:0 12px;border-bottom:1px solid #f0b90b}
+.hd b{color:#f0b90b;font-size:16px}
+.btn{border:none;border-radius:6px;padding:8px 16px;font-weight:bold;cursor:pointer}
+.y{background:#f0b90b;color:#000}.r{background:#f6465d;color:#fff}.g{background:#0ecb81;color:#fff}.b{background:#2a5bd7;color:#fff}
+.modal{position:fixed;inset:0;background:rgba(0,0,0,.95);z-index:200;display:none}
+.box{background:#1e2329;border:1px solid #f0b90b;max-width:420px;width:94%;margin:40px auto;padding:22px;border-radius:14px;text-align:center}
+.pi{background:#0b0e11;border:1px solid #2b3139;padding:13px;margin:8px;border-radius:8px;cursor:pointer;font-weight:bold}
+.pi:hover{border-color:#f0b90b;background:#1a1f28}
+.main{flex:1;display:flex;min-height:0;margin:6px;gap:6px}body{display:flex;flex-direction:column}
+.tools{width:50px;background:#12161c;border-radius:8px;display:flex;flex-direction:column;align-items:center;gap:18px;padding-top:16px;border:1px solid #1e2329}
+.tools span{font-size:20px;cursor:pointer;color:#848e9c;padding:6px;border-radius:6px}.tools span.on{background:#f0b90b;color:#000}
+.mid{flex:1;display:flex;flex-direction:column;min-width:0}
+.chartBox{flex:1;background:#0b0e11;border:1px solid #1e2329;border-radius:8px;overflow:hidden;position:relative;min-height:320px}
 #ch{width:100%;height:100%;display:block}
-#sym{position:absolute;top:10px;left:10px;background:#1e2329;color:#fff;border:1px solid #2b3139;padding:6px;border-radius:4px;z-index:10}
-#price{position:absolute;top:10px;left:140px;color:#0ecb81;font-weight:bold;font-family:Arial;z-index:10;background:rgba(0,0,0,.5);padding:6px 10px;border-radius:4px}
+.tbar{background:#12161c;border:1px solid #1e2329;border-radius:8px;display:flex;justify-content:center;align-items:center;gap:12px;padding:12px;margin-top:6px}
+.tbar input{width:80px;text-align:center;padding:10px;border-radius:6px;border:1px solid #2b3139;background:#0b0e11;color:#fff;font-weight:bold}
+.buyB{background:#0ecb81;color:#fff;padding:14px 44px;border:none;border-radius:8px;font-weight:bold;font-size:16px;cursor:pointer}
+.sellB{background:#f6465d;color:#fff;padding:14px 44px;border:none;border-radius:8px;font-weight:bold;font-size:16px;cursor:pointer}
+.ob{width:280px;background:#12161c;border:1px solid #1e2329;border-radius:8px;display:flex;flex-direction:column;overflow:hidden}
+.ob h4{margin:0;padding:10px;border-bottom:1px solid #1e2329;color:#f0b90b}#obB{flex:1;overflow:hidden;padding:5px;font-size:11px}
+.pos{background:#12161c;margin:0 6px 6px;padding:8px;border-radius:8px;border:1px solid #1e2329;max-height:140px;overflow:auto}
+table{width:100%;border-collapse:collapse}td,th{padding:6px;border-bottom:1px solid #1e2329;text-align:left}
 </style>
 </head>
 <body>
-<div id="wrap">
-<select id="sym"><option>BTCUSDT</option><option>ETHUSDT</option><option>BNBUSDT</option></select>
-<div id="price">$0</div>
-<canvas id="ch"></canvas>
+<div class="hd"><div><b>⚡ Trading Master Pro</b> <select id="sym" style="background:#1e2329;color:#fff;border:1px solid #333;padding:6px;border-radius:4px;margin-left:10px"><option>BTCUSDT</option><option>ETHUSDT</option><option>BNBUSDT</option></select> <span id="lp" style="color:#0ecb81;font-weight:bold;margin-left:8px">$0</span></div>
+<div>Balance: <b id="bal" style="color:#0ecb81">$0.00</b> <button class="btn y" onclick="document.getElementById('buyM').style.display='block'">Purchase</button> <button class="btn b" onclick="openH()">History</button> <button class="btn r" onclick="location.reload()">Logout</button></div></div>
+
+<div id="loginM" class="modal" style="display:block"><div class="box"><h2 style="color:#f0b90b">Welcome to Trading Master</h2><p style="color:#848e9c">Real Trading jaisa Demo Experience</p><input id="uid" placeholder="Enter Your ID" style="width:90%;padding:12px;background:#0b0e11;border:1px solid #333;color:#fff;border-radius:8px;margin:10px 0"><br><button class="btn y" style="width:95%;padding:12px" onclick="login()">Start Trading</button></div></div>
+
+<div id="buyM" class="modal"><div class="box"><h2>Purchase Demo Balance</h2>
+<div class="pi" onclick="doBuy(20)">💰 $1 - Get $20</div><div class="pi" onclick="doBuy(10000)">💰 $12 - Get $10,000</div><div class="pi" onclick="doBuy(30000)">💰 $25 - Get $30,000</div><div class="pi" onclick="doBuy(100000)">💰 $65 - Get $100,000</div>
+<button class="btn r" style="margin-top:10px" onclick="document.getElementById('buyM').style.display='none'">Close</button></div></div>
+
+<div id="hM" class="modal"><div class="box"><h2>History (20)</h2><div id="hB" style="text-align:left;max-height:300px;overflow:auto"></div><br><button class="btn r" onclick="document.getElementById('hM').style.display='none'">Close</button></div></div>
+<div id="cM" class="modal"><div class="box" style="text-align:left"><h3>Close Position</h3><div id="cI" style="background:#0b0e11;padding:10px;border-radius:8px"></div><br><button class="btn y" style="width:100%;padding:12px" onclick="doClose()">Confirm Close</button><br><br><button class="btn b" style="width:100%" onclick="document.getElementById('cM').style.display='none'">Cancel</button></div></div>
+
+<div class="main">
+<div class="tools"><span class="on" onclick="setT('cross',this)">✛</span><span onclick="setT('trend',this)">📈</span><span onclick="setT('box',this)">▭</span><span onclick="setT('pen',this)">✎</span><span onclick="setT('hline',this)">―</span><span onclick="draws=[];draw()">🗑</span></div>
+<div class="mid"><div class="chartBox"><canvas id="ch"></canvas></div>
+<div class="tbar"><button onclick="cq(-1)" style="width:36px;height:36px;border-radius:6px">-</button><input id="qty" value="10" type="number"><button onclick="cq(1)" style="width:36px;height:36px;border-radius:6px">+</button><button class="buyB" onclick="trade('BUY')">Buy / Long</button><button class="sellB" onclick="trade('SELL')">Sell / Short</button></div></div>
+<div class="ob"><h4>📊 Order Book - Live</h4><div id="obB"></div></div>
 </div>
+<div class="pos"><b style="color:#f0b90b">Positions (<span id="pc">0</span>)</b><table><thead><tr><th>Symbol</th><th>Side</th><th>Qty</th><th>PNL</th><th>Action</th></tr></thead><tbody id="pb"></tbody></table></div>
+
 <script>
-let candles=[],price=0;
-const cv=document.getElementById('ch'),ctx=cv.getContext('2d');
-const symEl=document.getElementById('sym'),priceEl=document.getElementById('price');
+let bal=0,trades=[],hist=[],candles=[],price=65000,tool='cross',draws=[],isD=false,sP=null,mP=null,ci=-1,user=null;
+const $=id=>document.getElementById(id);
+function login(){let u=$('uid').value.trim();if(!u)return alert('Enter ID');user=u;let b=localStorage.getItem('tm_'+u+'_b');bal=b?+b:0;$('bal').innerText='$'+bal.toFixed(2);document.getElementById('loginM').style.display='none';if(bal<=0)document.getElementById('buyM').style.display='block';}
+function doBuy(a){bal=a;localStorage.setItem('tm_'+user+'_b',bal);$('bal').innerText='$'+bal.toFixed(2);document.getElementById('buyM').style.display='none'}
+function cq(d){$('qty').value=Math.max(1,(+$('qty').value||10)+d)}
+function trade(s){if(bal<=0){document.getElementById('buyM').style.display='block';return alert('Please Purchase First')}trades.push({s,q:+$('qty').value||10,e:price});upd()}
+function setT(t,e){tool=t;document.querySelectorAll('.tools span').forEach(x=>x.classList.remove('on'));e.classList.add('on')}
+function openH(){document.getElementById('hM').style.display='block';$('hB').innerHTML=hist.map(x=>'<div style="display:flex;justify-content:space-between;padding:5px;border-bottom:1px solid #222"><span>'+x.d+'</span><span style="color:'+(x.pnl>=0?'#0ecb81':'#f6465d')+'">$'+x.pnl.toFixed(2)+'</span></div>').join('')||'No history'}
+function upd(){$('pc').innerText=trades.length;$('bal').innerText='$'+bal.toFixed(2);localStorage.setItem('tm_'+user+'_b',bal);$('pb').innerHTML=trades.map((t,i)=>{let pnl=t.s=='BUY'?(price-t.e)*t.q:-(price-t.e)*t.q;let c=pnl>=0?'#0ecb81':'#f6465d';return '<tr><td>'+$('sym').value+'</td><td style="color:'+c+'">'+t.s+'</td><td>'+t.q+'</td><td style="color:'+c+'">'+pnl.toFixed(2)+'</td><td><button class="btn y" style="padding:4px 10px" onclick="oc('+i+')">Close</button></td></tr>'}).join('')||'<tr><td colspan=5 style="text-align:center;color:#666">No open positions - Real jaisa feel lo!</td></tr>'}
+function oc(i){ci=i;let t=trades[i];let pnl=t.s=='BUY'?(price-t.e)*t.q:-(price-t.e)*t.q;$('cI').innerHTML='PNL: <b style="color:'+(pnl>=0?'#0ecb81':'#f6465d')+'">$'+pnl.toFixed(2)+'</b>';document.getElementById('cM').style.display='block'}
+function doClose(){let t=trades[ci];let pnl=t.s=='BUY'?(price-t.e)*t.q:-(price-t.e)*t.q;bal+=pnl;hist.unshift({d:new Date().toLocaleString(),pnl});while(hist.length>20)hist.shift();trades.splice(ci,1);document.getElementById('cM').style.display='none';upd()}
 
-async function load(){
-let s=symEl.value;
-let r=await fetch('https://api.binance.com/api/v3/klines?symbol='+s+'&interval=1s&limit=100');
-let j=await r.json();
-candles=j.map(k=>({o:+k[1],h:+k[2],l:+k[3],c:+k[4],t:k[0]}));
-price=candles[candles.length-1].c;
-}
+async function loadK(){try{let s=$('sym').value;let r=await fetch('https://api.binance.com/api/v3/klines?symbol='+s+'&interval=1m&limit=80');let j=await r.json();candles=j.map(k=>({o:+k[1],h:+k[2],l:+k[3],c:+k[4]}));price=candles[candles.length-1].c;}catch(e){for(let i=0;i<80;i++){let o=price;price+=(Math.random()-0.5)*100;candles.push({o,h:o+20,l:o-20,c:price})}}}
 function draw(){
-let w=cv.parentElement.clientWidth,h=cv.parentElement.clientHeight;
-cv.width=w;cv.height=h;
-ctx.fillStyle='#0b0e11';ctx.fillRect(0,0,w,h);
+let cv=$('ch'),rc=cv.parentElement.getBoundingClientRect();cv.width=rc.width;cv.height=rc.height;let ctx=cv.getContext('2d');
+ctx.fillStyle='#0b0e11';ctx.fillRect(0,0,cv.width,cv.height);
 if(!candles.length)return;
-let all=candles.flatMap(k=>[k.h,k.l]),mn=Math.min(...all),mx=Math.max(...all);
-let pad=(mx-mn)*0.2;mn-=pad;mx+=pad;let rg=mx-mn||1;
-let totalSlots=40; // 30% khali = 28 candle + 12 empty
-let visCount=28;
-let cw=w/totalSlots;
-let vis=candles.slice(-visCount);
-// grid
-ctx.strokeStyle='#1e2329';ctx.lineWidth=1;
-for(let i=0;i<5;i++){let y=h/5*i;ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(w,y);ctx.stroke();}
-
-vis.forEach((k,i)=>{
-let x=i*cw;
-let y=v=>h-20-((v-mn)/rg)*(h-40);
-let up=k.c>=k.o,col=up?'#0ecb81':'#f6465d';
-ctx.strokeStyle=col;ctx.fillStyle=col;ctx.lineWidth=1.5;
+let all=candles.flatMap(k=>[k.h,k.l]),mn=Math.min(...all),mx=Math.max(...all),pad=(mx-mn)*0.25;mn-=pad;mx+=pad;let rg=mx-mn||1;
+let total=40,visN=28,cw=cv.width/total,vis=candles.slice(-visN);
+ctx.strokeStyle='#1e2329';for(let g=0;g<6;g++){let y=cv.height/6*g;ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(cv.width,y);ctx.stroke()}
+vis.forEach((k,i)=>{let x=i*cw;let y=v=>cv.height-10-((v-mn)/rg)*(cv.height-20);
+let up=k.c>=k.o,col=up?'#0ecb81':'#f6465d';ctx.strokeStyle=col;ctx.fillStyle=col;ctx.lineWidth=1.5;
 ctx.beginPath();ctx.moveTo(x+cw/2,y(k.h));ctx.lineTo(x+cw/2,y(k.l));ctx.stroke();
-let yo=y(k.o),yc=y(k.c);
-let bh=Math.max(Math.abs(yc-yo),2);
-ctx.fillRect(x+cw*0.2,Math.min(yo,yc),cw*0.6,bh);
-});
-// last 40 second highlight - last candle live
-let last=vis[vis.length-1];
-if(last){
-let y=v=>h-20-((v-mn)/rg)*(h-120);
-let yp=y(last.c);
-ctx.strokeStyle='rgba(240,185,11,.6)';ctx.setLineDash([4,4]);
-ctx.beginPath();ctx.moveTo(0,yp);ctx.lineTo(w,yp);ctx.stroke();ctx.setLineDash([]);
-ctx.fillStyle='#f0b90b';ctx.fillRect(w-70,yp-10,70,20);
-ctx.fillStyle='#000';ctx.font='12px Arial';ctx.fillText(price.toFixed(2),w-65,yp+4);
+let bh=Math.max(Math.abs(y(k.c)-y(k.o)),3);ctx.fillRect(x+cw*0.2,Math.min(y(k.c),y(k.o)),cw*0.6,bh);});
+ctx.strokeStyle='#f0b90b';ctx.lineWidth=1.5;draws.forEach(d=>{if(d.type=='trend'){ctx.beginPath();ctx.moveTo(d.x1,d.y1);ctx.lineTo(d.x2,d.y2);ctx.stroke()}if(d.type=='hline'){ctx.beginPath();ctx.moveTo(0,d.y1);ctx.lineTo(cv.width,d.y1);ctx.stroke()}if(d.type=='box')ctx.strokeRect(Math.min(d.x1,d.x2),Math.min(d.y1,d.y2),Math.abs(d.x2-d.x1),Math.abs(d.y2-d.y1))if(d.type=='pen'){ctx.beginPath();d.pts.forEach((p,i)=>i?ctx.lineTo(p.x,p.y):ctx.moveTo(p.x,p.y));ctx.stroke()}});
 }
-priceEl.innerText='$'+price.toFixed(2);
-priceEl.style.color=candles[candles.length-1].c>=candles[candles.length-1].o?'#0ecb81':'#f6465d';
+function obLive(){
+let h='';for(let i=12;i>0;i--){h+='<div style="display:flex;justify-content:space-between;padding:2px"><span style="color:#f6465d">'+(price+i*5).toFixed(1)+'</span><span>'+(Math.random()*1.5).toFixed(4)+'</span></div>'}
+h+='<div style="text-align:center;padding:8px;font-weight:bold;font-size:14px;border-top:1px solid #1e2329;border-bottom:1px solid #1e2329;color:#fff">'+price.toFixed(1)+'</div>';
+for(let i=1;i<=12;i++){h+='<div style="display:flex;justify-content:space-between;padding:2px"><span style="color:#0ecb81">'+(price-i*5).toFixed(1)+'</span><span>'+(Math.random()*1.5).toFixed(4)+'</span></div>'}
+$('obB').innerHTML=h;$('lp').innerText='$'+price.toFixed(2);
 }
-
-// live via websocket 1s kline
-let ws;
-function connectWS(){
-if(ws)ws.close();
-let s=symEl.value.toLowerCase();
-ws=new WebSocket('wss://stream.binance.com:9443/ws/'+s+'@kline_1s');
-ws.onmessage=e=>{
-let k=JSON.parse(e.data).k;
-price=parseFloat(k.c);
-let last=candles[candles.length-1];
-if(k.t==last.t){
-last.c=price;last.h=Math.max(last.h,price);last.l=Math.min(last.l,price);
-}else{
-// new 1 second candle, 40 second visible rakho
-candles.push({o:parseFloat(k.o),h:parseFloat(k.h),l:parseFloat(k.l),c:price,t:k.t});
-if(candles.length>200)candles.shift();
+async function tick(){
+try{let r=await fetch('https://api.binance.com/api/v3/ticker/price?symbol='+$('sym').value);let j=await r.json();price=parseFloat(j.price);let l=candles[candles.length-1];if(l){l.c=price;if(price>l.h)l.h=price;if(price<l.l)l.l=price}}catch(e){price+=(Math.random()-0.5)*30}
+draw();obLive();upd();
 }
-draw();
-};
-}
-symEl.onchange=()=>{load().then(()=>{draw();connectWS();});};
-load().then(()=>{draw();connectWS();});
-window.onresize=draw;
-setInterval(draw,1000);
+$('sym').onchange=loadK;
+loadK().then(()=>{draw();obLive();setInterval(tick,1500);});
+let cvE=$('ch');function gp(e){let r=cvE.getBoundingClientRect();return{x:(e.clientX-r.left)*(cvE.width/r.width),y:(e.clientY-r.top)*(cvE.height/r.height)}}
+cvE.addEventListener('mousedown',e=>{let p=gp(e);mP=p;if(tool=='trend'||tool=='box'){isD=true;sP={x1:p.x,y1:p.y,x2:p.x,y2:p.y,type:tool}}else if(tool=='hline'){draws.push({type:'hline',y1:p.y});draw()}else if(tool=='pen'){isD=true;sP={type:'pen',pts:[p]}}});
+cvE.addEventListener('mousemove',e=>{mP=gp(e);if(isD&&sP&&sP.type=='pen'){sP.pts.push(mP);draw()}});
+window.addEventListener('mouseup',()=>{if(isD&&sP){if(sP.x1!==undefined){sP.x2=mP.x;sP.y2=mP.y}draws.push(sP);isD=false;draw()}});
+window.addEventListener('resize',draw);
 </script>
 </body>
 </html>
