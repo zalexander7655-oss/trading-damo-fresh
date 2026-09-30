@@ -1,1 +1,85 @@
-
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Trading Master Pro - Final</title>
+<style>
+*{box-sizing:border-box}html,body{margin:0;height:100%;font-family:Arial;background:#0b0e11;color:#fff;font-size:13px;overflow:hidden}
+body{display:flex;flex-direction:column}
+.hd{background:#12161c;height:42px;display:flex;justify-content:space-between;align-items:center;padding:0 10px}
+.hd b{color:#ffbf00}
+.btn{border:none;border-radius:6px;padding:9px 14px;font-weight:bold;cursor:pointer;width:100%;margin-bottom:6px}
+.y{background:#ffbf00;color:#000}.r{background:#f6465d;color:#fff}.b{background:#2a5bd7;color:#fff}.g{background:#0ecb81;color:#fff}
+.main{flex:1;display:flex;min-height:0;gap:4px;padding:6px}
+.tools{width:44px;background:#1e2a4a;border-radius:8px;display:flex;flex-direction:column;align-items:center;gap:10px;padding:10px 0;flex-shrink:0}
+.tools span{cursor:pointer;padding:6px;border-radius:6px}
+.chartWrap{flex:1;display:flex;background:#fff8e1;border-radius:8px;overflow:hidden;cursor:grab}
+.chartBox{flex:1;position:relative}
+#ch{width:100%;height:100%;display:block}
+.right{width:340px;background:#12161c;border-radius:8px;display:flex;flex-direction:column;border:1px solid #1e2329;overflow:hidden;flex-shrink:0}
+.obH{padding:8px;color:#ffbf00;font-weight:bold;border-bottom:1px solid #222;font-size:13px;text-align:center}
+#ob{flex:1;overflow:auto;padding:2px 4px;font-size:11px;min-height:200px}
+.obRow{display:flex;justify-content:space-between;padding:1px 4px;line-height:1.3;margin:0}
+.trade{padding:8px;border-top:2px solid #ffbf00;background:#0f1420;max-height:55%;overflow:auto}
+.ttabs{display:flex;flex-direction:column;gap:4px;margin-bottom:8px}
+.ttabs button.on{outline:2px solid #fff}
+.pos{background:#1e2a4a;margin:0 6px 6px;padding:6px;border-radius:8px;height:80px;overflow:auto;font-size:11px;flex-shrink:0}
+.modal{position:fixed;inset:0;background:rgba(0,0,0,.92);z-index:10;display:none}
+.box{background:#1e2329;max-width:520px;width:95%;margin:20px auto;padding:15px;border-radius:10px;border:1px solid #ffbf00;max-height:85%;overflow:auto}
+select,input{padding:8px;border-radius:6px;border:1px solid #333;background:#0b0e11;color:#fff}
+</style>
+</head>
+<body>
+<div class="hd"><div><b>Trading Master Pro</b> <span id="lp" style="color:#0ecb81;margin-left:8px"></span></div>
+<div>Balance: <b id="bal" style="color:#0ecb81">$0.00</b> <button class="btn b" style="width:auto;display:inline-block;margin:0" onclick="openH('h')">History</button> <button class="btn r" style="width:auto;display:inline-block;margin:0" onclick="doLogout()">Logout</button></div></div>
+<div id="tradeP" style="display:flex;flex-direction:column;flex:1;min-height:0">
+<div class="main">
+<div class="tools"><span>✛</span><span>📈</span><span>➖</span><span>▭</span><span>✎</span><span>T</span><span onclick="draws=[];draw()">🗑</span></div>
+<div class="chartWrap" id="cwrap"><div class="chartBox"><canvas id="ch"></canvas></div></div>
+<div class="right">
+<div class="obH">Order Book Live</div>
+<div id="ob"></div>
+<div class="trade">
+<div class="ttabs">
+<button id="tb1" class="btn b on" onclick="setMode('normal')">Normal</button>
+<button id="tb2" class="btn y" onclick="setMode('candle')">Candle Trading</button>
+<button id="tb3" class="btn g" onclick="setMode('time')">Time Trading</button>
+</div>
+<div id="timeOpts" style="display:none;margin-bottom:6px"><select id="tDur" style="width:100%"><option value="60">1 Minute</option><option value="300">5 Minutes</option><option value="900">15 Minutes</option></select></div>
+<div id="candleOpts" style="display:none;margin-bottom:6px;text-align:center;font-size:11px;color:#ffbf00">Next Candle Up/Down par trade lagayen</div>
+<div style="display:flex;gap:6px;margin-bottom:6px"><button class="btn b" style="width:50px" onclick="cq(-1)">-</button><input id="qty" value="0.01" style="flex:1;text-align:center"><button class="btn b" style="width:50px" onclick="cq(1)">+</button></div>
+<button class="btn g" onclick="trade('BUY')">Buy / Long</button>
+<button class="btn r" onclick="trade('SELL')">Sell / Short</button>
+</div>
+</div>
+</div>
+<div class="pos"><b style="color:#ffbf00">Positions (<span id="pc">0</span>)</b><div id="pb">No positions</div></div>
+</div>
+<div id="hM" class="modal"><div class="box"><div style="text-align:center"><button class="btn y" onclick="openH('h')">History</button> <button class="btn g" onclick="openH('p')">Profit Loss</button> <button class="btn r" onclick="document.getElementById('hM').style.display='none'">Close</button></div><div id="hB"></div></div></div>
+<script>
+var bal=0.00,trades=[],hist=[],candles=[],price=6420,mode='normal',scrollOffset=0,isDrag=false,dragX=0,draws=[];
+var hLines=[6415,6425,6435,6405];
+try{hist=JSON.parse(localStorage.getItem('tm_hist')||'[]')}catch(e){}
+var $=id=>document.getElementById(id);
+function cleanHist(){var c=Date.now()-20*24*60*60*1000;hist=hist.filter(x=>x.ts>c);try{localStorage.setItem('tm_hist',JSON.stringify(hist))}catch(e){}} cleanHist();
+function doLogout(){location.reload();}
+function setMode(m){mode=m;['tb1','tb2','tb3'].forEach(id=>$(id).classList.remove('on'));$('timeOpts').style.display='none';$('candleOpts').style.display='none';if(m=='normal')$('tb1').classList.add('on');if(m=='candle'){$('tb2').classList.add('on');$('candleOpts').style.display='block';}if(m=='time'){$('tb3').classList.add('on');$('timeOpts').style.display='block';}}
+function cq(d){var v=parseFloat($('qty').value)||0.01;$('qty').value=Math.max(0.01,v+d*0.01).toFixed(2);}
+function trade(s){var q=parseFloat($('qty').value)||0.01;var d=new Date();var ex=null;if(mode=='time')ex=Date.now()+parseInt($('tDur').value)*1000;trades.push({s:s,q:q,e:price,ts:d.getTime(),dt:d.toLocaleString(),type:mode,expiry:ex,target:s});upd();}
+function closeT(i){var t=trades[i];var pnl=0;if(t.type=='candle'){var last=candles[candles.length-1];var up=last.c>=last.o;var win=(t.target=='BUY'&&up)||(t.target=='SELL'&&!up);pnl=win?t.q*10:-t.q*10;}else{pnl=t.s=='BUY'?(price-t.e)*t.q*5:-(price-t.e)*t.q*5;}bal+=pnl;hist.unshift({side:t.s+'-'+t.type,pnl:pnl,ts:Date.now(),dt:t.dt});cleanHist();trades.splice(i,1);upd();}
+function upd(){$('pc').innerText=trades.length;$('bal').innerText='$'+bal.toFixed(2);var h='';trades.forEach((t,i)=>{h+='<div style="display:flex;justify-content:space-between;padding:3px;border-bottom:1px solid #333"><span>'+t.s+' '+t.type+'</span><button class="btn y" style="width:auto;padding:2px 8px;margin:0" onclick="closeT('+i+')">Close</button></div>';});$('pb').innerHTML=h||'No positions';}
+function openH(m){$('hM').style.display='block';if(m=='h'){var h='<h3>History 20 Days</h3>';hist.forEach(x=>{h+='<div style="display:flex;justify-content:space-between;padding:4px;border-bottom:1px solid #333"><span>'+x.dt+'</span><span>'+x.side+'</span><span>'+x.pnl.toFixed(2)+'</span></div>';});$('hB').innerHTML=h||'No history';}else{var p=0,l=0;hist.forEach(x=>{if(x.pnl>=0)p+=x.pnl;else l+=x.pnl;});$('hB').innerHTML='<h3>P/L</h3><p style="color:#0ecb81">Profit $'+p.toFixed(2)+'</p><p style="color:#f6465d">Loss $'+l.toFixed(2)+'</p>';}}
+for(var i=0;i<50;i++){var o=price;price+=(Math.random()-0.48)*6;var c=price;candles.push({o:o,h:Math.max(o,c)+1.5,l:Math.min(o,c)-1.5,c:c});}
+function draw(){var cv=$('ch');var rc=cv.parentElement.getBoundingClientRect();if(rc.width<10)return;cv.width=rc.width;cv.height=rc.height;var ctx=cv.getContext('2d');ctx.fillStyle='#fff8e1';ctx.fillRect(0,0,cv.width,cv.height);var all=[];candles.forEach(k=>{all.push(k.h);all.push(k.l)});hLines.forEach(p=>{all.push(p)});var mn=Math.min.apply(null,all),mx=Math.max.apply(null,all);var pad=(mx-mn)*0.25||5;mn-=pad;mx+=pad;var rg=mx-mn;var y=v=>cv.height-10-((v-mn)/rg)*(cv.height-20);
+// horizontal lines second last wali
+hLines.forEach(p=>{var yy=y(p);ctx.strokeStyle='#888';ctx.setLineDash([8,5]);ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(0,yy);ctx.lineTo(cv.width,yy);ctx.stroke();ctx.setLineDash([]);ctx.fillStyle='#333';ctx.font='11px Arial';ctx.fillText('HL '+p.toFixed(2),8,yy-5);});
+var total=34,empty=10,cw=cv.width/total;var end=candles.length-scrollOffset;var start=Math.max(0,end-(total-empty));var vis=candles.slice(start,end);
+vis.forEach((k,i)=>{var x=i*cw;var col=k.c>=k.o?'#0ecb81':'#f6465d';ctx.strokeStyle=col;ctx.fillStyle=col;var cx=x+cw*0.5;ctx.lineWidth=1.2;ctx.beginPath();ctx.moveTo(cx,y(k.h));ctx.lineTo(cx,y(k.l));ctx.stroke();var bh=Math.max(Math.abs(y(k.c)-y(k.o)),5);ctx.fillRect(cx-4,Math.min(y(k.c),y(k.o)),8,bh);});
+var yl=y(price);ctx.strokeStyle='#000';ctx.setLineDash([5,4]);ctx.beginPath();ctx.moveTo(0,yl);ctx.lineTo(cv.width,yl);ctx.stroke();ctx.setLineDash([]);}
+function live(){var h='';for(var i=6;i>0;i--)h+='<div class="obRow"><span style="color:#f6465d">'+(price+i*0.6).toFixed(2)+'</span><span style="color:#fff">'+(Math.random()*0.5).toFixed(4)+'</span></div>';for(var i=1;i<=6;i++)h+='<div class="obRow"><span style="color:#0ecb81">'+(price-i*0.6).toFixed(2)+'</span><span style="color:#fff">'+(Math.random()*0.5).toFixed(4)+'</span></div>';$('ob').innerHTML=h;$('lp').innerText='$'+price.toFixed(2);}
+var wrap=$('cwrap');wrap.addEventListener('mousedown',e=>{isDrag=true;dragX=e.clientX;});window.addEventListener('mouseup',()=>isDrag=false);window.addEventListener('mousemove',e=>{if(isDrag){var dx=e.clientX-dragX;if(Math.abs(dx)>25){scrollOffset+=dx>0?2:-2;scrollOffset=Math.max(0,Math.min(40,scrollOffset));dragX=e.clientX;draw();}}});
+setInterval(()=>{var l=candles[candles.length-1];price+=(Math.random()-0.48)*4;l.c=price;l.h=Math.max(l.h,price);l.l=Math.min(l.l,price);hLines=hLines.map(p=>p+(Math.random()-0.5)*0.8);if(Math.random()<0.25){var o=price;var c2=price+(Math.random()-0.48)*5;candles.push({o:o,h:Math.max(o,c2)+1.2,l:Math.min(o,c2)-1.2,c:c2});if(candles.length>80)candles.shift();if(scrollOffset>0)scrollOffset--;}trades.forEach((t,i)=>{if(t.type=='time'&&t.expiry&&Date.now()>t.expiry)closeT(i);});draw();live();upd();},800);
+draw();live();upd();
+</script>
+</body>
+</html>
