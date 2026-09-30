@@ -13,7 +13,7 @@ body{display:flex;flex-direction:column}
 .main{flex:1;display:flex;min-height:0;gap:4px;padding:6px}
 .tools{width:44px;background:#1e2a4a;border-radius:8px;display:flex;flex-direction:column;align-items:center;gap:10px;padding:10px 0}
 .tools span{cursor:pointer;padding:6px;border-radius:6px}.tools span.on{background:#ffbf00;color:#000}
-.chartWrap{flex:1;display:flex;background:#fff8e1;border-radius:8px;overflow:hidden;position:relative}
+.chartWrap{flex:1;display:flex;background:#fff8e1;border-radius:8px;overflow:hidden;position:relative;cursor:grab}
 .chartBox{flex:1;position:relative}
 #ch{width:100%;height:100%;display:block}
 #priceAxis{width:78px;background:#0b0e11;border-left:1px solid #1e2329;position:relative;overflow:hidden;flex-shrink:0}
@@ -21,6 +21,7 @@ body{display:flex;flex-direction:column}
 .right{width:310px;background:#12161c;border-radius:8px;display:flex;flex-direction:column;border:1px solid #1e2329;overflow:hidden;flex-shrink:0}
 .obH{padding:8px;color:#ffbf00;font-weight:bold;border-bottom:1px solid #222;font-size:13px;text-align:center}
 #ob{flex:1;overflow:auto;padding:4px;font-size:11px}
+.moveLabel{text-align:center;color:#ffbf00;font-size:12px;padding:4px 0 0;font-weight:bold}
 .trade{padding:8px;border-top:1px solid #222}
 .pos{background:#1e2a4a;margin:0 6px 6px;padding:6px;border-radius:8px;height:86px;overflow:auto;font-size:11px;flex-shrink:0}
 .modal{position:fixed;inset:0;background:rgba(0,0,0,.92);z-index:10;display:none}
@@ -35,26 +36,25 @@ body{display:flex;flex-direction:column}
 
 <div id="tradeP" style="display:flex;flex-direction:column;flex:1;min-height:0">
 <div class="main">
-<div class="tools">
-<span class="on" onclick="setT('c',this)">✛</span><span onclick="setT('t',this)">📈</span><span onclick="setT('h',this)">➖</span><span onclick="setT('b',this)">▭</span><span onclick="setT('p',this)">✎</span><span onclick="setT('txt',this)">T</span><span onclick="draws=[];draw()">🗑</span>
-</div>
-<div class="chartWrap"><div class="chartBox"><canvas id="ch"></canvas></div><div id="priceAxis"></div></div>
+<div class="tools"><span class="on" onclick="setT('c',this)">✛</span><span onclick="setT('t',this)">📈</span><span onclick="setT('h',this)">➖</span><span onclick="setT('b',this)">▭</span><span onclick="setT('p',this)">✎</span><span onclick="setT('txt',this)">T</span><span onclick="draws=[];draw()">🗑</span></div>
+<div class="chartWrap" id="cwrap"><div class="chartBox"><canvas id="ch"></canvas></div><div id="priceAxis"></div></div>
 <div class="right">
-<div class="obH">Move Line</div>
+<div class="obH">Order Book Live</div>
 <div id="ob"></div>
+<div class="moveLabel">Move Line</div>
+<div style="padding:0 6px 6px"><div id="mvBar" style="background:#ffbf00;color:#000;text-align:center;font-weight:bold;padding:7px;border-radius:4px">Move Line: 0</div></div>
 <div class="trade"><div style="display:flex;gap:6px;margin-bottom:6px"><button class="btn b" onclick="cq(-1)">-</button><input id="qty" value="0.01" style="flex:1;padding:8px;text-align:center;border-radius:6px;border:1px solid #333;background:#0b0e11;color:#fff"><button class="btn b" onclick="cq(1)">+</button></div><button class="btn g" style="width:100%;margin-bottom:6px;padding:11px" onclick="trade('BUY')">Buy / Long</button><button class="btn r" style="width:100%;padding:11px" onclick="trade('SELL')">Sell / Short</button></div>
 </div>
 </div>
 <div class="pos"><b style="color:#ffbf00">Positions (<span id="pc">0</span>)</b><div id="pb">No positions</div></div>
 </div>
 
-<div id="hM" class="modal"><div class="box">
-<div style="text-align:center"><button class="btn y" onclick="openH('h')">History</button> <button class="btn g" onclick="openH('p')">Profit Loss</button> <button class="btn r" onclick="document.getElementById('hM').style.display='none'">Close</button></div>
-<div id="hB" style="margin-top:10px"></div></div></div>
+<div id="hM" class="modal"><div class="box"><div style="text-align:center"><button class="btn y" onclick="openH('h')">History</button> <button class="btn g" onclick="openH('p')">Profit Loss</button> <button class="btn r" onclick="document.getElementById('hM').style.display='none'">Close</button></div><div id="hB" style="margin-top:10px"></div></div></div>
 
 <script>
-var bal=112606.40,trades=[],hist=[],candles=[],price=84000,tool='c',draws=[],isD=false,sP=null,mP=null;
-try{hist=JSON.parse(localStorage.getItem('tm_hist')||'[]')}catch(e){hist=[]}
+var bal=112606.40,trades=[],hist=[],candles=[],price=8400,tool='c',draws=[];
+var scrollOffset=0, isDragging=false, dragStartX=0;
+try{hist=JSON.parse(localStorage.getItem('tm_hist')||'[]')}catch(e){}
 var $=id=>document.getElementById(id);
 function cleanHist(){var cut=Date.now()-20*24*60*60*1000;hist=hist.filter(x=>x.ts>cut);try{localStorage.setItem('tm_hist',JSON.stringify(hist))}catch(e){}}
 cleanHist();
@@ -64,18 +64,41 @@ function setT(t,e){tool=t;document.querySelectorAll('.tools span').forEach(x=>x.
 function cq(d){var v=parseFloat($('qty').value)||0.01;$('qty').value=Math.max(0.01,v+d*0.01).toFixed(2);}
 function trade(s){var q=parseFloat($('qty').value)||0.01;var d=new Date();trades.push({s:s,q:q,e:price,ts:d.getTime(),dt:d.toLocaleString()});upd();}
 function closeT(i){var t=trades[i];var pnl=t.s=='BUY'?(price-t.e)*t.q*10:-(price-t.e)*t.q*10;bal+=pnl;hist.unshift({side:t.s,qty:t.q,pnl:pnl,ts:Date.now(),dt:t.dt});cleanHist();trades.splice(i,1);upd();}
-function upd(){$('pc').innerText=trades.length;$('bal').innerText='$'+bal.toFixed(2);var h='';trades.forEach((t,i)=>{var pnl=t.s=='BUY'?(price-t.e)*t.q*10:-(price-t.e)*t.q*10;var c=pnl>=0?'#0ecb81':'#f6465d';h+='<div style="display:flex;justify-content:space-between;padding:3px;border-bottom:1px solid #2a3a5a"><span>'+t.s+' '+t.q+'</span><span style="color:'+c+'">'+pnl.toFixed(2)+'</span><button class="btn y" style="padding:2px 8px" onclick="closeT('+i+')">Close</button></div>';});$('pb').innerHTML=h||'No positions';}
-function openH(m){$('hM').style.display='block';if(m=='h'){var h='<h3>History - Last 20 Days</h3>';hist.slice(0,100).forEach(x=>{h+='<div style="display:flex;justify-content:space-between;border-bottom:1px solid #333;padding:5px;font-size:12px"><span>'+x.dt+'</span><span>'+x.side+' '+x.qty+'</span><span style="color:'+(x.pnl>=0?'#0ecb81':'#f6465d')+'">'+x.pnl.toFixed(2)+'</span></div>';});$('hB').innerHTML=h||'No history';}else{var p=0,l=0;hist.forEach(x=>{if(x.pnl>=0)p+=x.pnl;else l+=x.pnl;});$('hB').innerHTML='<h3>Profit / Loss - 20 Days</h3><p style="color:#0ecb81">Total Profit: $'+p.toFixed(2)+'</p><p style="color:#f6465d">Total Loss: $'+l.toFixed(2)+'</p><p><b>Net: $'+(p+l).toFixed(2)+'</b></p>';}}
-for(var i=0;i<70;i++){var o=price;price+=(Math.random()-0.5)*50;var c=price;candles.push({o:o,h:Math.max(o,c)+18,l:Math.min(o,c)-18,c:c});}
-function draw(){var cv=$('ch');var rc=cv.parentElement.getBoundingClientRect();if(rc.width<10)return;cv.width=rc.width;cv.height=rc.height;var ctx=cv.getContext('2d');ctx.fillStyle='#fff8e1';ctx.fillRect(0,0,cv.width,cv.height);var all=[];candles.forEach(k=>{all.push(k.h);all.push(k.l)});var mn=Math.min.apply(null,all),mx=Math.max.apply(null,all);var pad=(mx-mn)*0.2||20;mn-=pad;mx+=pad;var rg=mx-mn;var vis=candles.slice(-32),cw=cv.width/36;vis.forEach((k,i)=>{var x=i*cw+cw*0.2;var y=v=>cv.height-10-((v-mn)/rg)*(cv.height-20);var col=k.c>=k.o?'#0ecb81':'#f6465d';ctx.strokeStyle=col;ctx.fillStyle=col;ctx.lineWidth=2;var cx=x+cw*0.3;ctx.beginPath();ctx.moveTo(cx,y(k.h));ctx.lineTo(cx,y(k.l));ctx.stroke();var bh=Math.max(Math.abs(y(k.c)-y(k.o)),9);var bw=Math.max(cw*0.6,11);ctx.fillRect(cx-bw/2,Math.min(y(k.c),y(k.o)),bw,bh);});var yl=cv.height-10-((price-mn)/rg)*(cv.height-20);ctx.strokeStyle='#000';ctx.setLineDash([6,4]);ctx.beginPath();ctx.moveTo(0,yl);ctx.lineTo(cv.width,yl);ctx.stroke();ctx.setLineDash([]);ctx.fillStyle='#000';ctx.fillRect(cv.width-72,yl-11,72,22);ctx.fillStyle='#fff';ctx.font='bold 12px Arial';ctx.fillText(price.toFixed(2),cv.width-67,yl+4);}
-function drawPriceAxis(){var h='';for(var i=5;i>=-5;i--){var p=price+i*2.5;var topPct=50-i*8;if(i==0){h+='<div class="pTag" style="top:'+topPct+'%;background:#0ecb81;color:#fff">'+p.toFixed(2)+'</div>';}else{h+='<div class="pTag" style="top:'+topPct+'%;color:'+(i>0?'#f6465d':'#848e9c')+'">'+p.toFixed(2)+'</div>';}}$('priceAxis').innerHTML=h;}
+function upd(){$('pc').innerText=trades.length;$('bal').innerText='$'+bal.toFixed(2);var h='';trades.forEach((t,i)=>{var pnl=t.s=='BUY'?(price-t.e)*t.q*10:-(price-t.e)*t.q*10;h+='<div style="display:flex;justify-content:space-between;padding:3px;border-bottom:1px solid #2a3a5a"><span>'+t.s+' '+t.q+'</span><span style="color:'+(pnl>=0?'#0ecb81':'#f6465d')+'">'+pnl.toFixed(2)+'</span><button class="btn y" style="padding:2px 8px" onclick="closeT('+i+')">Close</button></div>';});$('pb').innerHTML=h||'No positions';}
+function openH(m){$('hM').style.display='block';if(m=='h'){var h='<h3>History - 20 Days</h3>';hist.slice(0,100).forEach(x=>{h+='<div style="display:flex;justify-content:space-between;border-bottom:1px solid #333;padding:5px"><span>'+x.dt+'</span><span>'+x.side+'</span><span>'+x.pnl.toFixed(2)+'</span></div>';});$('hB').innerHTML=h||'No history';}else{var p=0,l=0;hist.forEach(x=>{if(x.pnl>=0)p+=x.pnl;else l+=x.pnl;});$('hB').innerHTML='<h3>Profit/Loss</h3><p style="color:#0ecb81">Profit $'+p.toFixed(2)+'</p><p style="color:#f6465d">Loss $'+l.toFixed(2)+'</p>';}}
+
+// Binance style live candles
+for(var i=0;i<100;i++){var o=price;price+=(Math.random()-0.48)*8;var c=price;candles.push({o:o,h:Math.max(o,c)+2+Math.random()*2,l:Math.min(o,c)-2-Math.random()*2,c:c});}
+
+function draw(){
+var cv=$('ch');var rc=cv.parentElement.getBoundingClientRect();if(rc.width<10)return;cv.width=rc.width;cv.height=rc.height;
+var ctx=cv.getContext('2d');ctx.fillStyle='#fff8e1';ctx.fillRect(0,0,cv.width,cv.height);
+var all=[];candles.forEach(k=>{all.push(k.h);all.push(k.l)});var mn=Math.min.apply(null,all),mx=Math.max.apply(null,all);var pad=(mx-mn)*0.2||10;mn-=pad;mx+=pad;var rg=mx-mn;
+// 30% empty space on right for upcoming candles
+var totalSlots=40; var emptySlots=12; // 30%
+var cw=cv.width/totalSlots;
+var endIdx=candles.length - scrollOffset;
+var startIdx=Math.max(0,endIdx-(totalSlots-emptySlots));
+var vis=candles.slice(startIdx,endIdx);
+vis.forEach((k,i)=>{var x=i*cw+cw*0.2;var y=v=>cv.height-10-((v-mn)/rg)*(cv.height-20);var col=k.c>=k.o?'#0ecb81':'#f6465d';ctx.strokeStyle=col;ctx.fillStyle=col;ctx.lineWidth=1.5;var cx=x+cw*0.3;ctx.beginPath();ctx.moveTo(cx,y(k.h));ctx.lineTo(cx,y(k.l));ctx.stroke();var bh=Math.max(Math.abs(y(k.c)-y(k.o)),6);var bw=Math.max(cw*0.6,8);ctx.fillRect(cx-bw/2,Math.min(y(k.c),y(k.o)),bw,bh);});
+// live move line synced with candles
+var yl=cv.height-10-((price-mn)/rg)*(cv.height-20);ctx.strokeStyle='#000';ctx.setLineDash([6,4]);ctx.beginPath();ctx.moveTo(0,yl);ctx.lineTo(cv.width,yl);ctx.stroke();ctx.setLineDash([]);ctx.fillStyle='#000';ctx.fillRect(cv.width-72,yl-11,72,22);ctx.fillStyle='#fff';ctx.font='bold 12px Arial';ctx.fillText(price.toFixed(2),cv.width-67,yl+4);
+}
+function drawPriceAxis(){var h='';for(var i=5;i>=-5;i--){var p=price+i*3;var tp=50-i*8;h+=i==0?'<div class="pTag" style="top:'+tp+'%;background:#0ecb81;color:#fff">'+p.toFixed(2)+'</div>':'<div class="pTag" style="top:'+tp+'%;color:'+(i>0?'#f6465d':'#848e9c')+'">'+p.toFixed(2)+'</div>';}$('priceAxis').innerHTML=h;}
 function live(){
 var h='';
-for(var i=7;i>0;i--)h+='<div style="display:flex;justify-content:space-between;padding:3px"><span style="color:#f6465d">'+(price+i*2).toFixed(2)+'</span><span>'+(Math.random()).toFixed(4)+'</span></div>';
-h+='<div style="background:#ffbf00;color:#000;text-align:center;font-weight:bold;padding:6px;margin:4px 0;border-radius:4px">Move Line: '+price.toFixed(2)+'</div>';
-for(var i=1;i<=7;i++)h+='<div style="display:flex;justify-content:space-between;padding:3px"><span style="color:#0ecb81">'+(price-i*2).toFixed(2)+'</span><span>'+(Math.random()).toFixed(4)+'</span></div>';
-$('ob').innerHTML=h;$('lp').innerText='$'+price.toFixed(2);drawPriceAxis();}
-setInterval(()=>{var l=candles[candles.length-1];price+=(Math.random()-0.5)*28;l.c=price;l.h=Math.max(l.h,price);l.l=Math.min(l.l,price);if(Math.random()<0.14){var o=price;var c=price+(Math.random()-0.5)*38;candles.push({o:o,h:Math.max(o,c)+14,l:Math.min(o,c)-14,c:c});if(candles.length>100)candles.shift();}draw();live();upd();},1000);
+for(var i=7;i>0;i--)h+='<div style="display:flex;justify-content:space-between;padding:3px"><span style="color:#f6465d">'+(price+i*1.5).toFixed(2)+'</span><span>'+(Math.random()).toFixed(4)+'</span></div>';
+for(var i=1;i<=7;i++)h+='<div style="display:flex;justify-content:space-between;padding:3px"><span style="color:#0ecb81">'+(price-i*1.5).toFixed(2)+'</span><span>'+(Math.random()).toFixed(4)+'</span></div>';
+$('ob').innerHTML=h;
+$('mvBar').innerText='Move Line: '+price.toFixed(2);
+$('lp').innerText='$'+price.toFixed(2);drawPriceAxis();
+}
+// drag to see past 100 candles
+var wrap=$('cwrap');
+wrap.addEventListener('mousedown',e=>{isDragging=true;dragStartX=e.clientX;wrap.style.cursor='grabbing';});
+window.addEventListener('mouseup',()=>{isDragging=false;wrap.style.cursor='grab';});
+window.addEventListener('mousemove',e=>{if(isDragging){var dx=e.clientX-dragStartX;if(Math.abs(dx)>20){scrollOffset+=dx>0?1:-1;scrollOffset=Math.max(0,Math.min(80,scrollOffset));dragStartX=e.clientX;draw();}}});
+setInterval(()=>{if(scrollOffset>0)scrollOffset=Math.max(0,scrollOffset-1);var l=candles[candles.length-1];price+=(Math.random()-0.48)*6;l.c=price;l.h=Math.max(l.h,price);l.l=Math.min(l.l,price);if(Math.random()<0.18){var o=price;var c=price+(Math.random()-0.48)*8;candles.push({o:o,h:Math.max(o,c)+2,l:Math.min(o,c)-2,c:c});if(candles.length>150)candles.shift();}draw();live();upd();},1000);
 window.addEventListener('resize',draw);
 draw();live();upd();
 </script>
