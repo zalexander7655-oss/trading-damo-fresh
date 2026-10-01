@@ -1,134 +1,26 @@
 <!DOCTYPE html>
-<html>
-<head>
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Buy Demo - Trading Master</title>
-<style>
-body{font-family: Arial; background:#0f172a; color:white; text-align:center; padding:15px;}
-.plan{background:#1e293b; padding:15px; margin:12px 0; border-radius:12px; border:2px solid #334155;}
-.plan.selected{border-color:#22c55e; background:#14532d;}
-.btn{padding:12px; margin:6px 5px; border:none; border-radius:8px; font-weight:bold; cursor:pointer; width:48%; color:white;}
-.jazz-btn{background:#e11d48;}
-.usdt-btn{background:#22c55e;}
-.box{background:#1e293b; padding:20px; border-radius:12px; margin-top:20px; text-align:left;}
-.highlight{color:#38bdf8; font-weight:bold; word-break:break-all;}
-.qr-box{text-align:center; background:white; padding:10px; border-radius:10px; margin:15px auto; width:220px;}
-.qr-box img{width:200px; height:200px;}
-input{padding:12px; width:92%; margin:10px 0; border-radius:6px; border:none;}
-</style>
-</head>
-<body>
-
-<h2>Buy Demo Trading Balance - Trading Master</h2>
-<p>Logged in as: <b id="userEmail"></b></p>
-<div id="plans"></div>
-
-<div id="paymentBox" class="box" style="display:none;">
-<h3 style="text-align:center;">Selected: Pay $<span id="payUSD"></span> (<span id="payPKR"></span> PKR) = Get $<span id="demoUSD"></span> Demo</h3>
-
-<div style="display:flex; justify-content:space-between;">
-<button class="btn jazz-btn" onclick="payJazz()">Pay with JazzCash Till</button>
-<button class="btn usdt-btn" onclick="payUSDT()">Pay with USDT TRC20</button>
+<html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Purchase Demo</title>
+<style>body{margin:0;font-family:Arial;background:#0b0e11;color:#fff;display:flex;justify-content:center;align-items:center;min-height:100vh;padding:20px}.card{background:#12161c;border:1px solid #1e2329;border-radius:12px;padding:20px;max-width:400px;width:100%;text-align:center}.btn{border:none;border-radius:8px;padding:12px;font-weight:bold;cursor:pointer;width:100%;margin-top:10px}.plan{background:#1e2329;border-radius:8px;padding:12px;margin:10px 0;cursor:pointer;border:2px solid transparent;text-align:left}.plan.active{border-color:#f3ba2f;background:#2b3139}</style>
+</head><body>
+<div class="card">
+<h2 style="color:#f3ba2f">Purchase Demo Balance</h2>
+<p style="color:#848e9c;font-size:12px">New ID will have lock. After purchase, balance auto added.</p>
+<div class="plan active" onclick="selectPlan(this,1000,10)"><b>$10 Plan</b><br><span style="color:#0ecb81">Get $1000 Demo</span></div>
+<div class="plan" onclick="selectPlan(this,5000,20)"><b>$20 Plan</b><br><span style="color:#0ecb81">Get $5000 Demo</span></div>
+<div class="plan" onclick="selectPlan(this,10000,50)"><b>$50 Plan</b><br><span style="color:#0ecb81">Get $10000 Demo</span></div>
+<div id="selected" style="margin:15px 0;background:#0d1421;padding:10px;border-radius:6px">Selected: $1000 for $10</div>
+<button class="btn" style="background:#f3ba2f;color:#000" onclick="simulate()">Pay with Binance & Unlock Trading</button>
+<button class="btn" style="background:#2b3139;color:#fff" onclick="location.href='demo-trading.html'">Back to Trading</button>
 </div>
-
-<div id="jazzDetail" style="display:none; margin-top:15px; border:1px solid #e11d48; padding:10px; border-radius:8px;">
-<b>JazzCash Till ID:</b> <span class="highlight">981149773</span><br>
-Title: <b>Trading Master</b><br>
-Amount: <b id="jAmount" style="color:#22c55e;"></b><br>
-<small>App will open. Paste Till ID if not auto filled.</small>
-</div>
-
-<div id="usdtDetail" style="display:none; margin-top:15px; border:1px solid #22c55e; padding:10px; border-radius:8px;">
-<div class="qr-box"><img id="qrImage" src="" /></div>
-Address: <span class="highlight">T9yimC9YJdVtCQbgfHdj8bDh1c8uNGKDmu</span><br>
-Network: TRC20 | Title: <b>Trading Master</b><br>
-Amount: <b id="uAmount"></b> USDT
-</div>
-
-<div style="margin-top:20px;">
-<input type="text" id="emailInput" placeholder="Confirm email" />
-<input type="file" id="screenshot" accept="image/*" />
-<p style="font-size:12px; color:#94a3b8; text-align:center;">Upload screenshot after payment</p>
-<button style="width:100%; padding:14px; background:#38bdf8; border:none; border-radius:8px; font-weight:bold; cursor:pointer;" onclick="submitRequest()">Submit Proof & Get Demo Balance</button>
-<p id="status" style="color:yellow; text-align:center;"></p>
-</div>
-</div>
-
 <script>
-const TILL_ID = "981149773";
-const USDT_ADDRESS = "T9yimC9YJdVtCQbgfHdj8bDh1c8uNGKDmu";
-const RATE = 280;
-const plansData = [
-  { pay: 1, demo: 20 }, { pay: 12, demo: 10000 }, { pay: 25, demo: 30000 },
-  { pay: 30, demo: 40000 }, { pay: 40, demo: 60000 }, { pay: 50, demo: 80000 }, { pay: 60, demo: 100000 }
-];
-let selectedPay=0, selectedDemo=0, selectedMethod="";
-
-let loggedEmail = localStorage.getItem('userEmail') || "";
-document.getElementById('userEmail').innerText = loggedEmail || "Guest";
-
-let html="";
-plansData.forEach(p=>{
-  html+=`<div class="plan" onclick="selectPlan(${p.pay}, ${p.demo}, this)"><div style="display:flex; justify-content:space-between; width:100%;"><span>Pay $${p.pay} = ${p.pay*RATE} PKR</span><span>Get $${p.demo}</span></div></div>`;
-});
-document.getElementById('plans').innerHTML=html;
-
-function selectPlan(pay, demo, el){
-  selectedPay=pay; selectedDemo=demo;
-  document.querySelectorAll('.plan').forEach(x=>x.classList.remove('selected'));
-  el.classList.add('selected');
-  document.getElementById('paymentBox').style.display='block';
-  document.getElementById('payUSD').innerText=pay;
-  document.getElementById('demoUSD').innerText=demo;
-  document.getElementById('payPKR').innerText=pay*RATE+" PKR";
-  document.getElementById('jAmount').innerText=pay*RATE+" PKR";
-  document.getElementById('uAmount').innerText=pay+" USDT";
-  document.getElementById('qrImage').src=`https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${USDT_ADDRESS}`;
-  document.getElementById('emailInput').value=loggedEmail;
-  window.scrollTo(0, document.body.scrollHeight);
-}
-
-function payJazz(){
-  selectedMethod="jazz";
-  document.getElementById('jazzDetail').style.display='block';
-  document.getElementById('usdtDetail').style.display='none';
-  navigator.clipboard.writeText(TILL_ID);
-  alert(`Till ID ${TILL_ID} (Trading Master) Copied! Amount ${selectedPay*RATE} PKR. Now opening JazzCash App.`);
-  window.location.href = "jazzcash://"; 
-  setTimeout(()=>{ window.open("https://www.jazzcash.com.pk/", "_blank"); }, 1000);
-}
-
-function payUSDT(){
-  selectedMethod="usdt";
-  document.getElementById('usdtDetail').style.display='block';
-  document.getElementById('jazzDetail').style.display='none';
-  navigator.clipboard.writeText(USDT_ADDRESS);
-  alert(`USDT Address ${USDT_ADDRESS} Copied! Amount ${selectedPay} USDT. Opening Wallet. Title: Trading Master`);
-  // Trust Wallet deep link with amount and address
-  window.location.href = `trust://send?asset=c195_t${USDT_ADDRESS}&amount=${selectedPay}`;
-  setTimeout(()=>{ window.open(`https://link.trustwallet.com/send?asset=c195&address=${USDT_ADDRESS}&amount=${selectedPay}`, "_blank"); }, 1200);
-}
-
-function submitRequest(){
-  let email=document.getElementById('emailInput').value.trim().toLowerCase();
-  let file=document.getElementById('screenshot').files[0];
-  if(!selectedPay){ alert("Select plan"); return; }
-  if(!selectedMethod){ alert("First click JazzCash or USDT button"); return; }
-  if(!email || !file){ alert("Email + Screenshot required"); return; }
-  let reader=new FileReader();
-  reader.onload=function(e){
-    let requests=JSON.parse(localStorage.getItem('purchaseRequests')||"[]");
-    requests.push({
-      id: Date.now(), email: email, payUSD: selectedPay, payPKR: selectedPay*RATE, demoAmount: selectedDemo,
-      method: selectedMethod==='jazz' ? `JazzCash Till ${TILL_ID} (Trading Master) - ${selectedPay*RATE} PKR` : `USDT TRC20 ${USDT_ADDRESS} (Trading Master) - ${selectedPay} USDT`,
-      paymentMethod: selectedMethod, status:"pending", screenshot:e.target.result, date:new Date().toLocaleString()
-    });
-    localStorage.setItem('purchaseRequests', JSON.stringify(requests));
-    document.getElementById('status').innerText=`Request sent for $${selectedPay}. Admin will approve and add $${selectedDemo} demo to ${email}`;
-    alert("Proof Submitted! Waiting for Admin Approval.");
-  };
-  reader.readAsDataURL(file);
+let selBal=1000,selPrice=10;
+function selectPlan(el,bal,price){document.querySelectorAll('.plan').forEach(p=>p.classList.remove('active'));el.classList.add('active');selBal=bal;selPrice=price;document.getElementById('selected').innerText=`Selected: $${bal} Demo for $${price}`;}
+function simulate(){
+ let cur=parseFloat(localStorage.getItem('demo_bal_purchased')||'0');
+ cur+=selBal;
+ localStorage.setItem('demo_bal_purchased',cur.toString());
+ alert('Success! $'+selBal+' Demo added! Total Balance: $'+cur+'\nNow trading will start.');
+ location.href='demo-trading.html';
 }
 </script>
-</body>
-</html>
+</body></html>
