@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>OKX Pro - Professional Live Trading</title>
+<script src="https://unpkg.com/lightweight-charts@4.1.0/dist/lightweight-charts.standalone.production.js"></script>
+<style>
+*{box-sizing:border-box}body{margin:0;background:#000;color:#fff;font-family:Inter,Arial;font-size:12px;overflow:hidden;height:100vh;display:flex;flex-direction:column}
+.hd{height:48px;background:#0a0a0a;border-bottom:1px solid #222;display:flex;align-items:center;justify-content:space-between;padding:0 12px}
+.ticker{display:flex;gap:18px;align-items:center}
+.up{color:#00c087}.down{color:#ff3b30}
+.main{flex:1;display:flex;min-height:0}
+.left-tools{width:44px;background:#121212;border-right:1px solid #222;display:flex;flex-direction:column;align-items:center;gap:12px;padding:10px 0}
+.left-tools div{width:28px;height:28px;display:flex;align-items:center;justify-content:center;background:#1a1a1a;border-radius:6px;cursor:pointer}
+.left-tools div.active{background:#fff;color:#000}
+.center{flex:1;display:flex;flex-direction:column;min-width:0;background:#000}
+.chart-top{height:36px;display:flex;align-items:center;gap:12px;padding:0 10px;border-bottom:1px solid #1a1a1a;color:#888;font-size:11px}
+.chart-top span{cursor:pointer;padding:4px 8px;border-radius:4px}
+.chart-top span.on{background:#222;color:#fff}
+#chart{flex:1;width:100%}
+.orderbook{width:280px;background:#0e0e0e;border-left:1px solid #222;display:flex;flex-direction:column}
+.ob-head{display:flex;justify-content:space-between;padding:8px 10px;border-bottom:1px solid #222;font-weight:bold}
+.ob-list{flex:1;overflow:hidden;padding:4px 8px;font-family:monospace;font-size:11px;line-height:16px}
+.ask{color:#ff3b30}.bid{color:#00c087}
+.ob-row{display:flex;justify-content:space-between}
+.trade-history{height:140px;border-top:1px solid #222;overflow:auto;padding:6px 8px}
+.right-panel{width:300px;background:#121212;border-left:1px solid #222;display:flex;flex-direction:column}
+.tabs{display:flex;background:#000}.tabs div{flex:1;text-align:center;padding:10px 0;cursor:pointer;border-bottom:2px solid transparent}.tabs div.on{border-bottom:2px solid #fff;color:#fff;font-weight:bold}
+.form{padding:12px}.inp{width:100%;background:#1e1e1e;border:1px solid #2a2a2a;color:#fff;border-radius:6px;padding:10px;margin:6px 0}
+.btn{width:100%;padding:12px;border:none;border-radius:8px;font-weight:900;cursor:pointer;margin-top:8px;font-size:13px}
+.buy{background:#00c087;color:#fff}.sell{background:#ff3b30;color:#fff}
+.bal-box{background:#1a1a1a;border-radius:8px;padding:10px;margin-bottom:10px;display:flex;justify-content:space-between}
+.msg{position:fixed;top:60px;left:50%;transform:translateX(-50%);background:#ff3b30;color:#fff;padding:12px 20px;border-radius:8px;display:none;z-index:100;font-weight:bold}
+</style>
+</head>
+<body>
+<div class="msg" id="msg"></div>
+<div class="hd">
+<div style="font-weight:900"><b style="color:#ff3b30">OKX</b> PRO</div>
+<div class="ticker">
+<div><small style="color:#888">BTC/USDT</small><br><b id="price">$0.00</b> <small id="change" class="up">0.00%</small></div>
+<div><small style="color:#888">24h High</small><br><span id="high">-</span></div>
+<div><small style="color:#888">24h Low</small><br><span id="low">-</span></div>
+<div><small style="color:#888">24h Vol</small><br><span id="vol">-</span></div>
+</div>
+<div><b id="balTop" style="color:#00c087">$0.00</b></div>
+</div>
+<div class="main">
+<div class="left-tools"><div class="active">📈</div><div>✏️</div><div>📏</div><div>🔍</div><div>⚙️</div></div>
+<div class="center">
+<div class="chart-top"><span>Time</span><span class="on" onclick="setTF('1m',this)">1M</span><span onclick="setTF('5m',this)">5M</span><span onclick="setTF('15m',this)">15M</span><span onclick="setTF('1H',this)">1H</span><span onclick="setTF('4H',this)">4H</span><span onclick="setTF('1D',this)">1D</span><span style="margin-left:auto">OKX LIVE - No Delay</span></div>
+<div id="chart"></div>
+</div>
+<div class="orderbook">
+<div class="ob-head"><span>Order Book</span><small>BTC/USDT</small></div>
+<div style="display:flex;justify-content:space-between;padding:4px 8px;color:#555;font-size:10px"><span>Price(USDT)</span><span>Amount</span><span>Total</span></div>
+<div class="ob-list" id="asks"></div>
+<div style="text-align:center;padding:6px 0;font-weight:bold;color:#00c087;border-top:1px solid #222;border-bottom:1px solid #222" id="midPrice">$0.00</div>
+<div class="ob-list" id="bids"></div>
+<div class="trade-history" id="trades"><div style="color:#666">Live Trades</div></div>
+</div>
+<div class="right-panel">
+<div class="tabs"><div class="on">Limit</div><div>Market</div><div>Stop</div></div>
+<div class="form">
+<div class="bal-box"><span>Available</span><b id="balBox">$0.00 USDT</b></div>
+<input class="inp" id="instId" value="BTC-USDT" readonly>
+<input class="inp" id="priceInp" placeholder="Price USDT">
+<input class="inp" id="amountInp" placeholder="Amount BTC" value="0.001">
+<input class="inp" id="totalInp" placeholder="Total USDT" readonly>
+<button class="btn buy" onclick="tryTrade('BUY')">Buy / Long</button>
+<button class="btn sell" onclick="tryTrade('SELL')">Sell / Short</button>
+<button class="btn" style="background:#f3ba2f;color:#000" onclick="location.href='purchase.html'">Purchase Demo Balance</button>
+<div style="margin-top:10px;font-size:11px;color:#888">Open Orders<div id="openOrders" style="margin-top:6px">No open orders - Purchase required</div></div>
+</div>
+</div>
+</div>
+<script>
+let currentPrice=0,balance=parseFloat(localStorage.getItem('demo_bal_purchased')||'0'),instId='BTC-USDT';
+let chart,candleSeries,okxWs,trades=[];
+function showMsg(txt,color='#ff3b30'){const m=document.getElementById('msg');m.innerText=txt;m.style.background=color;m.style.display='block';setTimeout(()=>m.style.display='none',3500);}
+function updateBal(){document.getElementById('balTop').innerText='$'+balance.toFixed(2);document.getElementById('balBox').innerText='$'+balance.toFixed(2)+' USDT';localStorage.setItem('demo_bal_purchased',balance.toString());}
+updateBal();
+function tryTrade(side){
+ if(balance<=0){showMsg('⚠️ Please Purchase Demo First Then Start Trading');return;}
+ const amt=parseFloat(document.getElementById('amountInp').value||'0');
+ if(amt*currentPrice>balance){showMsg('Insufficient Balance! Please Purchase Demo');return;}
+ trades.push({id:Date.now(),side,price:currentPrice,amount:amt,time:new Date().toLocaleTimeString()});
+ document.getElementById('openOrders').innerHTML=trades.slice(-5).reverse().map(o=>`<div style="background:#1e1e1e;padding:6px;border-radius:6px;margin-bottom:4px"><b style="color:${o.side=='BUY'?'#00c087':'#ff3b30'}">${o.side}</b> ${o.amount} BTC @ $${o.price.toFixed(2)}<br><small>${o.time}</small></div>`).join('');
+ balance-=amt*currentPrice*0.001;updateBal();showMsg(side+' Order Placed @ $'+currentPrice.toFixed(2),'#00c087');
+}
+const chartEl=document.getElementById('chart');
+chart=LightweightCharts.createChart(chartEl,{layout:{background:{color:'#000'},textColor:'#888'},grid:{vertLines:{color:'#111'},horzLines:{color:'#111'}}});
+candleSeries=chart.addCandlestickSeries({upColor:'#00c087',downColor:'#ff3b30'});
+async function loadOKXCandles(){try{const res=await fetch(`https://www.okx.com/api/v5/market/candles?instId=${instId}&bar=1m&limit=200`);const json=await res.json();if(json.data){const candles=json.data.map(d=>({time:parseInt(d[0])/1000,open:+d[1],high:+d[2],low:+d[3],close:+d[4]})).reverse();candleSeries.setData(candles);}}catch(e){}}
+loadOKXCandles();
+function connectOKX(){
+ okxWs=new WebSocket('wss://ws.okx.com:8443/ws/v5/public');
+ okxWs.onopen=()=>{okxWs.send(JSON.stringify({op:'subscribe',args:[{channel:'tickers',instId:instId},{channel:'books',instId:instId},{channel:'trades',instId:instId},{channel:'candle1m',instId:instId}]}));};
+ okxWs.onmessage=(e)=>{
+  const data=JSON.parse(e.data);if(!data.data)return;const d=data.data[0];
+  if(data.arg.channel==='tickers'){currentPrice=parseFloat(d.last);document.getElementById('price').innerText='$'+currentPrice.toLocaleString();document.getElementById('midPrice').innerText='$'+currentPrice.toLocaleString();document.getElementById('priceInp').value=currentPrice.toFixed(2);document.getElementById('high').innerText='$'+parseFloat(d.high24h).toLocaleString();document.getElementById('low').innerText='$'+parseFloat(d.low24h).toLocaleString();document.getElementById('vol').innerText=parseFloat(d.vol24h).toFixed(2)+' BTC';}
+  if(data.arg.channel==='books'){const asks=d.asks.slice(0,8).reverse();const bids=d.bids.slice(0,8);document.getElementById('asks').innerHTML=asks.map(a=>`<div style="display:flex;justify-content:space-between;color:#ff3b30"><span>${parseFloat(a[0]).toFixed(2)}</span><span style="color:#aaa">${parseFloat(a[1]).toFixed(4)}</span><span style="color:#555">${(parseFloat(a[0])*parseFloat(a[1])).toFixed(2)}</span></div>`).join('');document.getElementById('bids').innerHTML=bids.map(b=>`<div style="display:flex;justify-content:space-between;color:#00c087"><span>${parseFloat(b[0]).toFixed(2)}</span><span style="color:#aaa">${parseFloat(b[1]).toFixed(4)}</span><span style="color:#555">${(parseFloat(b[0])*parseFloat(b[1])).toFixed(2)}</span></div>`).join('');}
+  if(data.arg.channel==='trades'){const tr=d;const div=document.createElement('div');div.innerHTML=`<div style="display:flex;justify-content:space-between"><span style="color:${tr.side==='buy'?'#00c087':'#ff3b30'}">${tr.side.toUpperCase()}</span><span style="color:#fff">${parseFloat(tr.px).toFixed(2)}</span><span>${parseFloat(tr.sz).toFixed(4)}</span></div>`;const cont=document.getElementById('trades');cont.prepend(div);if(cont.children.length>20)cont.removeChild(cont.lastChild);}
+  if(data.arg.channel==='candle1m'){const k=d;candleSeries.update({time:parseInt(k[0])/1000,open:+k[1],high:+k[2],low:+k[3],close:+k[4]});}
+ };
+ okxWs.onclose=()=>setTimeout(connectOKX,2000);
+}
+connectOKX();
+document.getElementById('amountInp').addEventListener('input',()=>{const amt=parseFloat(document.getElementById('amountInp').value||'0');document.getElementById('totalInp').value=(amt*currentPrice).toFixed(2)+' USDT';});
+</script>
+</body>
+</html>
