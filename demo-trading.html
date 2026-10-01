@@ -2,81 +2,98 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Trading Master Pro - Final Live</title>
+<title>Trading Master Pro - Live</title>
 <script src="https://unpkg.com/lightweight-charts@4.1.0/dist/lightweight-charts.standalone.production.js"></script>
 <style>
 *{box-sizing:border-box}html,body{margin:0;height:100%;font-family:Arial;background:#0b0e11;color:#fff;font-size:13px;overflow:hidden}
 .hd{background:#12161c;height:42px;display:flex;justify-content:space-between;align-items:center;padding:0 10px;border-bottom:1px solid #1e2329}
-.hd.logo{font-weight:bold;color:#f3ba2f}
-.hd.live{color:#0ecb81;font-size:11px}
-.btn{border:none;border-radius:6px;padding:8px;font-weight:bold;cursor:pointer;width:100%;margin-bottom:5px;font-size:12px}
+.btn{border:none;border-radius:6px;padding:10px;font-weight:bold;cursor:pointer;width:100%;margin-bottom:6px;font-size:13px}
 .main{flex:1;display:flex;min-height:0;gap:4px;padding:4px}
 .tools{width:42px;background:#1e242a;border-radius:8px;display:flex;flex-direction:column;align-items:center;gap:8px;padding:8px 0}
-.tools span{color:#fff;padding:6px;cursor:pointer;border-radius:5px}.tools span.on{background:#f3ba2f;color:#000}
-.chartWrap{flex:1;display:flex;background:#0d1421;border-radius:8px;overflow:hidden;border:1px solid #1e2329}
+.chartWrap{flex:1;display:flex;background:#0d1421;border-radius:8px;overflow:hidden;border:1px solid #1e2329;position:relative}
 .chartBox{flex:1;position:relative}#ch{width:100%;height:100%;display:block}
 .priceCol{width:98px;background:#0d1421;border-left:2px solid #f3ba2f;display:flex;flex-direction:column;flex-shrink:0}
 .priceHead{color:#ffbb00;text-align:center;font-weight:bold;font-size:11px;padding:8px 2px;border-bottom:2px solid #ffbb00;background:#12161c}
 .priceBody{flex:1;display:flex;flex-direction:column;justify-content:space-evenly;padding:6px 4px}
-.pFixed{font-size:11px;padding:10px 2px;text-align:right;white-space:nowrap;border-bottom:1px dashed #2a2a5a;margin:2px 0}
+.pFixed{font-size:11px;padding:10px 2px;text-align:right;border-bottom:1px dashed #2a2a5a}
 .right{width:290px;background:#12161c;border-radius:8px;display:flex;flex-direction:column;border:1px solid #1e2329}
-.rHead{padding:10px;font-weight:bold;border-bottom:1px solid #1e2329;display:flex;justify-content:space-between}
-.tabs{display:flex;background:#0b0e11;margin:8px;border-radius:6px}
-.tabs div{flex:1;text-align:center;padding:6px;cursor:pointer;font-size:11px;border-radius:6px}
-.tabs div.on{background:#2b3139;color:#fff}
-.order{padding:10px}
-.inp{width:100%;background:#1e2329;border:1px solid #2b3139;color:#fff;border-radius:6px;padding:8px;margin:6px 0}
-.bal{background:#1e2329;border-radius:6px;padding:8px;margin-bottom:8px;font-size:11px;text-align:center}
+.order{padding:10px}.inp{width:100%;background:#1e2329;border:1px solid #2b3139;color:#fff;border-radius:6px;padding:8px;margin:6px 0}
+.bal{background:#1e2329;border-radius:6px;padding:10px;margin-bottom:8px;text-align:center}
 .pos{flex:1;overflow:auto;padding:8px;border-top:1px solid #1e2329}
-.lock{background:rgba(0,0,0,0.85);position:absolute;top:0;left:0;right:0;bottom:0;display:flex;flex-direction:column;justify-content:center;align-items:center;z-index:10}
+.lock{background:rgba(11,14,17,0.93);position:absolute;inset:0;display:flex;flex-direction:column;justify-content:center;align-items:center;z-index:20}
+.msg{position:fixed;top:20px;left:50%;transform:translateX(-50%);background:#f6465d;color:#fff;padding:12px 22px;border-radius:8px;z-index:99;display:none;font-weight:bold}
 </style>
 </head>
 <body style="display:flex;flex-direction:column">
+<div class="msg" id="topMsg">Please Purchase Demo To Start Trading</div>
 <div class="hd">
-<div class="logo">TRADING MASTER PRO <span style="color:#fff;font-weight:normal">| DEMO</span></div>
-<div><span class="live">● LIVE BINANCE</span> <span id="livePriceTop" style="margin-left:10px;color:#f3ba2f;font-weight:bold">Loading...</span> <span id="sym" style="margin-left:5px">BTCUSDT</span></div>
-<div>Balance: <b id="balTop" style="color:#f6465d">$0.00</b></div>
+<div style="font-weight:bold;color:#f3ba2f">TRADING MASTER PRO | DEMO</div>
+<div><span style="color:#0ecb81">● LIVE BINANCE</span> <span id="livePriceTop" style="margin-left:10px;color:#f3ba2f;font-weight:bold">Loading...</span></div>
+<div>Balance: <b id="balTop">$0.00</b></div>
 </div>
 <div class="main">
-<div class="tools"><span class="on">📈</span><span>✏️</span><span>📏</span><span>🔍</span></div>
-<div class="chartWrap" style="position:relative">
+<div class="chartWrap">
 <div class="chartBox"><div id="ch"></div></div>
 <div class="priceCol"><div class="priceHead">PRICE (USDT)</div><div class="priceBody" id="priceBody"></div></div>
 <div class="lock" id="lockScreen">
-<div style="font-size:50px">🔒</div>
-<h2 style="margin:10px 0;color:#f3ba2f">Demo Balance 0</h2>
-<p style="color:#848e9c;text-align:center;padding:0 20px">Aapke paas demo balance nahi hai.<br>Purchase karein tab trading start hogi.</p>
-<button class="btn" style="background:#f3ba2f;color:#000;width:200px;margin-top:15px" onclick="window.location.href='purchase.html'">PURCHASE DEMO NOW</button>
+<div style="font-size:48px">🔒</div>
+<h2 style="color:#f3ba2f">Demo Balance 0</h2>
+<p style="color:#848e9c;text-align:center">New user is locked. After purchase, your balance will be added and trading will start.</p>
+<button class="btn" style="background:#f3ba2f;color:#000;width:220px;margin-top:15px" onclick="location.href='purchase.html'">PURCHASE DEMO NOW</button>
 </div>
 </div>
 <div class="right">
-<div class="rHead"><span>Demo Order</span><span style="color:#f3ba2f">P2P Ready</span></div>
-<div class="tabs"><div class="on">Limit</div><div>Market</div><div>P2P Lend</div></div>
+<div style="padding:10px;font-weight:bold;border-bottom:1px solid #1e2329;display:flex;justify-content:space-between"><span>Demo Order</span><span id="sym" style="color:#f3ba2f">BTCUSDT</span></div>
 <div class="order">
-<div class="bal" id="balBox">Available: <b style="color:#f6465d">$0.00</b><br><span style="font-size:10px">No free demo. Please purchase.</span></div>
+<div class="bal" id="balBox">Available: $0.00</div>
 <select class="inp" id="symbolSel" onchange="changeSymbol()"><option value="BTCUSDT">BTCUSDT</option><option value="ETHUSDT">ETHUSDT</option><option value="BNBUSDT">BNBUSDT</option><option value="SOLUSDT">SOLUSDT</option></select>
-<input class="inp" id="amount" type="number" value="100" disabled>
-<input class="inp" id="leverage" type="number" value="10" disabled>
-<button class="btn" style="background:#2b3139;color:#848e9c" disabled>BUY / LONG ↑</button>
-<button class="btn" style="background:#2b3139;color:#848e9c" disabled>SELL / SHORT ↓</button>
-<button class="btn" style="background:#f3ba2f;color:#000" onclick="window.location.href='purchase.html'">💳 Purchase Demo Balance</button>
+<input class="inp" id="amount" type="number" value="100" placeholder="Amount">
+<input class="inp" id="lev" type="number" value="10" placeholder="Leverage">
+<button class="btn" style="background:#0ecb81;color:#fff" onclick="tryTrade('BUY')">BUY / LONG ↑</button>
+<button class="btn" style="background:#f6465d;color:#fff" onclick="tryTrade('SELL')">SELL / SHORT ↓</button>
+<button class="btn" style="background:#f3ba2f;color:#000" onclick="location.href='purchase.html'">Purchase / Add Balance</button>
 </div>
-<div class="pos"><b>Open Positions</b><div id="posList" style="margin-top:8px;font-size:11px;color:#848e9c">Purchase ke baad trades yahan show hongi.</div></div>
+<div class="pos"><b>Open Positions</b><div id="posList" style="margin-top:8px;color:#848e9c">No trades yet</div></div>
 </div>
 </div>
 <script>
 let balance = parseFloat(localStorage.getItem('demo_bal_purchased')||'0');
-let currentPrice = 0, symbol='BTCUSDT', chart, candleSeries, ws, klWs;
-function updateBal(){document.getElementById('balTop').innerText='$'+balance.toFixed(2);document.getElementById('balTop').style.color=balance>0?'#0ecb81':'#f6465d';}
-function checkLock(){const lock=document.getElementById('lockScreen');if(balance>0){lock.style.display='none';document.getElementById('amount').disabled=false;document.getElementById('leverage').disabled=false;}else{lock.style.display='flex';}}
-updateBal();checkLock();
+let currentPrice=0,symbol='BTCUSDT',chart,candleSeries,ws,klWs,trades=JSON.parse(localStorage.getItem('demo_trades')||'[]');
+function showMsg(txt){const m=document.getElementById('topMsg');m.innerText=txt;m.style.display='block';setTimeout(()=>m.style.display='none',3000);}
+function updateAll(){
+ document.getElementById('balTop').innerText='$'+balance.toFixed(2);
+ document.getElementById('balTop').style.color=balance>0?'#0ecb81':'#f6465d';
+ document.getElementById('balBox').innerHTML= balance>0? `Available: <b style="color:#0ecb81">$${balance.toFixed(2)}</b><br><small>Trading Active</small>` : `Available: <b style="color:#f6465d">$0.00</b><br><small>Please purchase demo</small>`;
+ document.getElementById('lockScreen').style.display= balance>0?'none':'flex';
+ localStorage.setItem('demo_bal_purchased',balance.toString()); renderTrades();
+}
+updateAll();
+function tryTrade(side){
+ if(balance<=0){showMsg('Please Purchase Demo To Start Trading');return;}
+ const amt=parseFloat(document.getElementById('amount').value||'0');
+ if(amt>balance){showMsg('Balance Finished! Please Purchase Demo To Start Trading');updateAll();return;}
+ trades.push({id:Date.now(),symbol,side,entry:currentPrice,amount:amt,lev:document.getElementById('lev').value});
+ localStorage.setItem('demo_trades',JSON.stringify(trades));
+ // For demo, reduce 1% to show balance finish logic
+ balance = Math.max(0, balance - amt*0.01);
+ updateAll(); showMsg(side+' Trade Placed @ $'+currentPrice.toFixed(2));
+}
+function renderTrades(){
+ const list=document.getElementById('posList');
+ if(trades.length==0){list.innerHTML='No trades yet';return;}
+ list.innerHTML=trades.slice(-8).reverse().map(t=>{
+  const pnl = t.side=='BUY'?(currentPrice-t.entry)/t.entry*t.amount:(t.entry-currentPrice)/t.entry*t.amount;
+  return `<div style="background:#1e2329;padding:6px;border-radius:6px;margin-bottom:5px"><b>${t.side} ${t.symbol}</b> $${t.amount}<br>Entry $${t.entry.toFixed(2)} PnL <span style="color:${pnl>=0?'#0ecb81':'#f6465d'}">${pnl.toFixed(2)}</span> <span style="float:right;cursor:pointer" onclick="closeT(${t.id})">❌</span></div>`;
+ }).join('');
+}
+function closeT(id){trades=trades.filter(t=>t.id!=id);localStorage.setItem('demo_trades',JSON.stringify(trades));updateAll();}
 const chartEl=document.getElementById('ch');
-chart=LightweightCharts.createChart(chartEl,{layout:{background:{color:'#0d1421'},textColor:'#848e9c'},grid:{vertLines:{color:'#1e2329'},horzLines:{color:'#1e2329'}},timeScale:{timeVisible:true}});
-candleSeries=chart.addCandlestickSeries({upColor:'#0ecb81',downColor:'#f6465d',wickUpColor:'#0ecb81',wickDownColor:'#f6465d'});
-async function loadHistory(){try{const res=await fetch(`https://api.binance.com/api/v3/klines?symbol=${symbol}&interval=1m&limit=200`);const data=await res.json();const candles=data.map(d=>({time:d[0]/1000,open:+d[1],high:+d[2],low:+d[3],close:+d[4]}));candleSeries.setData(candles);renderLadder(candles[candles.length-1].close);}catch(e){}}
-function connectWS(){if(ws)ws.close();if(klWs)klWs.close();ws=new WebSocket(`wss://stream.binance.com:9443/ws/${symbol.toLowerCase()}@trade`);ws.onmessage=(e)=>{const d=JSON.parse(e.data);currentPrice=parseFloat(d.p);document.getElementById('livePriceTop').innerText='$'+currentPrice.toFixed(2);};klWs=new WebSocket(`wss://stream.binance.com:9443/ws/${symbol.toLowerCase()}@kline_1m`);klWs.onmessage=(e)=>{const d=JSON.parse(e.data).k;candleSeries.update({time:d.t/1000,open:+d.o,high:+d.h,low:+d.l,close:+d.c});};}
-connectWS();
-function renderLadder(mid){const body=document.getElementById('priceBody');body.innerHTML='';for(let i=8;i>=-8;i--){const p=mid+i*(mid*0.0005);const div=document.createElement('div');div.className='pFixed';div.style.color=i>0?'#f6465d':i<0?'#0ecb81':'#ffbb00';div.innerText=p.toFixed(2);body.appendChild(div);}}
+chart=LightweightCharts.createChart(chartEl,{layout:{background:{color:'#0d1421'},textColor:'#848e9c'},grid:{vertLines:{color:'#1e2329'},horzLines:{color:'#1e2329'}}});
+candleSeries=chart.addCandlestickSeries({upColor:'#0ecb81',downColor:'#f6465d'});
+async function loadHistory(){try{const r=await fetch(`https://api.binance.com/api/v3/klines?symbol=${symbol}&interval=1m&limit=200`);const d=await r.json();const c=d.map(x=>({time:x[0]/1000,open:+x[1],high:+x[2],low:+x[3],close:+x[4]}));candleSeries.setData(c);renderLadder(c[c.length-1].close);}catch(e){}}
+function connectWS(){if(ws)ws.close();if(klWs)klWs.close();ws=new WebSocket(`wss://stream.binance.com:9443/ws/${symbol.toLowerCase()}@trade`);ws.onmessage=e=>{const d=JSON.parse(e.data);currentPrice=parseFloat(d.p);document.getElementById('livePriceTop').innerText='$'+currentPrice.toFixed(2);if(trades.length)renderTrades();};klWs=new WebSocket(`wss://stream.binance.com:9443/ws/${symbol.toLowerCase()}@kline_1m`);klWs.onmessage=e=>{const d=JSON.parse(e.data).k;candleSeries.update({time:d.t/1000,open:+d.o,high:+d.h,low:+d.l,close:+d.c});};}
+loadHistory();connectWS();
+function renderLadder(mid){const b=document.getElementById('priceBody');b.innerHTML='';for(let i=8;i>=-8;i--){const p=mid+i*(mid*0.0005);const div=document.createElement('div');div.className='pFixed';div.style.color=i>0?'#f6465d':i<0?'#0ecb81':'#ffbb00';div.innerText=p.toFixed(2);b.appendChild(div);}}
 function changeSymbol(){symbol=document.getElementById('symbolSel').value;document.getElementById('sym').innerText=symbol;loadHistory();connectWS();}
 </script>
 </body>
