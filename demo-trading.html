@@ -62,21 +62,20 @@ function lockMsg(){alert('Balance zero hai.');}
 function doLogout(){if(confirm('Logout?')){localStorage.clear();location.reload();}}
 var hist=[];try{hist=JSON.parse(localStorage.getItem('tm_hist')||'[]')}catch(e){}
 function openHistory(){document.getElementById('histModal').style.display='block';showTab('h');}
-function showTab(t){var b=document.getElementById('histBody');if(t=='h'){var s='<h3>History - Last 20</h3>';hist.slice(0,20).forEach(x=>{s+='<div style="display:flex;justify-content:space-between;padding:5px;border-bottom:1px solid #333"><span>'+x.dt+'</span><span>'+x.side+'</span><span>'+x.pnl.toFixed(2)+'</span></div>'});b.innerHTML=s||'No history';}else{var p=0,l=0;hist.forEach(x=>{if(x.pnl>=0)p+=x.pnl;else l+=x.pnl});b.innerHTML='<h3>Profit/Loss</h3><p style="color:#0ecb81">Profit $'+p.toFixed(2)+'</p><p style="color:#f6465d">Loss $'+l.toFixed(2)+'</p>';}}
+function showTab(t){var b=document.getElementById('histBody');if(t=='h'){var s='<h3>History - Last 20</h3>';hist.slice(0,20).forEach(function(x){s+='<div style="display:flex;justify-content:space-between;padding:5px;border-bottom:1px solid #333"><span>'+x.dt+'</span><span>'+x.side+'</span><span>'+x.pnl.toFixed(2)+'</span></div>'});b.innerHTML=s||'No history';}else{var p=0,l=0;hist.forEach(function(x){if(x.pnl>=0)p+=x.pnl;else l+=x.pnl});b.innerHTML='<h3>Profit/Loss</h3><p style="color:#0ecb81">Profit $'+p.toFixed(2)+'</p><p style="color:#f6465d">Loss $'+l.toFixed(2)+'</p>';}}
 
 var tool='cross',drawings=[],hlines=[],isDown=false,startPt=null,mousePt=null;
-document.querySelectorAll('#toolBar span[data-t]').forEach(el=>{el.onclick=()=>{tool=el.dataset.t;document.querySelectorAll('#toolBar span').forEach(x=>x.classList.remove('on'));el.classList.add('on');};});
-document.getElementById('delTool').onclick=()=>{drawings=[];hlines=[];};
+document.querySelectorAll('#toolBar span[data-t]').forEach(function(el){el.onclick=function(){tool=el.dataset.t;document.querySelectorAll('#toolBar span').forEach(function(x){x.classList.remove('on')});el.classList.add('on');};});
+document.getElementById('delTool').onclick=function(){drawings=[];hlines=[];};
 
-var price=6429.41,target=price,candles=[];
-for(var i=0;i<65;i++){var o=price;price+=(Math.random()-0.5)*4;var c=price;candles.push({o:o,h:Math.max(o,c)+1.2,l:Math.min(o,c)-1.2,c:c});}
-price=6429.41;target=price;
+var price=6421.93,target=price,candles=[];
+for(var i=0;i<65;i++){var o=price;price+=(Math.random()-0.5)*3.5;var c=price;candles.push({o:o,h:Math.max(o,c)+Math.random()*1.8,l:Math.min(o,c)-Math.random()*1.8,c:c});}
+price=6421.93;target=price;
 
-// Fixed lines - yahan se le kar wahan tak, space ke sath
 var fixedPrices=[6465.00,6450.00,6435.00,6420.00,6405.00,6390.00];
 function renderFixedPrices(){
  var h='';
- fixedPrices.forEach(p=>{
+ fixedPrices.forEach(function(p){
   var col=p>6420?'#ff4d6d':'#00e5c0';
   h+='<div class="pFixed" style="color:'+col+'">'+p.toFixed(2)+'</div>';
  });
@@ -88,29 +87,42 @@ var cv=document.getElementById('ch'),ctx=cv.getContext('2d');
 var ob=document.getElementById('ob');
 function getPos(e){var r=cv.getBoundingClientRect();return{x:e.clientX-r.left,y:e.clientY-r.top};}
 var Mn=0,Rg=1;function yToPrice(y){return Mn+((cv.height-10-y)/(cv.height-20))*Rg;}
-cv.addEventListener('mousedown',e=>{isDown=true;startPt=getPos(e);if(tool=='hline'){hlines.push(yToPrice(startPt.y));}if(tool=='text'){var t=prompt('Text:');if(t)drawings.push({t:'text',x:startPt.x,y:startPt.y,txt:t});}});
-cv.addEventListener('mousemove',e=>{mousePt=getPos(e);});
-window.addEventListener('mouseup',()=>{if(isDown&&startPt&&mousePt){if(tool=='trend'||tool=='box'){drawings.push({t:tool,x1:startPt.x,y1:startPt.y,x2:mousePt.x,y2:mousePt.y});}}isDown=false;startPt=null;});
+cv.addEventListener('mousedown',function(e){isDown=true;startPt=getPos(e);if(tool=='hline'){hlines.push(yToPrice(startPt.y));}if(tool=='text'){var t=prompt('Text:');if(t)drawings.push({t:'text',x:startPt.x,y:startPt.y,txt:t});}});
+cv.addEventListener('mousemove',function(e){mousePt=getPos(e);});
+window.addEventListener('mouseup',function(){if(isDown&&startPt&&mousePt){if(tool=='trend'||tool=='box'){drawings.push({t:tool,x1:startPt.x,y1:startPt.y,x2:mousePt.x,y2:mousePt.y});}}isDown=false;startPt=null;});
 
 function draw(){
  var rc=cv.parentElement.getBoundingClientRect();if(rc.width>10){cv.width=rc.width;cv.height=rc.height;}
- price+=(target-price)*0.12;
+ // live forex smooth interpolation
+ price+=(target-price)*0.18;
  var lc=candles[candles.length-1];lc.c=price;lc.h=Math.max(lc.h,price);lc.l=Math.min(lc.l,price);
- var all=[];candles.forEach(k=>{all.push(k.h);all.push(k.l)});fixedPrices.forEach(p=>all.push(p));
+ var all=[];candles.forEach(function(k){all.push(k.h);all.push(k.l)});fixedPrices.forEach(function(p){all.push(p)});
  var mn=Math.min.apply(null,all),mx=Math.max.apply(null,all);var pad=(mx-mn)*0.35||5;mn-=pad;mx+=pad;var rg=mx-mn;Mn=mn;Rg=rg;
- var Y=v=>cv.height-10-((v-mn)/rg)*(cv.height-20);
+ var Y=function(v){return cv.height-10-((v-mn)/rg)*(cv.height-20);};
  ctx.fillStyle='#0a0f24';ctx.fillRect(0,0,cv.width,cv.height);
- // Fixed lines - yahan se wahan tak mukammal, space ke sath
- fixedPrices.forEach(p=>{
+
+ // Lines without upper price - price removed as requested
+ fixedPrices.forEach(function(p){
   var yy=Math.round(Y(p))+0.5;
   ctx.strokeStyle='#6b7a99';ctx.setLineDash([7,6]);ctx.lineWidth=1;
   ctx.beginPath();ctx.moveTo(0,yy);ctx.lineTo(cv.width,yy);ctx.stroke();ctx.setLineDash([]);
-  ctx.fillStyle='#8a9bb5';ctx.font='11px Arial';ctx.fillText(p.toFixed(2),10,yy-6);
+  // no price text on line
  });
+
  ctx.strokeStyle='#ffbf00';ctx.fillStyle='#ffbf00';
- drawings.forEach(d=>{if(d.t=='trend'){ctx.beginPath();ctx.moveTo(d.x1,d.y1);ctx.lineTo(d.x2,d.y2);ctx.stroke();}if(d.t=='box'){ctx.strokeRect(d.x1,d.y1,d.x2-d.x1,d.y2-d.y1);}if(d.t=='text'){ctx.fillText(d.txt,d.x,d.y);}});
- var cw=cv.width/34;var vis=candles.slice(-32);
- vis.forEach((k,i)=>{var x=i*cw;var up=k.c>=k.o;var col=up?'#00e5c0':'#ff4d6d';ctx.strokeStyle=col;ctx.fillStyle=col;var cx=x+cw/2;ctx.lineWidth=1.2;ctx.beginPath();ctx.moveTo(cx,Y(k.h));ctx.lineTo(cx,Y(k.l));ctx.stroke();var yO=Y(k.o),yC=Y(k.c);ctx.fillRect(cx-4,Math.min(yO,yC),8,Math.max(Math.abs(yC-yO),4));});
+ drawings.forEach(function(d){if(d.t=='trend'){ctx.beginPath();ctx.moveTo(d.x1,d.y1);ctx.lineTo(d.x2,d.y2);ctx.stroke();}if(d.t=='box'){ctx.strokeRect(d.x1,d.y1,d.x2-d.x1,d.y2-d.y1);}if(d.t=='text'){ctx.fillText(d.txt,d.x,d.y);}});
+
+ // Live Forex style candles - correct size, smooth
+ var totalSlots=45;var cw=cv.width/totalSlots;
+ var vis=candles.slice(-40);
+ vis.forEach(function(k,i){
+  var x=i*cw;var up=k.c>=k.o;var col=up?'#00e5c0':'#ff4d6d';
+  ctx.strokeStyle=col;ctx.fillStyle=col;var cx=x+cw*0.5;
+  ctx.lineWidth=1.2;ctx.beginPath();ctx.moveTo(cx,Y(k.h));ctx.lineTo(cx,Y(k.l));ctx.stroke();
+  var yO=Y(k.o),yC=Y(k.c);var bh=Math.max(Math.abs(yC-yO),3);var bw=Math.max(cw*0.6,5);
+  ctx.fillRect(cx-bw/2,Math.min(yO,yC),bw,bh);
+ });
+
  var yl=Y(price);
  ctx.strokeStyle='#ffbf00';ctx.setLineDash([7,5]);ctx.lineWidth=1.3;ctx.beginPath();ctx.moveTo(0,yl);ctx.lineTo(cv.width,yl);ctx.stroke();ctx.setLineDash([]);
  ctx.fillStyle='#ffbf00';ctx.fillRect(cv.width-70,yl-11,70,22);ctx.fillStyle='#000';ctx.font='bold 11px Arial';ctx.fillText(price.toFixed(2),cv.width-66,yl+4);
@@ -121,7 +133,7 @@ function draw(){
  document.getElementById('lp').innerText='$'+price.toFixed(2);
  requestAnimationFrame(draw);
 }
-setInterval(()=>{target+=(Math.random()-0.5)*5;if(Math.random()<0.09){var o=target;candles.push({o:o,h:o+1,l:o-1,c:o});if(candles.length>140)candles.shift();}},700);
+setInterval(function(){target+=(Math.random()-0.5)*4;if(Math.random()<0.10){var o=target;candles.push({o:o,h:o+Math.random()*1.5,l:o-Math.random()*1.5,c:target});if(candles.length>120)candles.shift();}},750);
 draw();
 </script>
 </body>
