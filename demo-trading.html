@@ -3,148 +3,81 @@
 <head>
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Trading Master Pro - Final Live</title>
+<script src="https://unpkg.com/lightweight-charts@4.1.0/dist/lightweight-charts.standalone.production.js"></script>
 <style>
 *{box-sizing:border-box}html,body{margin:0;height:100%;font-family:Arial;background:#0b0e11;color:#fff;font-size:13px;overflow:hidden}
-body{display:flex;flex-direction:column}
-.hd{background:#12161c;height:42px;display:flex;justify-content:space-between;align-items:center;padding:0 10px}
+.hd{background:#12161c;height:42px;display:flex;justify-content:space-between;align-items:center;padding:0 10px;border-bottom:1px solid #1e2329}
+.hd.logo{font-weight:bold;color:#f3ba2f}
+.hd.live{color:#0ecb81;font-size:11px}
 .btn{border:none;border-radius:6px;padding:8px;font-weight:bold;cursor:pointer;width:100%;margin-bottom:5px;font-size:12px}
 .main{flex:1;display:flex;min-height:0;gap:4px;padding:4px}
-.tools{width:42px;background:#1e2a4a;border-radius:8px;display:flex;flex-direction:column;align-items:center;gap:8px;padding:8px 0;flex-shrink:0}
-.tools span{color:#fff;padding:6px;cursor:pointer;border-radius:5px}.tools span.on{background:#ffbf00;color:#000}
+.tools{width:42px;background:#1e242a;border-radius:8px;display:flex;flex-direction:column;align-items:center;gap:8px;padding:8px 0}
+.tools span{color:#fff;padding:6px;cursor:pointer;border-radius:5px}.tools span.on{background:#f3ba2f;color:#000}
 .chartWrap{flex:1;display:flex;background:#0d1421;border-radius:8px;overflow:hidden;border:1px solid #1e2329}
-.chartBox{flex:1;position:relative}#ch{width:100%;height:100%;display:block;cursor:crosshair}
-.priceCol{width:98px;background:#0d1421;border-left:2px solid #ffbf00;display:flex;flex-direction:column;flex-shrink:0}
-.priceHead{color:#ffbf00;text-align:center;font-weight:bold;font-size:12px;padding:8px 2px;border-bottom:2px solid #ffbf00;background:#12161c}
+.chartBox{flex:1;position:relative}#ch{width:100%;height:100%;display:block}
+.priceCol{width:98px;background:#0d1421;border-left:2px solid #f3ba2f;display:flex;flex-direction:column;flex-shrink:0}
+.priceHead{color:#ffbb00;text-align:center;font-weight:bold;font-size:11px;padding:8px 2px;border-bottom:2px solid #ffbb00;background:#12161c}
 .priceBody{flex:1;display:flex;flex-direction:column;justify-content:space-evenly;padding:6px 4px}
-.pFixed{font-size:11px;padding:10px 2px;text-align:right;white-space:nowrap;border-bottom:1px dashed #2a3a5a;margin:2px 0}
-.right{width:290px;background:#12161c;border-radius:8px;display:flex;flex-direction:column;border:1px solid #1e2329;flex-shrink:0}
-.obH{padding:7px;color:#ffbf00;font-weight:bold;border-bottom:2px solid #ffbf00;font-size:13px;text-align:center;background:#0f1420}
-#ob{flex:1;overflow:hidden;padding:3px}.obRow{display:flex;justify-content:space-between;padding:2px 4px;font-size:11px;transition:background 0.2s}
-.ctrl{padding:6px;background:#0f1420;border-top:2px solid #ffbf00;max-height:55%;overflow:auto}
-.pos{background:#1e2a4a;margin:0 4px 4px;padding:5px;border-radius:8px;height:68px;overflow:auto;font-size:11px}
-.modal{position:fixed;inset:0;background:rgba(0,0,0,.9);display:none;z-index:20}
-.box{background:#1e2329;max-width:560px;width:95%;margin:20px auto;padding:15px;border-radius:10px;border:1px solid #ffbf00;max-height:85%;overflow:auto}
-.flash-up{background:rgba(0,229,192,0.15)} .flash-down{background:rgba(255,77,109,0.15)}
+.pFixed{font-size:11px;padding:10px 2px;text-align:right;white-space:nowrap;border-bottom:1px dashed #2a2a5a;margin:2px 0}
+.right{width:290px;background:#12161c;border-radius:8px;display:flex;flex-direction:column;border:1px solid #1e2329}
+.rHead{padding:10px;font-weight:bold;border-bottom:1px solid #1e2329;display:flex;justify-content:space-between}
+.tabs{display:flex;background:#0b0e11;margin:8px;border-radius:6px}
+.tabs div{flex:1;text-align:center;padding:6px;cursor:pointer;font-size:11px;border-radius:6px}
+.tabs div.on{background:#2b3139;color:#fff}
+.order{padding:10px}
+.inp{width:100%;background:#1e2329;border:1px solid #2b3139;color:#fff;border-radius:6px;padding:8px;margin:6px 0}
+.bal{background:#1e2329;border-radius:6px;padding:8px;margin-bottom:8px;font-size:11px;text-align:center}
+.pos{flex:1;overflow:auto;padding:8px;border-top:1px solid #1e2329}
+.lock{background:rgba(0,0,0,0.85);position:absolute;top:0;left:0;right:0;bottom:0;display:flex;flex-direction:column;justify-content:center;align-items:center;z-index:10}
 </style>
 </head>
-<body>
-<div class="hd"><div><b style="color:#ffbf00">Trading Master Pro</b> <span id="lp" style="color:#0ecb81;margin-left:8px"></span></div>
-<div>Balance: <b id="bal" style="color:#0ecb81">$0.00</b>
-<button class="btn" style="width:auto;display:inline-block;background:#2a5bd7;color:#fff;margin:0" onclick="openHistory()">History</button>
-<button class="btn" style="width:auto;display:inline-block;background:#f6465d;color:#fff;margin:0" onclick="doLogout()">Logout</button></div></div>
-
-<div style="display:flex;flex-direction:column;flex:1;min-height:0">
+<body style="display:flex;flex-direction:column">
+<div class="hd">
+<div class="logo">TRADING MASTER PRO <span style="color:#fff;font-weight:normal">| DEMO</span></div>
+<div><span class="live">● LIVE BINANCE</span> <span id="livePriceTop" style="margin-left:10px;color:#f3ba2f;font-weight:bold">Loading...</span> <span id="sym" style="margin-left:5px">BTCUSDT</span></div>
+<div>Balance: <b id="balTop" style="color:#f6465d">$0.00</b></div>
+</div>
 <div class="main">
-<div class="tools" id="toolBar"><span data-t="cross" class="on">✛</span><span data-t="trend">📈</span><span data-t="hline">➖</span><span data-t="box">▭</span><span data-t="pen">✎</span><span data-t="text">T</span><span id="delTool">🗑</span></div>
-<div class="chartWrap"><div class="chartBox"><canvas id="ch"></canvas></div>
-<div class="priceCol"><div class="priceHead">Price</div><div class="priceBody" id="pcol"></div></div>
+<div class="tools"><span class="on">📈</span><span>✏️</span><span>📏</span><span>🔍</span></div>
+<div class="chartWrap" style="position:relative">
+<div class="chartBox"><div id="ch"></div></div>
+<div class="priceCol"><div class="priceHead">PRICE (USDT)</div><div class="priceBody" id="priceBody"></div></div>
+<div class="lock" id="lockScreen">
+<div style="font-size:50px">🔒</div>
+<h2 style="margin:10px 0;color:#f3ba2f">Demo Balance 0</h2>
+<p style="color:#848e9c;text-align:center;padding:0 20px">Aapke paas demo balance nahi hai.<br>Purchase karein tab trading start hogi.</p>
+<button class="btn" style="background:#f3ba2f;color:#000;width:200px;margin-top:15px" onclick="window.location.href='purchase.html'">PURCHASE DEMO NOW</button>
 </div>
-<div class="right"><div class="obH">Order Book Live</div><div id="ob"></div>
-<div class="ctrl"><div style="color:#f6465d;font-size:11px;text-align:center">Balance $0 - Trade locked</div>
-<button class="btn" style="background:#2a5bd7;color:#fff">Normal</button>
-<div style="color:#ffbf00;text-align:center;margin:5px 0">Candle Trading</div>
-<button class="btn" style="background:#26a69a;color:#fff" onclick="lockMsg()">Green Candle Bet</button>
-<button class="btn" style="background:#f6465d;color:#fff" onclick="lockMsg()">Red Candle Bet</button>
-<div style="color:#ffbf00;text-align:center;margin:5px 0">Quantity</div>
-<div style="display:flex;gap:4px;margin-bottom:5px"><button class="btn" style="width:36px;background:#2a5bd7;color:#fff">-</button><input value="0.01" style="flex:1;text-align:center;background:#0b0e11;color:#fff;border:1px solid #333;border-radius:6px"><button class="btn" style="width:36px;background:#2a5bd7;color:#fff">+</button></div>
-<button class="btn" style="background:#0ecb81;color:#fff" onclick="lockMsg()">Buy / Long</button>
-<button class="btn" style="background:#f6465d;color:#fff" onclick="lockMsg()">Sell / Short</button>
-</div></div>
 </div>
-<div class="pos"><b style="color:#ffbf00">Positions (0)</b><div>No positions</div></div>
+<div class="right">
+<div class="rHead"><span>Demo Order</span><span style="color:#f3ba2f">P2P Ready</span></div>
+<div class="tabs"><div class="on">Limit</div><div>Market</div><div>P2P Lend</div></div>
+<div class="order">
+<div class="bal" id="balBox">Available: <b style="color:#f6465d">$0.00</b><br><span style="font-size:10px">No free demo. Please purchase.</span></div>
+<select class="inp" id="symbolSel" onchange="changeSymbol()"><option value="BTCUSDT">BTCUSDT</option><option value="ETHUSDT">ETHUSDT</option><option value="BNBUSDT">BNBUSDT</option><option value="SOLUSDT">SOLUSDT</option></select>
+<input class="inp" id="amount" type="number" value="100" disabled>
+<input class="inp" id="leverage" type="number" value="10" disabled>
+<button class="btn" style="background:#2b3139;color:#848e9c" disabled>BUY / LONG ↑</button>
+<button class="btn" style="background:#2b3139;color:#848e9c" disabled>SELL / SHORT ↓</button>
+<button class="btn" style="background:#f3ba2f;color:#000" onclick="window.location.href='purchase.html'">💳 Purchase Demo Balance</button>
 </div>
-
-<div id="histModal" class="modal"><div class="box">
-<div style="display:flex;gap:6px"><button class="btn" style="background:#ffbf00" onclick="showTab('h')">History</button><button class="btn" style="background:#0ecb81" onclick="showTab('p')">Profit / Loss</button><button class="btn" style="background:#f6465d" onclick="document.getElementById('histModal').style.display='none'">Close</button></div>
-<div id="histBody"></div></div></div>
-
+<div class="pos"><b>Open Positions</b><div id="posList" style="margin-top:8px;font-size:11px;color:#848e9c">Purchase ke baad trades yahan show hongi.</div></div>
+</div>
+</div>
 <script>
-function lockMsg(){alert('Balance zero hai.');}
-function doLogout(){if(confirm('Logout?')){localStorage.clear();location.reload();}}
-var hist=[];try{hist=JSON.parse(localStorage.getItem('tm_hist')||'[]')}catch(e){}
-function openHistory(){document.getElementById('histModal').style.display='block';showTab('h');}
-function showTab(t){var b=document.getElementById('histBody');if(t=='h'){var s='<h3>History - Last 20</h3>';hist.slice(0,20).forEach(function(x){s+='<div style="display:flex;justify-content:space-between;padding:5px;border-bottom:1px solid #333"><span>'+x.dt+'</span><span>'+x.side+'</span><span>'+x.pnl.toFixed(2)+'</span></div>'});b.innerHTML=s||'No history';}else{var p=0,l=0;hist.forEach(function(x){if(x.pnl>=0)p+=x.pnl;else l+=x.pnl});b.innerHTML='<h3>Profit/Loss</h3><p style="color:#0ecb81">Profit $'+p.toFixed(2)+'</p><p style="color:#f6465d">Loss $'+l.toFixed(2)+'</p>';}}
-
-var tool='cross',drawings=[],hlines=[],isDown=false,startPt=null,mousePt=null;
-document.querySelectorAll('#toolBar span[data-t]').forEach(function(el){el.onclick=function(){tool=el.dataset.t;document.querySelectorAll('#toolBar span').forEach(function(x){x.classList.remove('on')});el.classList.add('on');};});
-document.getElementById('delTool').onclick=function(){drawings=[];hlines=[];};
-
-// LIVE FOREX ENGINE - active ticks like original Forex
-var price=6408.50,candles=[];
-for(var i=0;i<70;i++){var o=price;var mv=(Math.random()-0.48)*4;price+=mv;var c=price;candles.push({o:o,h:Math.max(o,c)+Math.random()*1.5,l:Math.min(o,c)-Math.random()*1.5,c:c});}
-var tickCount=0;
-
-var fixedPrices=[6465.00,6450.00,6435.00,6420.00,6405.00,6390.00];
-function renderFixedPrices(){
- var h='';fixedPrices.forEach(function(p){var col=p>6420?'#ff4d6d':'#00e5c0';h+='<div class="pFixed" style="color:'+col+'">'+p.toFixed(2)+'</div>';});
- document.getElementById('pcol').innerHTML=h;
-}
-renderFixedPrices();
-
-var cv=document.getElementById('ch'),ctx=cv.getContext('2d');
-var ob=document.getElementById('ob');
-function getPos(e){var r=cv.getBoundingClientRect();return{x:e.clientX-r.left,y:e.clientY-r.top};}
-var Mn=0,Rg=1;function yToPrice(y){return Mn+((cv.height-10-y)/(cv.height-20))*Rg;}
-cv.addEventListener('mousedown',function(e){isDown=true;startPt=getPos(e);if(tool=='hline'){hlines.push(yToPrice(startPt.y));}if(tool=='text'){var t=prompt('Text:');if(t)drawings.push({t:'text',x:startPt.x,y:startPt.y,txt:t});}});
-cv.addEventListener('mousemove',function(e){mousePt=getPos(e);});
-window.addEventListener('mouseup',function(){if(isDown&&startPt&&mousePt){if(tool=='trend'||tool=='box'){drawings.push({t:tool,x1:startPt.x,y1:startPt.y,x2:mousePt.x,y2:mousePt.y});}}isDown=false;startPt=null;});
-
-function draw(){
- var rc=cv.parentElement.getBoundingClientRect();if(rc.width>10){cv.width=rc.width;cv.height=rc.height;}
- var lc=candles[candles.length-1];lc.c=price;lc.h=Math.max(lc.h,price);lc.l=Math.min(lc.l,price);
- var all=[];candles.forEach(function(k){all.push(k.h);all.push(k.l)});fixedPrices.forEach(function(p){all.push(p)});
- var mn=Math.min.apply(null,all),mx=Math.max.apply(null,all);var pad=(mx-mn)*0.35||5;mn-=pad;mx+=pad;var rg=mx-mn;Mn=mn;Rg=rg;
- var Y=function(v){return cv.height-10-((v-mn)/rg)*(cv.height-20);};
- ctx.fillStyle='#0a0f24';ctx.fillRect(0,0,cv.width,cv.height);
- // fixed lines - no price text on lines
- fixedPrices.forEach(function(p){var yy=Math.round(Y(p))+0.5;ctx.strokeStyle='#6b7a99';ctx.setLineDash([7,6]);ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(0,yy);ctx.lineTo(cv.width,yy);ctx.stroke();ctx.setLineDash([]);});
- ctx.strokeStyle='#ffbf00';ctx.fillStyle='#ffbf00';
- drawings.forEach(function(d){if(d.t=='trend'){ctx.beginPath();ctx.moveTo(d.x1,d.y1);ctx.lineTo(d.x2,d.y2);ctx.stroke();}if(d.t=='box'){ctx.strokeRect(d.x1,d.y1,d.x2-d.x1,d.y2-d.y1);}if(d.t=='text'){ctx.fillText(d.txt,d.x,d.y);}});
-
- // active live candles - 40 visible, smooth forex motion
- var totalSlots=45;var cw=cv.width/totalSlots;var vis=candles.slice(-40);
- vis.forEach(function(k,i){var x=i*cw;var up=k.c>=k.o;var col=up?'#00e5c0':'#ff4d6d';ctx.strokeStyle=col;ctx.fillStyle=col;var cx=x+cw*0.5;ctx.lineWidth=1.3;ctx.beginPath();ctx.moveTo(cx,Y(k.h));ctx.lineTo(cx,Y(k.l));ctx.stroke();var yO=Y(k.o),yC=Y(k.c);var bh=Math.max(Math.abs(yC-yO),2.5);var bw=Math.max(cw*0.62,5);ctx.fillRect(cx-bw/2,Math.min(yO,yC),bw,bh);});
-
- var yl=Y(price);
- ctx.strokeStyle='#ffbf00';ctx.setLineDash([7,5]);ctx.lineWidth=1.3;ctx.beginPath();ctx.moveTo(0,yl);ctx.lineTo(cv.width,yl);ctx.stroke();ctx.setLineDash([]);
- ctx.fillStyle='#ffbf00';ctx.fillRect(cv.width-70,yl-11,70,22);ctx.fillStyle='#000';ctx.font='bold 11px Arial';ctx.fillText(price.toFixed(2),cv.width-66,yl+4);
- if(tool=='cross'&&mousePt){ctx.strokeStyle='#5a6a85';ctx.beginPath();ctx.moveTo(mousePt.x,0);ctx.lineTo(mousePt.x,cv.height);ctx.moveTo(0,mousePt.y);ctx.lineTo(cv.width,mousePt.y);ctx.stroke();}
- document.getElementById('lp').innerText='$'+price.toFixed(2);
- requestAnimationFrame(draw);
-}
-
-// Forex tick every 180ms - candle moves same as live rate up/down
-setInterval(function(){
- var volatility=1.8;
- var move=(Math.random()-0.5)*volatility;
- // add micro trend for realism
- if(Math.random()<0.15) move+=(Math.random()-0.5)*4;
- price+=move;
- tickCount++;
- // new candle every ~22 ticks (~4 sec) like live forex
- if(tickCount>22){tickCount=0;var o=price;candles.push({o:o,h:o,l:o,c:o});if(candles.length>120)candles.shift();}
-},180);
-
-// Crypto style Order Book Live - fast flickering like Binance
-function renderOrderBook(){
- var html='';
- for(var i=6;i>=1;i--){
-  var pp=price+i*0.85+ (Math.random()-0.5)*0.3;
-  var sz=(Math.random()*0.9+0.05).toFixed(3);
-  var fl=Math.random()<0.5?'flash-down':'';
-  html+='<div class="obRow '+fl+'"><span style="color:#ff4d6d">'+pp.toFixed(2)+'</span><span>'+sz+'</span></div>';
- }
- for(var i=1;i<=6;i++){
-  var pp2=price-i*0.85+ (Math.random()-0.5)*0.3;
-  var sz2=(Math.random()*0.9+0.05).toFixed(3);
-  var fl2=Math.random()<0.5?'flash-up':'';
-  html+='<div class="obRow '+fl2+'"><span style="color:#00e5c0">'+pp2.toFixed(2)+'</span><span>'+sz2+'</span></div>';
- }
- ob.innerHTML=html;
-}
-setInterval(renderOrderBook,350);
-renderOrderBook();
-draw();
+let balance = parseFloat(localStorage.getItem('demo_bal_purchased')||'0');
+let currentPrice = 0, symbol='BTCUSDT', chart, candleSeries, ws, klWs;
+function updateBal(){document.getElementById('balTop').innerText='$'+balance.toFixed(2);document.getElementById('balTop').style.color=balance>0?'#0ecb81':'#f6465d';}
+function checkLock(){const lock=document.getElementById('lockScreen');if(balance>0){lock.style.display='none';document.getElementById('amount').disabled=false;document.getElementById('leverage').disabled=false;}else{lock.style.display='flex';}}
+updateBal();checkLock();
+const chartEl=document.getElementById('ch');
+chart=LightweightCharts.createChart(chartEl,{layout:{background:{color:'#0d1421'},textColor:'#848e9c'},grid:{vertLines:{color:'#1e2329'},horzLines:{color:'#1e2329'}},timeScale:{timeVisible:true}});
+candleSeries=chart.addCandlestickSeries({upColor:'#0ecb81',downColor:'#f6465d',wickUpColor:'#0ecb81',wickDownColor:'#f6465d'});
+async function loadHistory(){try{const res=await fetch(`https://api.binance.com/api/v3/klines?symbol=${symbol}&interval=1m&limit=200`);const data=await res.json();const candles=data.map(d=>({time:d[0]/1000,open:+d[1],high:+d[2],low:+d[3],close:+d[4]}));candleSeries.setData(candles);renderLadder(candles[candles.length-1].close);}catch(e){}}
+function connectWS(){if(ws)ws.close();if(klWs)klWs.close();ws=new WebSocket(`wss://stream.binance.com:9443/ws/${symbol.toLowerCase()}@trade`);ws.onmessage=(e)=>{const d=JSON.parse(e.data);currentPrice=parseFloat(d.p);document.getElementById('livePriceTop').innerText='$'+currentPrice.toFixed(2);};klWs=new WebSocket(`wss://stream.binance.com:9443/ws/${symbol.toLowerCase()}@kline_1m`);klWs.onmessage=(e)=>{const d=JSON.parse(e.data).k;candleSeries.update({time:d.t/1000,open:+d.o,high:+d.h,low:+d.l,close:+d.c});};}
+connectWS();
+function renderLadder(mid){const body=document.getElementById('priceBody');body.innerHTML='';for(let i=8;i>=-8;i--){const p=mid+i*(mid*0.0005);const div=document.createElement('div');div.className='pFixed';div.style.color=i>0?'#f6465d':i<0?'#0ecb81':'#ffbb00';div.innerText=p.toFixed(2);body.appendChild(div);}}
+function changeSymbol(){symbol=document.getElementById('symbolSel').value;document.getElementById('sym').innerText=symbol;loadHistory();connectWS();}
 </script>
 </body>
 </html>
