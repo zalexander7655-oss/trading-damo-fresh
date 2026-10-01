@@ -7,89 +7,139 @@
 *{box-sizing:border-box}html,body{margin:0;height:100%;font-family:Arial;background:#0b0e11;color:#fff;font-size:13px;overflow:hidden}
 body{display:flex;flex-direction:column}
 .hd{background:#12161c;height:42px;display:flex;justify-content:space-between;align-items:center;padding:0 10px}
-.hd b{color:#ffbf00}
 .btn{border:none;border-radius:6px;padding:8px;font-weight:bold;cursor:pointer;width:100%;margin-bottom:5px;font-size:12px}
 .main{flex:1;display:flex;min-height:0;gap:4px;padding:4px}
-.tools{width:40px;background:#1e2a4a;border-radius:8px;display:flex;flex-direction:column;align-items:center;gap:8px;padding:8px 0;flex-shrink:0}
-.tools span{color:#fff;padding:5px}
+.tools{width:42px;background:#1e2a4a;border-radius:8px;display:flex;flex-direction:column;align-items:center;gap:8px;padding:8px 0;flex-shrink:0}
+.tools span{color:#fff;padding:6px;cursor:pointer;border-radius:5px}.tools span.on{background:#ffbf00;color:#000}
 .chartWrap{flex:1;display:flex;background:#0d1421;border-radius:8px;overflow:hidden;border:1px solid #1e2329}
-.chartBox{flex:1;position:relative}#ch{width:100%;height:100%;display:block}
+.chartBox{flex:1;position:relative}#ch{width:100%;height:100%;display:block;cursor:crosshair}
 .priceCol{width:90px;background:#0d1421;border-left:1px solid #1e3a5f;position:relative;flex-shrink:0}
 .pTag{position:absolute;right:2px;font-size:10px;padding:1px 4px;border-radius:3px;transform:translateY(-50%)}
 .right{width:290px;background:#12161c;border-radius:8px;display:flex;flex-direction:column;border:1px solid #1e2329;flex-shrink:0}
 .obH{padding:7px;color:#ffbf00;font-weight:bold;border-bottom:2px solid #ffbf00;font-size:13px;text-align:center;background:#0f1420}
-#ob{flex:1;overflow:hidden;padding:3px}
-.obRow{display:flex;justify-content:space-between;padding:1px 4px;line-height:1.5;font-size:11px}
+#ob{flex:1;overflow:hidden;padding:3px}.obRow{display:flex;justify-content:space-between;padding:1px 4px;font-size:11px}
 .ctrl{padding:6px;background:#0f1420;border-top:2px solid #ffbf00;max-height:55%;overflow:auto}
 .pos{background:#1e2a4a;margin:0 4px 4px;padding:5px;border-radius:8px;height:68px;overflow:auto;font-size:11px}
+.modal{position:fixed;inset:0;background:rgba(0,0,0,.9);display:none;z-index:20}
+.box{background:#1e2329;max-width:560px;width:95%;margin:20px auto;padding:15px;border-radius:10px;border:1px solid #ffbf00;max-height:85%;overflow:auto}
 </style>
 </head>
 <body>
-<div class="hd"><div><b style="color:#ffbf00">Trading Master Pro</b> <span id="lp" style="color:#0ecb81;margin-left:8px"></span></div><div>Balance: <b id="bal" style="color:#0ecb81">$0.00</b> <button class="btn" style="width:auto;display:inline-block;background:#2a5bd7;color:#fff;margin:0">History</button> <button class="btn" style="width:auto;display:inline-block;background:#f6465d;color:#fff;margin:0" onclick="location.reload()">Logout</button></div></div>
-<div style="display:flex;flex-direction:column;flex:1;min-height:0">
+<div class="hd"><div><b style="color:#ffbf00">Trading Master Pro</b> <span id="lp" style="color:#0ecb81;margin-left:8px"></span></div>
+<div>Balance: <b id="bal" style="color:#0ecb81">$0.00</b>
+<button class="btn" style="width:auto;display:inline-block;background:#2a5bd7;color:#fff;margin:0" onclick="openHistory()">History</button>
+<button class="btn" style="width:auto;display:inline-block;background:#f6465d;color:#fff;margin:0" onclick="doLogout()">Logout</button></div></div>
+
+<div id="mainWrap" style="display:flex;flex-direction:column;flex:1;min-height:0">
 <div class="main">
-<div class="tools"><span>🟡</span><span>✛</span><span>📈</span><span>➖</span><span>▭</span><span>✎</span><span>T</span></div>
+<div class="tools" id="toolBar">
+<span data-t="cross" class="on">✛</span><span data-t="trend">📈</span><span data-t="hline">➖</span><span data-t="box">▭</span><span data-t="pen">✎</span><span data-t="text">T</span><span id="delTool">🗑</span>
+</div>
 <div class="chartWrap"><div class="chartBox"><canvas id="ch"></canvas></div><div class="priceCol" id="pcol"></div></div>
 <div class="right">
-<div class="obH">Order Book Live</div>
-<div id="ob"></div>
+<div class="obH">Order Book Live</div><div id="ob"></div>
 <div class="ctrl">
-<div style="color:#f6465d;font-size:11px;text-align:center;margin-bottom:5px">Balance $0 - Trade locked</div>
+<div style="color:#f6465d;font-size:11px;text-align:center">Balance $0 - Trade locked</div>
 <button class="btn" style="background:#2a5bd7;color:#fff">Normal</button>
-<div style="color:#ffbf00;text-align:center;font-size:12px;margin:5px 0">Candle Trading</div>
-<button class="btn" style="background:#26a69a;color:#fff" onclick="lock()">Green Candle Bet</button>
-<button class="btn" style="background:#f6465d;color:#fff" onclick="lock()">Red Candle Bet</button>
-<div style="color:#ffbf00;text-align:center;font-size:12px;margin:5px 0">Quantity</div>
+<div style="color:#ffbf00;text-align:center;margin:5px 0">Candle Trading</div>
+<button class="btn" style="background:#26a69a;color:#fff" onclick="lockMsg()">Green Candle Bet</button>
+<button class="btn" style="background:#f6465d;color:#fff" onclick="lockMsg()">Red Candle Bet</button>
+<div style="color:#ffbf00;text-align:center;margin:5px 0">Quantity</div>
 <div style="display:flex;gap:4px;margin-bottom:5px"><button class="btn" style="width:36px;background:#2a5bd7;color:#fff">-</button><input value="0.01" style="flex:1;text-align:center;background:#0b0e11;color:#fff;border:1px solid #333;border-radius:6px"><button class="btn" style="width:36px;background:#2a5bd7;color:#fff">+</button></div>
-<div style="color:#ffbf00;text-align:center;font-size:12px;margin:5px 0">Normal Trade</div>
-<button class="btn" style="background:#0ecb81;color:#fff" onclick="lock()">Buy / Long</button>
-<button class="btn" style="background:#f6465d;color:#fff" onclick="lock()">Sell / Short</button>
+<button class="btn" style="background:#0ecb81;color:#fff" onclick="lockMsg()">Buy / Long</button>
+<button class="btn" style="background:#f6465d;color:#fff" onclick="lockMsg()">Sell / Short</button>
 </div>
 </div>
 </div>
 <div class="pos"><b style="color:#ffbf00">Positions (0)</b><div>No positions</div></div>
 </div>
+
+<div id="histModal" class="modal"><div class="box">
+<div style="display:flex;gap:6px;margin-bottom:10px">
+<button class="btn" style="background:#ffbf00" onclick="showTab('h')">History</button>
+<button class="btn" style="background:#0ecb81" onclick="showTab('p')">Profit / Loss</button>
+<button class="btn" style="background:#f6465d" onclick="document.getElementById('histModal').style.display='none'">Close</button>
+</div>
+<div id="histBody"></div>
+</div></div>
+
 <script>
-function lock(){alert('Balance zero hai. Pehle balance purchase karein.');}
+function lockMsg(){alert('Balance zero hai. Pehle balance purchase karein.');}
+function doLogout(){ if(confirm('Logout karna hai?')){ localStorage.clear(); location.reload(); } }
+
+// history with 20 entries, time date profit loss
+var hist=[]; try{hist=JSON.parse(localStorage.getItem('tm_hist')||'[]')}catch(e){}
+if(hist.length==0){ for(var i=0;i<5;i++){ hist.push({dt:new Date(Date.now()-i*86400000).toLocaleString(), side:i%2?'BUY':'SELL', pnl:(Math.random()*10-5)}); } }
+function openHistory(){ document.getElementById('histModal').style.display='block'; showTab('h'); }
+function showTab(t){
+ var b=document.getElementById('histBody');
+ if(t=='h'){ var s='<h3>History - Last 20</h3>'; hist.slice(0,20).forEach(x=>{ s+='<div style="display:flex;justify-content:space-between;padding:5px;border-bottom:1px solid #333;font-size:12px"><span>'+x.dt+'</span><span>'+x.side+'</span><span style="color:'+(x.pnl>=0?'#0ecb81':'#f6465d')+'">'+x.pnl.toFixed(2)+'</span></div>'; }); b.innerHTML=s; }
+ else{ var p=0,l=0; hist.forEach(x=>{ if(x.pnl>=0)p+=x.pnl; else l+=x.pnl; }); b.innerHTML='<h3>Profit / Loss</h3><p style="color:#0ecb81">Total Profit: $'+p.toFixed(2)+'</p><p style="color:#f6465d">Total Loss: $'+l.toFixed(2)+'</p><p>Net: $'+(p+l).toFixed(2)+'</p>'; }
+}
+
+// tools working
+var tool='cross', drawings=[], hlines=[], isDown=false, startPt=null, mousePt=null;
+document.querySelectorAll('#toolBar span[data-t]').forEach(el=>{
+ el.onclick=()=>{ tool=el.dataset.t; document.querySelectorAll('#toolBar span').forEach(x=>x.classList.remove('on')); el.classList.add('on'); };
+});
+document.getElementById('delTool').onclick=()=>{ drawings=[]; hlines=[]; };
+
 var price=6429.41, target=price, candles=[];
-for(var i=0;i<65;i++){var o=price; price+=(Math.random()-0.5)*4; var c=price; candles.push({o:o,h:Math.max(o,c)+1.2,l:Math.min(o,c)-1.2,c:c});}
+for(var i=0;i<65;i++){ var o=price; price+=(Math.random()-0.5)*4; var c=price; candles.push({o:o,h:Math.max(o,c)+1.2,l:Math.min(o,c)-1.2,c:c}); }
 price=6429.41; target=price;
+var staticPrice = 6420.00; // finger wali line - ek jagah fix rahegi
+
 var cv=document.getElementById('ch'), ctx=cv.getContext('2d');
 var pcol=document.getElementById('pcol'), ob=document.getElementById('ob');
+
+function getPos(e){ var r=cv.getBoundingClientRect(); return {x:e.clientX-r.left, y:e.clientY-r.top}; }
+var Yfunc=null, Mn=0, Rg=1;
+function yToPrice(y){ return Mn + ((cv.height-10 - y)/(cv.height-20))*Rg; }
+
+cv.addEventListener('mousedown', e=>{ isDown=true; startPt=getPos(e); if(tool=='hline'){ hlines.push(yToPrice(startPt.y)); } if(tool=='text'){ var t=prompt('Text:'); if(t) drawings.push({t:'text',x:startPt.x,y:startPt.y,txt:t}); } });
+cv.addEventListener('mousemove', e=>{ mousePt=getPos(e); });
+window.addEventListener('mouseup', e=>{ if(isDown && startPt && mousePt){ if(tool=='trend' || tool=='box'){ drawings.push({t:tool,x1:startPt.x,y1:startPt.y,x2:mousePt.x,y2:mousePt.y}); } } isDown=false; startPt=null; });
+
 function draw(){
- var rc=cv.parentElement.getBoundingClientRect(); if(rc.width<10){requestAnimationFrame(draw);return;}
- cv.width=rc.width; cv.height=rc.height;
+ var rc=cv.parentElement.getBoundingClientRect(); if(rc.width>10){ cv.width=rc.width; cv.height=rc.height; }
  price += (target-price)*0.12;
  var lc=candles[candles.length-1]; lc.c=price; lc.h=Math.max(lc.h,price); lc.l=Math.min(lc.l,price);
- var all=[]; candles.forEach(k=>{all.push(k.h);all.push(k.l)});
- var mn=Math.min.apply(null,all), mx=Math.max.apply(null,all); var pad=(mx-mn)*0.35||5; mn-=pad; mx+=pad; var rg=mx-mn;
- var Y=v=>cv.height-10-((v-mn)/rg)*(cv.height-20);
+ var all=[]; candles.forEach(k=>{all.push(k.h);all.push(k.l)}); all.push(staticPrice); hlines.forEach(p=>all.push(p));
+ var mn=Math.min.apply(null,all), mx=Math.max.apply(null,all); var pad=(mx-mn)*0.35||5; mn-=pad; mx+=pad; var rg=mx-mn; Mn=mn; Rg=rg;
+ var Y=v=>cv.height-10-((v-mn)/rg)*(cv.height-20); Yfunc=Y;
  ctx.fillStyle='#0a0f24'; ctx.fillRect(0,0,cv.width,cv.height);
- // live forex style candles
+
+ // user drawings (tools)
+ ctx.strokeStyle='#ffbf00'; ctx.fillStyle='#ffbf00';
+ drawings.forEach(d=>{ if(d.t=='trend'){ ctx.beginPath(); ctx.moveTo(d.x1,d.y1); ctx.lineTo(d.x2,d.y2); ctx.stroke(); } if(d.t=='box'){ ctx.strokeRect(d.x1,d.y1,d.x2-d.x1,d.y2-d.y1); } if(d.t=='text'){ ctx.fillText(d.txt,d.x,d.y); } });
+ hlines.forEach(p=>{ var yy=Y(p); ctx.strokeStyle='#9aa;'; ctx.setLineDash([5,4]); ctx.beginPath(); ctx.moveTo(0,yy); ctx.lineTo(cv.width,yy); ctx.stroke(); ctx.setLineDash([]); });
+
+ // static line - finger wali, ek jagah fix
+ var ys=Y(staticPrice);
+ ctx.strokeStyle='#ffffff'; ctx.setLineDash([6,4]); ctx.lineWidth=1; ctx.beginPath(); ctx.moveTo(0,ys); ctx.lineTo(cv.width,ys); ctx.stroke(); ctx.setLineDash([]);
+ ctx.fillStyle='#fff'; ctx.font='11px Arial'; ctx.fillText(staticPrice.toFixed(2)+' FIX', 10, ys-6);
+
+ // candles live forex same
  var cw=cv.width/34; var vis=candles.slice(-32);
- vis.forEach((k,i)=>{var x=i*cw; var up=k.c>=k.o; var col=up?'#00e5c0':'#ff4d6d';
-  ctx.strokeStyle=col; ctx.fillStyle=col; var cx=x+cw/2;
-  ctx.lineWidth=1.2; ctx.beginPath(); ctx.moveTo(cx,Y(k.h)); ctx.lineTo(cx,Y(k.l)); ctx.stroke();
-  var yO=Y(k.o), yC=Y(k.c); var top=Math.min(yO,yC); var h=Math.max(Math.abs(yC-yO),4);
-  ctx.fillRect(cx-4,top,8,h); });
- // full move line - live market line
+ vis.forEach((k,i)=>{ var x=i*cw; var up=k.c>=k.o; var col=up?'#00e5c0':'#ff4d6d'; ctx.strokeStyle=col; ctx.fillStyle=col; var cx=x+cw/2; ctx.lineWidth=1.2; ctx.beginPath(); ctx.moveTo(cx,Y(k.h)); ctx.lineTo(cx,Y(k.l)); ctx.stroke(); var yO=Y(k.o), yC=Y(k.c); ctx.fillRect(cx-4, Math.min(yO,yC), 8, Math.max(Math.abs(yC-yO),4)); });
+
+ // move line - candle ke sath move karti rahegi
  var yl=Y(price);
- ctx.strokeStyle='#ffbf00'; ctx.setLineDash([7,5]); ctx.lineWidth=1.3;
- ctx.beginPath(); ctx.moveTo(0,yl); ctx.lineTo(cv.width,yl); ctx.stroke(); ctx.setLineDash([]);
- ctx.fillStyle='#ffbf00'; ctx.fillRect(cv.width-70,yl-11,70,22);
- ctx.fillStyle='#000'; ctx.font='bold 11px Arial'; ctx.fillText(price.toFixed(2),cv.width-66,yl+4);
- // price ladder
- var ph=''; for(var d=10;d>=-10;d--){var pp=price+d*1.6; var yy=Y(pp); if(yy<0||yy>cv.height) continue;
-  var is0=d==0; ph+='<div class="pTag" style="top:'+yy+'px;background:'+(is0?'#ffbf00':'transparent')+';color:'+(is0?'#000':(d>0?'#ff4d6d':'#00e5c0'))+'">'+pp.toFixed(2)+'</div>';}
+ ctx.strokeStyle='#ffbf00'; ctx.setLineDash([7,5]); ctx.lineWidth=1.3; ctx.beginPath(); ctx.moveTo(0,yl); ctx.lineTo(cv.width,yl); ctx.stroke(); ctx.setLineDash([]);
+ ctx.fillStyle='#ffbf00'; ctx.fillRect(cv.width-70,yl-11,70,22); ctx.fillStyle='#000'; ctx.font='bold 11px Arial'; ctx.fillText(price.toFixed(2), cv.width-66, yl+4);
+
+ // cross tool
+ if(tool=='cross' && mousePt){ ctx.strokeStyle='#5a6a85'; ctx.beginPath(); ctx.moveTo(mousePt.x,0); ctx.lineTo(mousePt.x,cv.height); ctx.moveTo(0,mousePt.y); ctx.lineTo(cv.width,mousePt.y); ctx.stroke(); }
+
+ var ph=''; for(var d=10;d>=-10;d--){ var pp=price+d*1.6; var yy2=Y(pp); if(yy2<0||yy2>cv.height) continue; var is0=d==0; ph+='<div class="pTag" style="top:'+yy2+'px;background:'+(is0?'#ffbf00':'transparent')+';color:'+(is0?'#000':(d>0?'#ff4d6d':'#00e5c0'))+'">'+pp.toFixed(2)+'</div>'; }
  pcol.innerHTML=ph;
- // order book live
  var oh=''; for(var i=6;i>0;i--) oh+='<div class="obRow"><span style="color:#ff4d6d">'+(price+i*1.1).toFixed(2)+'</span><span>'+(Math.random()*0.3+0.05).toFixed(3)+'</span></div>';
  for(var i=1;i<=6;i++) oh+='<div class="obRow"><span style="color:#00e5c0">'+(price-i*1.1).toFixed(2)+'</span><span>'+(Math.random()*0.3+0.05).toFixed(3)+'</span></div>';
  ob.innerHTML=oh;
  document.getElementById('lp').innerText='$'+price.toFixed(2);
  requestAnimationFrame(draw);
 }
-setInterval(()=>{ target+=(Math.random()-0.5)*5; if(Math.random()<0.09){var o=target; candles.push({o:o,h:o+1,l:o-1,c:o}); if(candles.length>140)candles.shift();} },700);
+setInterval(()=>{ target+=(Math.random()-0.5)*5; if(Math.random()<0.09){ var o=target; candles.push({o:o,h:o+1,l:o-1,c:o}); if(candles.length>140)candles.shift(); } },700);
 draw();
 </script>
 </body>
