@@ -1,112 +1,116 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>OKX Pro - Professional Live Trading</title>
-<script src="https://unpkg.com/lightweight-charts@4.1.0/dist/lightweight-charts.standalone.production.js"></script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>OKX Pro Live - Final Fixed</title>
+<script src="https://unpkg.com/lightweight-charts@4.1.3/dist/lightweight-charts.standalone.production.js"></script>
 <style>
-*{box-sizing:border-box}body{margin:0;background:#000;color:#fff;font-family:Inter,Arial;font-size:12px;overflow:hidden;height:100vh;display:flex;flex-direction:column}
-.hd{height:48px;background:#0a0a0a;border-bottom:1px solid #222;display:flex;align-items:center;justify-content:space-between;padding:0 12px}
-.ticker{display:flex;gap:18px;align-items:center}
-.up{color:#00c087}.down{color:#ff3b30}
+*{box-sizing:border-box}
+body{margin:0;background:#000;color:#fff;font-family:Arial, sans-serif;height:100vh;display:flex;flex-direction:column;overflow:hidden}
+.header{height:54px;background:#101010;border-bottom:1px solid #222;display:flex;align-items:center;justify-content:space-between;padding:0 16px}
+.logo{color:#f3ba2f;font-weight:900;font-size:15px}
+.price{color:#f3ba2f;font-weight:900;font-size:14px}
 .main{flex:1;display:flex;min-height:0}
-.left-tools{width:44px;background:#121212;border-right:1px solid #222;display:flex;flex-direction:column;align-items:center;gap:12px;padding:10px 0}
-.left-tools div{width:28px;height:28px;display:flex;align-items:center;justify-content:center;background:#1a1a1a;border-radius:6px;cursor:pointer}
-.left-tools div.active{background:#fff;color:#000}
-.center{flex:1;display:flex;flex-direction:column;min-width:0;background:#000}
-.chart-top{height:36px;display:flex;align-items:center;gap:12px;padding:0 10px;border-bottom:1px solid #1a1a1a;color:#888;font-size:11px}
-.chart-top span{cursor:pointer;padding:4px 8px;border-radius:4px}
-.chart-top span.on{background:#222;color:#fff}
-#chart{flex:1;width:100%}
-.orderbook{width:280px;background:#0e0e0e;border-left:1px solid #222;display:flex;flex-direction:column}
-.ob-head{display:flex;justify-content:space-between;padding:8px 10px;border-bottom:1px solid #222;font-weight:bold}
-.ob-list{flex:1;overflow:hidden;padding:4px 8px;font-family:monospace;font-size:11px;line-height:16px}
-.ask{color:#ff3b30}.bid{color:#00c087}
-.ob-row{display:flex;justify-content:space-between}
-.trade-history{height:140px;border-top:1px solid #222;overflow:auto;padding:6px 8px}
-.right-panel{width:300px;background:#121212;border-left:1px solid #222;display:flex;flex-direction:column}
-.tabs{display:flex;background:#000}.tabs div{flex:1;text-align:center;padding:10px 0;cursor:pointer;border-bottom:2px solid transparent}.tabs div.on{border-bottom:2px solid #fff;color:#fff;font-weight:bold}
-.form{padding:12px}.inp{width:100%;background:#1e1e1e;border:1px solid #2a2a2a;color:#fff;border-radius:6px;padding:10px;margin:6px 0}
-.btn{width:100%;padding:12px;border:none;border-radius:8px;font-weight:900;cursor:pointer;margin-top:8px;font-size:13px}
-.buy{background:#00c087;color:#fff}.sell{background:#ff3b30;color:#fff}
-.bal-box{background:#1a1a1a;border-radius:8px;padding:10px;margin-bottom:10px;display:flex;justify-content:space-between}
-.msg{position:fixed;top:60px;left:50%;transform:translateX(-50%);background:#ff3b30;color:#fff;padding:12px 20px;border-radius:8px;display:none;z-index:100;font-weight:bold}
+.center{flex:1;display:flex;flex-direction:column;background:#000;min-width:0}
+#chart{flex:1;width:100%;height:100%}
+.orderbook{width:280px;background:#0a0a0a;border-left:1px solid #222;display:flex;flex-direction:column;flex-shrink:0}
+.ob-head{padding:10px 12px;font-weight:800;font-size:12px;border-bottom:1px solid #222;display:flex;justify-content:space-between}
+.ob-list{height:170px;overflow:hidden;padding:6px 10px;font-family:monospace;font-size:11px;line-height:21px}
+.ob-row{display:flex;justify-content:space-between;align-items:center;height:21px;white-space:nowrap}
+.mid{height:40px;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:14px;background:#111;border-top:1px solid #222;border-bottom:1px solid #222;color:#f3ba2f}
+.right{width:300px;background:#121212;border-left:1px solid #222;padding:12px;overflow:auto}
+.inp{width:100%;background:#1e1e1e;border:1px solid #333;color:#fff;padding:10px;border-radius:6px;margin:6px 0}
+.btn{width:100%;padding:12px;border:none;border-radius:8px;font-weight:900;cursor:pointer;margin-top:8px}
+.buy{background:#0ecb81;color:#fff}.sell{background:#f6465d;color:#fff}
+.msg{position:fixed;top:60px;left:50%;transform:translateX(-50%);background:#0ecb81;color:#000;padding:12px 20px;border-radius:8px;font-weight:800;display:none;z-index:99}
 </style>
 </head>
 <body>
 <div class="msg" id="msg"></div>
-<div class="hd">
-<div style="font-weight:900"><b style="color:#ff3b30">OKX</b> PRO</div>
-<div class="ticker">
-<div><small style="color:#888">BTC/USDT</small><br><b id="price">$0.00</b> <small id="change" class="up">0.00%</small></div>
-<div><small style="color:#888">24h High</small><br><span id="high">-</span></div>
-<div><small style="color:#888">24h Low</small><br><span id="low">-</span></div>
-<div><small style="color:#888">24h Vol</small><br><span id="vol">-</span></div>
-</div>
-<div><b id="balTop" style="color:#00c087">$0.00</b></div>
+<div class="header">
+<div class="logo">OKX PRO LIVE</div>
+<div class="price" id="livePrice">$0.00</div>
+<div>Balance: <b id="bal" style="color:#0ecb81">$1000.00</b></div>
 </div>
 <div class="main">
-<div class="left-tools"><div class="active">📈</div><div>✏️</div><div>📏</div><div>🔍</div><div>⚙️</div></div>
-<div class="center">
-<div class="chart-top"><span>Time</span><span class="on" onclick="setTF('1m',this)">1M</span><span onclick="setTF('5m',this)">5M</span><span onclick="setTF('15m',this)">15M</span><span onclick="setTF('1H',this)">1H</span><span onclick="setTF('4H',this)">4H</span><span onclick="setTF('1D',this)">1D</span><span style="margin-left:auto">OKX LIVE - No Delay</span></div>
-<div id="chart"></div>
-</div>
+<div class="center"><div id="chart"></div></div>
 <div class="orderbook">
-<div class="ob-head"><span>Order Book</span><small>BTC/USDT</small></div>
-<div style="display:flex;justify-content:space-between;padding:4px 8px;color:#555;font-size:10px"><span>Price(USDT)</span><span>Amount</span><span>Total</span></div>
-<div class="ob-list" id="asks"></div>
-<div style="text-align:center;padding:6px 0;font-weight:bold;color:#00c087;border-top:1px solid #222;border-bottom:1px solid #222" id="midPrice">$0.00</div>
-<div class="ob-list" id="bids"></div>
-<div class="trade-history" id="trades"><div style="color:#666">Live Trades</div></div>
+<div class="ob-head"><span>Order Book</span><span>BTC-USDT</span></div>
+<div id="asks" class="ob-list"></div>
+<div id="midPrice" class="mid">$0.00</div>
+<div id="bids" class="ob-list"></div>
 </div>
-<div class="right-panel">
-<div class="tabs"><div class="on">Limit</div><div>Market</div><div>Stop</div></div>
-<div class="form">
-<div class="bal-box"><span>Available</span><b id="balBox">$0.00 USDT</b></div>
-<input class="inp" id="instId" value="BTC-USDT" readonly>
-<input class="inp" id="priceInp" placeholder="Price USDT">
-<input class="inp" id="amountInp" placeholder="Amount BTC" value="0.001">
-<input class="inp" id="totalInp" placeholder="Total USDT" readonly>
-<button class="btn buy" onclick="tryTrade('BUY')">Buy / Long</button>
-<button class="btn sell" onclick="tryTrade('SELL')">Sell / Short</button>
-<button class="btn" style="background:#f3ba2f;color:#000" onclick="location.href='purchase.html'">Purchase Demo Balance</button>
-<div style="margin-top:10px;font-size:11px;color:#888">Open Orders<div id="openOrders" style="margin-top:6px">No open orders - Purchase required</div></div>
-</div>
+<div class="right">
+<input class="inp" id="priceInp" readonly placeholder="Live Price">
+<input class="inp" id="amt" value="100" placeholder="Amount">
+<input class="inp" id="lev" value="10" placeholder="Leverage">
+<button class="btn buy" onclick="trade('BUY')">BUY / LONG</button>
+<button class="btn sell" onclick="trade('SELL')">SELL / SHORT</button>
+<div id="trades" style="margin-top:12px;color:#666;font-size:11px">No trades</div>
 </div>
 </div>
 <script>
-let currentPrice=0,balance=parseFloat(localStorage.getItem('demo_bal_purchased')||'0'),instId='BTC-USDT';
-let chart,candleSeries,okxWs,trades=[];
-function showMsg(txt,color='#ff3b30'){const m=document.getElementById('msg');m.innerText=txt;m.style.background=color;m.style.display='block';setTimeout(()=>m.style.display='none',3500);}
-function updateBal(){document.getElementById('balTop').innerText='$'+balance.toFixed(2);document.getElementById('balBox').innerText='$'+balance.toFixed(2)+' USDT';localStorage.setItem('demo_bal_purchased',balance.toString());}
-updateBal();
-function tryTrade(side){
- if(balance<=0){showMsg('⚠️ Please Purchase Demo First Then Start Trading');return;}
- const amt=parseFloat(document.getElementById('amountInp').value||'0');
- if(amt*currentPrice>balance){showMsg('Insufficient Balance! Please Purchase Demo');return;}
- trades.push({id:Date.now(),side,price:currentPrice,amount:amt,time:new Date().toLocaleTimeString()});
- document.getElementById('openOrders').innerHTML=trades.slice(-5).reverse().map(o=>`<div style="background:#1e1e1e;padding:6px;border-radius:6px;margin-bottom:4px"><b style="color:${o.side=='BUY'?'#00c087':'#ff3b30'}">${o.side}</b> ${o.amount} BTC @ $${o.price.toFixed(2)}<br><small>${o.time}</small></div>`).join('');
- balance-=amt*currentPrice*0.001;updateBal();showMsg(side+' Order Placed @ $'+currentPrice.toFixed(2),'#00c087');
+let price=0,chart,candleSeries,ws=null,lastCandle=null,trades=[],balance=1000;
+function showMsg(t){let m=document.getElementById('msg');m.innerText=t;m.style.display='block';setTimeout(()=>m.style.display='none',2500);}
+const el=document.getElementById('chart');
+chart=LightweightCharts.createChart(el,{layout:{background:{color:'#000'},textColor:'#888'},grid:{vertLines:{color:'#111'},horzLines:{color:'#111'}},rightPriceScale:{borderColor:'#222'},timeScale:{borderColor:'#222',timeVisible:true}});
+candleSeries=chart.addCandlestickSeries({upColor:'#0ecb81',downColor:'#f6465d',wickUpColor:'#0ecb81',wickDownColor:'#f6465d',borderVisible:false});
+new ResizeObserver(()=>chart.timeScale().fitContent()).observe(el);
+
+async function loadCandles(){
+try{
+let r=await fetch('https://www.okx.com/api/v5/market/candles?instId=BTC-USDT&bar=1m&limit=200');
+let j=await r.json();
+if(j.data){
+let data=j.data.map(x=>({time:parseInt(x[0])/1000,open:+x[1],high:+x[2],low:+x[3],close:+x[4]})).reverse();
+candleSeries.setData(data);
+lastCandle=data[data.length-1];
+chart.timeScale().fitContent();
 }
-const chartEl=document.getElementById('chart');
-chart=LightweightCharts.createChart(chartEl,{layout:{background:{color:'#000'},textColor:'#888'},grid:{vertLines:{color:'#111'},horzLines:{color:'#111'}}});
-candleSeries=chart.addCandlestickSeries({upColor:'#00c087',downColor:'#ff3b30'});
-async function loadOKXCandles(){try{const res=await fetch(`https://www.okx.com/api/v5/market/candles?instId=${instId}&bar=1m&limit=200`);const json=await res.json();if(json.data){const candles=json.data.map(d=>({time:parseInt(d[0])/1000,open:+d[1],high:+d[2],low:+d[3],close:+d[4]})).reverse();candleSeries.setData(candles);}}catch(e){}}
-loadOKXCandles();
-function connectOKX(){
- okxWs=new WebSocket('wss://ws.okx.com:8443/ws/v5/public');
- okxWs.onopen=()=>{okxWs.send(JSON.stringify({op:'subscribe',args:[{channel:'tickers',instId:instId},{channel:'books',instId:instId},{channel:'trades',instId:instId},{channel:'candle1m',instId:instId}]}));};
- okxWs.onmessage=(e)=>{
-  const data=JSON.parse(e.data);if(!data.data)return;const d=data.data[0];
-  if(data.arg.channel==='tickers'){currentPrice=parseFloat(d.last);document.getElementById('price').innerText='$'+currentPrice.toLocaleString();document.getElementById('midPrice').innerText='$'+currentPrice.toLocaleString();document.getElementById('priceInp').value=currentPrice.toFixed(2);document.getElementById('high').innerText='$'+parseFloat(d.high24h).toLocaleString();document.getElementById('low').innerText='$'+parseFloat(d.low24h).toLocaleString();document.getElementById('vol').innerText=parseFloat(d.vol24h).toFixed(2)+' BTC';}
-  if(data.arg.channel==='books'){const asks=d.asks.slice(0,8).reverse();const bids=d.bids.slice(0,8);document.getElementById('asks').innerHTML=asks.map(a=>`<div style="display:flex;justify-content:space-between;color:#ff3b30"><span>${parseFloat(a[0]).toFixed(2)}</span><span style="color:#aaa">${parseFloat(a[1]).toFixed(4)}</span><span style="color:#555">${(parseFloat(a[0])*parseFloat(a[1])).toFixed(2)}</span></div>`).join('');document.getElementById('bids').innerHTML=bids.map(b=>`<div style="display:flex;justify-content:space-between;color:#00c087"><span>${parseFloat(b[0]).toFixed(2)}</span><span style="color:#aaa">${parseFloat(b[1]).toFixed(4)}</span><span style="color:#555">${(parseFloat(b[0])*parseFloat(b[1])).toFixed(2)}</span></div>`).join('');}
-  if(data.arg.channel==='trades'){const tr=d;const div=document.createElement('div');div.innerHTML=`<div style="display:flex;justify-content:space-between"><span style="color:${tr.side==='buy'?'#00c087':'#ff3b30'}">${tr.side.toUpperCase()}</span><span style="color:#fff">${parseFloat(tr.px).toFixed(2)}</span><span>${parseFloat(tr.sz).toFixed(4)}</span></div>`;const cont=document.getElementById('trades');cont.prepend(div);if(cont.children.length>20)cont.removeChild(cont.lastChild);}
-  if(data.arg.channel==='candle1m'){const k=d;candleSeries.update({time:parseInt(k[0])/1000,open:+k[1],high:+k[2],low:+k[3],close:+k[4]});}
- };
- okxWs.onclose=()=>setTimeout(connectOKX,2000);
+}catch(e){console.log(e)}
 }
-connectOKX();
-document.getElementById('amountInp').addEventListener('input',()=>{const amt=parseFloat(document.getElementById('amountInp').value||'0');document.getElementById('totalInp').value=(amt*currentPrice).toFixed(2)+' USDT';});
+function connect(){
+if(ws)ws.close();
+ws=new WebSocket('wss://ws.okx.com:8443/ws/v5/public');
+ws.onopen=()=>{
+ws.send(JSON.stringify({op:'subscribe',args:[{channel:'tickers',instId:'BTC-USDT'},{channel:'books',instId:'BTC-USDT',sz:'15'},{channel:'candle1m',instId:'BTC-USDT'}]}));
+};
+ws.onmessage=(e)=>{
+let msg=JSON.parse(e.data);
+if(!msg.data||!msg.arg)return;
+let d=msg.data[0];
+if(msg.arg.channel==='tickers'){
+price=parseFloat(d.last);
+document.getElementById('livePrice').innerText='$'+price.toFixed(2);
+document.getElementById('midPrice').innerText='$'+price.toFixed(2);
+document.getElementById('priceInp').value=price.toFixed(2);
+}
+if(msg.arg.channel==='books'){
+let asks='',bids='';
+(d.asks||[]).slice(0,8).reverse().forEach(a=>{asks+=`<div class="ob-row"><span style="color:#f6465d">${parseFloat(a[0]).toFixed(2)}</span><span>${parseFloat(a[1]).toFixed(4)}</span></div>`;});
+(d.bids||[]).slice(0,8).forEach(b=>{bids+=`<div class="ob-row"><span style="color:#0ecb81">${parseFloat(b[0]).toFixed(2)}</span><span>${parseFloat(b[1]).toFixed(4)}</span></div>`;});
+document.getElementById('asks').innerHTML=asks;
+document.getElementById('bids').innerHTML=bids;
+}
+if(msg.arg.channel==='candle1m'){
+let c={time:parseInt(d[0])/1000,open:+d[1],high:+d[2],low:+d[3],close:+d[4]};
+candleSeries.update(c);
+lastCandle=c;
+}
+};
+ws.onerror=()=>setTimeout(connect,2000);
+}
+function trade(side){
+let amt=parseFloat(document.getElementById('amt').value);
+trades.push({side,price,amt,time:new Date().toLocaleTimeString()});
+document.getElementById('trades').innerHTML=trades.slice().reverse().map(t=>`<div style="background:#1a1a1a;padding:8px;margin-top:6px;border-radius:6px"><b style="color:${t.side==='BUY'?'#0ecb81':'#f6465d'}">${t.side}</b> $${t.amt} @ $${t.price.toFixed(2)}<br><small>${t.time}</small></div>`).join('');
+showMsg(side+' Order Placed @ $'+price.toFixed(2));
+}
+loadCandles();
+connect();
+// Make last candle move live every second
+setInterval(()=>{if(lastCandle&&price){let c={...lastCandle,close:price,high:Math.max(lastCandle.high,price),low:Math.min(lastCandle.low,price)};candleSeries.update(c);}},900);
 </script>
 </body>
 </html>
