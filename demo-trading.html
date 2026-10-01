@@ -13,8 +13,10 @@ body{display:flex;flex-direction:column}
 .tools span{color:#fff;padding:6px;cursor:pointer;border-radius:5px}.tools span.on{background:#ffbf00;color:#000}
 .chartWrap{flex:1;display:flex;background:#0d1421;border-radius:8px;overflow:hidden;border:1px solid #1e2329}
 .chartBox{flex:1;position:relative}#ch{width:100%;height:100%;display:block;cursor:crosshair}
-.priceCol{width:92px;background:#0d1421;border-left:2px solid #ffbf00;display:flex;flex-direction:column;justify-content:center;padding:4px;flex-shrink:0}
-.pFixed{font-size:11px;padding:4px 2px;border-bottom:1px solid #1e2a4a;text-align:right;white-space:nowrap}
+.priceCol{width:98px;background:#0d1421;border-left:2px solid #ffbf00;display:flex;flex-direction:column;flex-shrink:0}
+.priceHead{color:#ffbf00;text-align:center;font-weight:bold;font-size:12px;padding:8px 2px;border-bottom:2px solid #ffbf00;background:#12161c}
+.priceBody{flex:1;display:flex;flex-direction:column;justify-content:space-evenly;padding:6px 4px}
+.pFixed{font-size:11px;padding:10px 2px;text-align:right;white-space:nowrap;border-bottom:1px dashed #2a3a5a;margin:2px 0}
 .right{width:290px;background:#12161c;border-radius:8px;display:flex;flex-direction:column;border:1px solid #1e2329;flex-shrink:0}
 .obH{padding:7px;color:#ffbf00;font-weight:bold;border-bottom:2px solid #ffbf00;font-size:13px;text-align:center;background:#0f1420}
 #ob{flex:1;overflow:hidden;padding:3px}.obRow{display:flex;justify-content:space-between;padding:2px 4px;font-size:11px}
@@ -33,7 +35,9 @@ body{display:flex;flex-direction:column}
 <div style="display:flex;flex-direction:column;flex:1;min-height:0">
 <div class="main">
 <div class="tools" id="toolBar"><span data-t="cross" class="on">✛</span><span data-t="trend">📈</span><span data-t="hline">➖</span><span data-t="box">▭</span><span data-t="pen">✎</span><span data-t="text">T</span><span id="delTool">🗑</span></div>
-<div class="chartWrap"><div class="chartBox"><canvas id="ch"></canvas></div><div class="priceCol" id="pcol"></div></div>
+<div class="chartWrap"><div class="chartBox"><canvas id="ch"></canvas></div>
+<div class="priceCol"><div class="priceHead">Price</div><div class="priceBody" id="pcol"></div></div>
+</div>
 <div class="right"><div class="obH">Order Book Live</div><div id="ob"></div>
 <div class="ctrl"><div style="color:#f6465d;font-size:11px;text-align:center">Balance $0 - Trade locked</div>
 <button class="btn" style="background:#2a5bd7;color:#fff">Normal</button>
@@ -67,23 +71,21 @@ document.getElementById('delTool').onclick=()=>{drawings=[];hlines=[];};
 var price=6429.41,target=price,candles=[];
 for(var i=0;i<65;i++){var o=price;price+=(Math.random()-0.5)*4;var c=price;candles.push({o:o,h:Math.max(o,c)+1.2,l:Math.min(o,c)-1.2,c:c});}
 price=6429.41;target=price;
-var staticPrice=6420.00;
-var cv=document.getElementById('ch'),ctx=cv.getContext('2d');
-var pcol=document.getElementById('pcol'),ob=document.getElementById('ob');
 
-// FIXED price labels - ek jagah fix, move nahi karenge
-var fixedPrices=[6445.00,6440.00,6435.00,6430.00,6425.00,6420.00,6415.00,6410.00,6405.00,6400.00];
+// Fixed lines - yahan se le kar wahan tak, space ke sath
+var fixedPrices=[6465.00,6450.00,6435.00,6420.00,6405.00,6390.00];
 function renderFixedPrices(){
  var h='';
  fixedPrices.forEach(p=>{
-  var col=p>staticPrice?'#ff4d6d':'#00e5c0';
-  if(Math.abs(p-staticPrice)<0.01) col='#ffbf00';
+  var col=p>6420?'#ff4d6d':'#00e5c0';
   h+='<div class="pFixed" style="color:'+col+'">'+p.toFixed(2)+'</div>';
  });
- pcol.innerHTML=h;
+ document.getElementById('pcol').innerHTML=h;
 }
 renderFixedPrices();
 
+var cv=document.getElementById('ch'),ctx=cv.getContext('2d');
+var ob=document.getElementById('ob');
 function getPos(e){var r=cv.getBoundingClientRect();return{x:e.clientX-r.left,y:e.clientY-r.top};}
 var Mn=0,Rg=1;function yToPrice(y){return Mn+((cv.height-10-y)/(cv.height-20))*Rg;}
 cv.addEventListener('mousedown',e=>{isDown=true;startPt=getPos(e);if(tool=='hline'){hlines.push(yToPrice(startPt.y));}if(tool=='text'){var t=prompt('Text:');if(t)drawings.push({t:'text',x:startPt.x,y:startPt.y,txt:t});}});
@@ -94,34 +96,25 @@ function draw(){
  var rc=cv.parentElement.getBoundingClientRect();if(rc.width>10){cv.width=rc.width;cv.height=rc.height;}
  price+=(target-price)*0.12;
  var lc=candles[candles.length-1];lc.c=price;lc.h=Math.max(lc.h,price);lc.l=Math.min(lc.l,price);
- var all=[];candles.forEach(k=>{all.push(k.h);all.push(k.l)});all.push(staticPrice);
+ var all=[];candles.forEach(k=>{all.push(k.h);all.push(k.l)});fixedPrices.forEach(p=>all.push(p));
  var mn=Math.min.apply(null,all),mx=Math.max.apply(null,all);var pad=(mx-mn)*0.35||5;mn-=pad;mx+=pad;var rg=mx-mn;Mn=mn;Rg=rg;
  var Y=v=>cv.height-10-((v-mn)/rg)*(cv.height-20);
  ctx.fillStyle='#0a0f24';ctx.fillRect(0,0,cv.width,cv.height);
- 
- // FIXED horizontal lines - seedhi, ek jagah fix
- var fixedLines=[6442.00,6420.00,6395.00];
- fixedLines.forEach(p=>{
+ // Fixed lines - yahan se wahan tak mukammal, space ke sath
+ fixedPrices.forEach(p=>{
   var yy=Math.round(Y(p))+0.5;
   ctx.strokeStyle='#6b7a99';ctx.setLineDash([7,6]);ctx.lineWidth=1;
   ctx.beginPath();ctx.moveTo(0,yy);ctx.lineTo(cv.width,yy);ctx.stroke();ctx.setLineDash([]);
-  ctx.fillStyle='#8a9bb5';ctx.font='11px Arial';ctx.fillText(p.toFixed(2)+' FIX',10,yy-6);
+  ctx.fillStyle='#8a9bb5';ctx.font='11px Arial';ctx.fillText(p.toFixed(2),10,yy-6);
  });
- 
  ctx.strokeStyle='#ffbf00';ctx.fillStyle='#ffbf00';
  drawings.forEach(d=>{if(d.t=='trend'){ctx.beginPath();ctx.moveTo(d.x1,d.y1);ctx.lineTo(d.x2,d.y2);ctx.stroke();}if(d.t=='box'){ctx.strokeRect(d.x1,d.y1,d.x2-d.x1,d.y2-d.y1);}if(d.t=='text'){ctx.fillText(d.txt,d.x,d.y);}});
- hlines.forEach(p=>{var yy=Y(p);ctx.strokeStyle='#aaa';ctx.setLineDash([5,4]);ctx.beginPath();ctx.moveTo(0,yy);ctx.lineTo(cv.width,yy);ctx.stroke();ctx.setLineDash([]);});
-
  var cw=cv.width/34;var vis=candles.slice(-32);
  vis.forEach((k,i)=>{var x=i*cw;var up=k.c>=k.o;var col=up?'#00e5c0':'#ff4d6d';ctx.strokeStyle=col;ctx.fillStyle=col;var cx=x+cw/2;ctx.lineWidth=1.2;ctx.beginPath();ctx.moveTo(cx,Y(k.h));ctx.lineTo(cx,Y(k.l));ctx.stroke();var yO=Y(k.o),yC=Y(k.c);ctx.fillRect(cx-4,Math.min(yO,yC),8,Math.max(Math.abs(yC-yO),4));});
-
- // MOVE line - sirf ye move karegi puri body me
  var yl=Y(price);
  ctx.strokeStyle='#ffbf00';ctx.setLineDash([7,5]);ctx.lineWidth=1.3;ctx.beginPath();ctx.moveTo(0,yl);ctx.lineTo(cv.width,yl);ctx.stroke();ctx.setLineDash([]);
  ctx.fillStyle='#ffbf00';ctx.fillRect(cv.width-70,yl-11,70,22);ctx.fillStyle='#000';ctx.font='bold 11px Arial';ctx.fillText(price.toFixed(2),cv.width-66,yl+4);
-
  if(tool=='cross'&&mousePt){ctx.strokeStyle='#5a6a85';ctx.beginPath();ctx.moveTo(mousePt.x,0);ctx.lineTo(mousePt.x,cv.height);ctx.moveTo(0,mousePt.y);ctx.lineTo(cv.width,mousePt.y);ctx.stroke();}
-
  var oh='';for(var i=5;i>0;i--)oh+='<div class="obRow"><span style="color:#ff4d6d">'+(price+i*1.2).toFixed(2)+'</span><span>0.'+(100+i*7)+'</span></div>';
  for(var i=1;i<=5;i++)oh+='<div class="obRow"><span style="color:#00e5c0">'+(price-i*1.2).toFixed(2)+'</span><span>0.'+(100+i*5)+'</span></div>';
  ob.innerHTML=oh;
