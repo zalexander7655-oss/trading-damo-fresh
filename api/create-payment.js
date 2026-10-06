@@ -1,12 +1,16 @@
-// NOWPayments - Unlimited Mails Auto Approve - Final
+// FINAL - Unlimited Auto Approval System
 export default async function handler(req, res) {
-  if (req.method !== 'POST') {
+  if (req.method!== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
   const { email, price_amount, demo_amount } = req.body;
-  if (!email) return res.status(400).json({ error: 'Email zaroori hai' });
 
+  if (!email) {
+    return res.status(400).json({ error: 'Email is required' });
+  }
+
+  // This creates unlimited unique Order ID with customer email inside
   const orderId = `DEMO_${email}_${Date.now()}_${demo_amount || 2000}`;
 
   try {
@@ -28,8 +32,8 @@ export default async function handler(req, res) {
 
     const data = await response.json();
     return res.status(200).json(data);
-    
-  } catch (e) {
-    return res.status(500).json({ error: e.message });
+
+  } catch (err) {
+    return res.status(500).json({ error: err.message });
   }
 }
