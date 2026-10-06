@@ -1,19 +1,24 @@
-// FINAL - Unlimited Auto Approval System
+// FINAL CODE - Unlimited Auto Approval - Any Demo Amount
 export default async function handler(req, res) {
-  if (req.method!== 'POST') {
+  if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
-  const { email, price_amount, demo_amount } = req.body;
-
-  if (!email) {
-    return res.status(400).json({ error: 'Email is required' });
-  }
-
-  // This creates unlimited unique Order ID with customer email inside
-  const orderId = `DEMO_${email}_${Date.now()}_${demo_amount || 2000}`;
-
   try {
+    const { email, price_amount, demo_amount } = req.body;
+
+    if (!email) {
+      return res.status(400).json({ error: 'Email is required' });
+    }
+
+    if (!demo_amount) {
+      return res.status(400).json({ error: 'demo_amount is required' });
+    }
+
+    // This creates Unlimited Unique Order ID with Email + Demo Amount
+    // Example: DEMO_test@gmail.com_1700000000000_5000
+    const orderId = `DEMO_${email}_${Date.now()}_${demo_amount}`;
+
     const response = await fetch('https://api.nowpayments.io/v1/invoice', {
       method: 'POST',
       headers: {
@@ -25,15 +30,21 @@ export default async function handler(req, res) {
         price_currency: 'usd',
         pay_currency: 'usdttrc20',
         order_id: orderId,
-        order_description: `Demo for ${email}`,
+        order_description: `Demo ${demo_amount} for ${email}`,
         ipn_callback_url: 'https://trading-damo-fresh.vercel.app/api/nowpayments-ipn'
       })
     });
 
     const data = await response.json();
+
+    if (!response.ok) {
+      return res.status(400).json({ error: data.message || 'Failed to create invoice', details: data });
+    }
+
     return res.status(200).json(data);
 
-  } catch (err) {
-    return res.status(500).json({ error: err.message });
+  } catch (error) {
+    console.error('Create Payment Error:', error);
+    return res.status(500).json({ error: 'Internal server error', details: error.message });
   }
 }
