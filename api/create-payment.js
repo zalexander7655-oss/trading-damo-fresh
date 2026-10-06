@@ -1,4 +1,4 @@
-// FINAL CODE - Unlimited Auto Approval - Any Demo Amount
+// FINAL CODE - Unlimited Auto Approval - Any Demo Amount - Fixed Version
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
@@ -15,9 +15,8 @@ export default async function handler(req, res) {
       return res.status(400).json({ error: 'demo_amount is required' });
     }
 
-    // This creates Unlimited Unique Order ID with Email + Demo Amount
-    // Example: DEMO_test@gmail.com_1700000000000_5000
-    const orderId = `DEMO_${email}_${Date.now()}_${demo_amount}`;
+    // Fixed: Using + instead of ${} to avoid single quote bug
+    const orderId = 'DEMO_' + email + '_' + Date.now() + '_' + demo_amount;
 
     const response = await fetch('https://api.nowpayments.io/v1/invoice', {
       method: 'POST',
@@ -30,7 +29,7 @@ export default async function handler(req, res) {
         price_currency: 'usd',
         pay_currency: 'usdttrc20',
         order_id: orderId,
-        order_description: `Demo ${demo_amount} for ${email}`,
+        order_description: 'Demo ' + demo_amount + ' for ' + email,
         ipn_callback_url: 'https://trading-damo-fresh.vercel.app/api/nowpayments-ipn'
       })
     });
