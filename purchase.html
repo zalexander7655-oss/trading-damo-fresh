@@ -2,73 +2,88 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Purchase Demo</title>
+<title>Purchase Demo - Trading Master Pro</title>
 <style>
-*{box-sizing:border-box}body{margin:0;background:#000;color:#fff;font-family:Inter,Arial;padding:15px}
-.header{max-width:900px;margin:auto;display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid #222}
-.grid{max-width:900px;margin:30px auto;display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:15px}
-.card{background:#121212;border:1px solid #222;border-radius:12px;padding:20px;text-align:center}
-.btn{width:100%;padding:12px;background:#f3ba2f;color:#000;border:none;border-radius:8px;font-weight:900;cursor:pointer;margin-top:10px}
-.modal{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.9);display:none;align-items:center;justify-content:center;z-index:999}
-.modal-box{background:#121212;border:1px solid #333;padding:20px;border-radius:12px;max-width:400px;width:90%}
-.inp{width:100%;padding:10px;background:#1e1e1e;border:1px solid #333;color:#fff;border-radius:8px;margin:6px 0}
+*{box-sizing:border-box}body{margin:0;background:#0f172a;color:#fff;font-family:Inter,Arial;padding:20px}
+.header{max-width:1000px;margin:auto;display:flex;justify-content:space-between;align-items:center;padding:12px 0;border-bottom:1px solid #1e293b}
+.grid{max-width:1000px;margin:30px auto;display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:16px}
+.card{background:#1e293b;border:1px solid #334155;border-radius:14px;padding:20px;text-align:center}
+.price{font-size:24px;font-weight:900}.bonus{color:#22c55e;font-weight:800;font-size:18px;margin:8px 0}
+.btn{width:100%;padding:12px;background:#f59e0b;color:#000;border:none;border-radius:10px;font-weight:900;cursor:pointer;margin-top:12px}
+.btn:hover{background:#fbbf24}
+.loader{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.85);justify-content:center;align-items:center;z-index:9999;flex-direction:column}
 </style>
 </head>
 <body>
-<div class="header"><b style="color:#f3ba2f">TRADING MASTER PRO</b><button onclick="location.href='main.html'" style="background:#1e1e1e;color:#fff;border:1px solid #333;padding:6px 12px;border-radius:6px">Back</button></div>
-<h2 style="text-align:center">Demo Package خریدیں</h2>
+<div class="header">
+<b style="color:#f59e0b">TRADING MASTER PRO</b>
+<div><span id="bal">Balance: $0</span> <button onclick="location.href='main.html'" style="margin-left:10px;background:#1e293b;color:#fff;border:1px solid #334155;padding:6px 14px;border-radius:6px;cursor:pointer">Back to Trading</button></div>
+</div>
+
+<h2 style="text-align:center;margin-top:20px">Purchase Demo Balance</h2>
+<p style="text-align:center;color:#94a3b8;font-size:13px">Pay with Binance / Crypto via NOWPayments - Real payment will come to you</p>
+
 <div class="grid" id="grid"></div>
 
-<div class="modal" id="payModal">
-<div class="modal-box">
-<h3 id="mTitle"></h3>
-<p style="font-size:12px;color:#aaa">Binance / NOWPayments پر یہ رقم بھیجیں:<br><b id="payAddr" style="color:#f3ba2f">آپ کا Binance Wallet</b></p>
-<input class="inp" id="txId" placeholder="Transaction ID / TxID ڈالیں">
-<input class="inp" type="file" id="screenShot" accept="image/*">
-<p style="font-size:11px;color:#888">Screenshot لازمی لگائیں تاکہ میں approval دے سکوں</p>
-<button class="btn" onclick="submitForApproval()">Approval کے لیے بھیجیں</button>
-<button class="btn" style="background:#222;color:#fff" onclick="document.getElementById('payModal').style.display='none'">Cancel</button>
-</div>
+<div id="loader" class="loader">
+<h3 style="color:#f59e0b">Creating Binance Payment...</h3>
+<p style="color:#94a3b8">Please wait, redirecting to Binance Pay</p>
 </div>
 
 <script>
 const packages = [
-{real:1, demo:20},{real:10, demo:2000},{real:25, demo:10000},
-{real:50, demo:40000},{real:70, demo:60000},{real:100, demo:100000}
+  { id: 1, real: 1, demo: 20 },
+  { id: 2, real: 10, demo: 2000 },
+  { id: 3, real: 25, demo: 10000 },
+  { id: 4, real: 50, demo: 40000 },
+  { id: 5, real: 70, demo: 60000 },
+  { id: 6, real: 100, demo: 100000 }
 ];
-let selected=null;
-document.getElementById('grid').innerHTML = packages.map((p,i)=>`
-<div class="card">
-<h3>$${p.real} والا پیکج</h3>
-<div style="color:#0ecb81;font-weight:900;font-size:20px">$${p.demo} Demo ملے گا</div>
-<button class="btn" onclick="openModal(${i})">Binance سے خریدیں</button>
-</div>`).join('');
 
-function openModal(i){
-selected=packages[i];
-document.getElementById('mTitle').innerText=`$${selected.real} بھیجیں اور $${selected.demo} Demo لیں`;
-document.getElementById('payModal').style.display='flex';
-}
+document.getElementById('bal').innerText = "Balance: $" + (localStorage.getItem('demo_bal_purchased') || '1000');
+document.getElementById('grid').innerHTML = packages.map(p => `
+  <div class="card">
+    <h3 style="color:#f59e0b">PACKAGE $${p.real}</h3>
+    <div class="price">Pay $${p.real} Real</div>
+    <div class="bonus">Get $${p.demo.toLocaleString()} Demo</div>
+    <div style="font-size:11px;color:#94a3b8;margin-top:6px">Practice trading without loss</div>
+    <button class="btn" onclick="buyNow(${p.real}, ${p.demo})">Buy with Binance</button>
+  </div>
+`).join('');
 
-function submitForApproval(){
-let tx=document.getElementById('txId').value.trim();
-let file=document.getElementById('screenShot').files[0];
-if(tx.length<5 || !file){alert('TxID اور Screenshot دونوں لازمی ہیں');return;}
+async function buyNow(realUSD, demoAmount) {
+  document.getElementById('loader').style.display = 'flex';
+  
+  // Save pending package for after payment success
+  localStorage.setItem('pending_demo', demoAmount);
+  localStorage.setItem('pending_real', realUSD);
 
-let reader=new FileReader();
-reader.onload=function(e){
-let payments=JSON.parse(localStorage.getItem('all_payments')||'[]');
-payments.push({
-id:Date.now(), real:selected.real, demo:selected.demo,
-tx:tx, screenshot:e.target.result, status:'pending',
-time:new Date().toLocaleString()
-});
-localStorage.setItem('all_payments',JSON.stringify(payments));
-alert('آپ کی payment approval کے لیے بھیج دی گئی ہے۔ میں check کر کے approve کروں گا تو آپ کا demo balance add ہو جائے گا۔');
-document.getElementById('payModal').style.display='none';
-location.href='main.html';
-};
-reader.readAsDataURL(file);
+  try {
+    // Call your Vercel API to create payment securely
+    const response = await fetch('/api/create-payment', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ price_amount: realUSD, demo_amount: demoAmount })
+    });
+
+    const data = await response.json();
+    
+    if (data.invoice_url) {
+      // DIRECT REDIRECT TO BINANCE / NOWPAYMENTS
+      window.location.href = data.invoice_url;
+    } else if (data.pay_address) {
+      // If you use direct payment, show address
+      alert("Pay to: " + data.pay_address + " Amount: " + data.pay_amount);
+      window.location.href = data.invoice_url || 'main.html';
+    } else {
+      alert("Error: " + JSON.stringify(data));
+      document.getElementById('loader').style.display = 'none';
+    }
+  } catch (err) {
+    // Fallback if API not set - redirect to NOWPayments hosted page
+    alert("API not connected. Please setup /api/create-payment.js with your NOWPayments API Key");
+    document.getElementById('loader').style.display = 'none';
+  }
 }
 </script>
 </body>
