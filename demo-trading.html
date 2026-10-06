@@ -2,12 +2,12 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Trading Master Pro - AUTO SYSTEM FINAL</title>
+<title>Trading Master Pro - BINANCE ONLY</title>
 <script src="https://unpkg.com/lightweight-charts@4.1.3/dist/lightweight-charts.standalone.production.js"></script>
 <style>
 *{box-sizing:border-box}body{margin:0;background:#000;color:#fff;font-family:Inter,Arial;height:100vh;display:flex;flex-direction:column;overflow:hidden}
 .header{height:54px;background:#0f0f0f;border-bottom:1px solid #222;display:flex;align-items:center;justify-content:space-between;padding:0 14px}
-select.exch{background:#1e2329;color:#f3ba2f;border:1px solid #f3ba2f;border-radius:6px;padding:7px 12px;font-weight:800;cursor:pointer}
+.exch-label{background:#1e2329;color:#f3ba2f;border:1px solid #f3ba2f;border-radius:6px;padding:7px 12px;font-weight:800}
 .main{flex:1;display:flex;min-height:0}.center{flex:1;display:flex;flex-direction:column;min-width:0;background:#000}#chart{flex:1;width:100%}
 .orderbook{width:260px;background:#0a0a0a;border-left:1px solid #222;display:flex;flex-direction:column}
 .ob-list{height:168px;overflow:hidden;padding:6px 8px;font-family:monospace;font-size:11px;line-height:20px}
@@ -24,8 +24,8 @@ select.exch{background:#1e2329;color:#f3ba2f;border:1px solid #f3ba2f;border-rad
 <body>
 <div class="msg" id="topMsg"></div>
 <div class="header">
-<div style="font-weight:900;color:#f3ba2f">TRADING MASTER PRO <span style="background:#0ecb81;color:#000;padding:2px 6px;border-radius:4px;font-size:9px;margin-left:8px">AUTO</span></div>
-<div style="display:flex;gap:12px;align-items:center"><select id="exchangeSel" class="exch" onchange="saveAndSwitch()"><option value="OKX">OKX - Live</option><option value="BINANCE">BINANCE - Live</option></select><span id="livePrice" style="color:#f3ba2f;font-weight:900">$0.00</span></div>
+<div style="font-weight:900;color:#f3ba2f">TRADING MASTER PRO <span style="background:#0ecb81;color:#000;padding:2px 6px;border-radius:4px;font-size:9px;margin-left:8px">BINANCE</span></div>
+<div style="display:flex;gap:12px;align-items:center"><div class="exch-label">BINANCE - Live</div><span id="livePrice" style="color:#f3ba2f;font-weight:900">$0.00</span></div>
 <div>Balance: <b id="balTop">$0.00</b></div>
 </div>
 <div class="main">
@@ -34,8 +34,8 @@ select.exch{background:#1e2329;color:#f3ba2f;border:1px solid #f3ba2f;border-rad
 <div class="right"><div style="padding:12px"><div style="background:#1a1a1a;padding:10px;border-radius:8px;display:flex;justify-content:space-between"><span>Available</span><b id="balBox">$0.00</b></div><input class="inp" id="priceInp" readonly><div style="display:flex;gap:6px"><input class="inp" id="amountInp" value="100"><input class="inp" id="levInp" value="10"></div><div style="display:flex;gap:6px"><input class="inp" id="slInp" value="5" placeholder="SL %"><input class="inp" id="tpInp" value="10" placeholder="TP %"></div><button class="btn buy" onclick="tryTrade('BUY')">BUY / LONG</button><button class="btn sell" onclick="tryTrade('SELL')">SELL / SHORT</button><button class="btn purchase" onclick="location.href='purchase.html'">💳 Purchase Demo</button><div id="posList"></div></div></div>
 </div>
 <script>
-let balance=parseFloat(localStorage.getItem('demo_bal_purchased')||'1000');let savedExchange=localStorage.getItem('selected_exchange')||'OKX';document.getElementById('exchangeSel').value=savedExchange;
-let currentPrice=0,chart,candleSeries,binanceWs=null,okxWs=null,trades=JSON.parse(localStorage.getItem('open_trades')||'[]'),lastCandle=null;
+let balance=parseFloat(localStorage.getItem('demo_bal_purchased')||'1000');
+let currentPrice=0,chart,candleSeries,binanceWs=null,trades=JSON.parse(localStorage.getItem('open_trades')||'[]'),lastCandle=null;
 function showMsg(t,c='#f6465d'){let m=document.getElementById('topMsg');m.innerText=t;m.style.background=c;m.style.display='block';setTimeout(()=>m.style.display='none',4000);}
 function updateBal(){document.getElementById('balTop').innerText='$'+balance.toFixed(2);document.getElementById('balBox').innerText='$'+balance.toFixed(2);localStorage.setItem('demo_bal_purchased',balance.toFixed(2));localStorage.setItem('open_trades',JSON.stringify(trades));}
 function calcPnl(t){if(!currentPrice)return 0;let ch=t.side==='BUY'?(currentPrice-t.price)/t.price:(t.price-currentPrice)/t.price;return ch*t.amount*t.lev;}
@@ -45,12 +45,9 @@ function tryTrade(side){if(balance<=0){showMsg('Please Purchase Demo First');ret
 function closeTrade(id,isAuto=false,reason=''){let i=trades.findIndex(t=>t.id===id);if(i===-1)return;let t=trades[i];let pnl=calcPnl(t);balance+=t.amount+pnl;if(balance<0)balance=0;trades.splice(i,1);updateBal();renderTrades();showMsg((isAuto?'🤖 AUTO CLOSED - '+reason+' | ':'')+'PnL: '+(pnl>=0?'+':'')+'$'+pnl.toFixed(2),pnl>=0?'#0ecb81':'#f6465d');}
 setInterval(()=>{if(!currentPrice||!trades.length)return;let sl=parseFloat(document.getElementById('slInp').value||5);let tp=parseFloat(document.getElementById('tpInp').value||10);trades.slice().forEach(t=>{let per=calcPnlPercent(t);let pnl=calcPnl(t);if(per<=-sl){closeTrade(t.id,true,'Stop Loss '+per.toFixed(2)+'%');return;}if(per>=tp){closeTrade(t.id,true,'Take Profit +'+per.toFixed(2)+'%');return;}if(pnl<=-(t.amount*0.9)){closeTrade(t.id,true,'LIQUIDATED -90%');return;}});renderTrades();},1000);
 const chartEl=document.getElementById('chart');chart=LightweightCharts.createChart(chartEl,{layout:{background:{color:'#000'},textColor:'#888'},grid:{vertLines:{color:'#111'},horzLines:{color:'#111'}}});candleSeries=chart.addCandlestickSeries({upColor:'#0ecb81',downColor:'#f6465d',wickUpColor:'#0ecb81',wickDownColor:'#f6465d',borderVisible:false});
-async function loadOKX(){try{let r=await fetch('https://www.okx.com/api/v5/market/candles?instId=BTC-USDT&bar=1m&limit=200');let j=await r.json();if(j.data){let d=j.data.map(x=>({time:parseInt(x[0])/1000,open:+x[1],high:+x[2],low:+x[3],close:+x[4]})).reverse();candleSeries.setData(d);lastCandle=d[d.length-1];chart.timeScale().fitContent();}}catch(e){}}
 async function loadBinance(){try{let r=await fetch('https://api.binance.com/api/v3/klines?symbol=BTCUSDT&interval=1m&limit=200');let d=await r.json();let data=d.map(x=>({time:x[0]/1000,open:+x[1],high:+x[2],low:+x[3],close:+x[4]}));candleSeries.setData(data);lastCandle=data[data.length-1];chart.timeScale().fitContent();}catch(e){}}
-function connectOKX(){if(binanceWs){binanceWs.close();binanceWs=null;}if(okxWs)okxWs.close();okxWs=new WebSocket('wss://ws.okx.com:8443/ws/v5/public');okxWs.onopen=()=>{okxWs.send(JSON.stringify({op:'subscribe',args:[{channel:'tickers',instId:'BTC-USDT'},{channel:'books',instId:'BTC-USDT',sz:'15'},{channel:'candle1m',instId:'BTC-USDT'}]}));};okxWs.onmessage=(e)=>{let msg=JSON.parse(e.data);if(!msg.data||!msg.arg)return;let d=msg.data[0];if(msg.arg.channel==='tickers'){currentPrice=parseFloat(d.last);document.getElementById('livePrice').innerText='$'+currentPrice.toFixed(2);document.getElementById('midPrice').innerText='$'+currentPrice.toFixed(2);document.getElementById('priceInp').value=currentPrice.toFixed(2);}if(msg.arg.channel==='books'){let asks='',bids='';(d.asks||[]).slice(0,8).reverse().forEach(a=>{asks+=`<div class="ob-row"><span style="color:#f6465d">${parseFloat(a[0]).toFixed(2)}</span><span>${parseFloat(a[1]).toFixed(4)}</span></div>`;});(d.bids||[]).slice(0,8).forEach(b=>{bids+=`<div class="ob-row"><span style="color:#0ecb81">${parseFloat(b[0]).toFixed(2)}</span><span>${parseFloat(b[1]).toFixed(4)}</span></div>`;});document.getElementById('asks').innerHTML=asks;document.getElementById('bids').innerHTML=bids;}if(msg.arg.channel==='candle1m'){let c={time:parseInt(d[0])/1000,open:+d[1],high:+d[2],low:+d[3],close:+d[4]};candleSeries.update(c);lastCandle=c;}};}
-function connectBinance(){if(okxWs){okxWs.close();okxWs=null;}if(binanceWs)binanceWs.close();binanceWs=new WebSocket('wss://stream.binance.com:9443/ws/btcusdt@trade/btcusdt@kline_1m');binanceWs.onmessage=(e)=>{let m=JSON.parse(e.data);if(m.e==='trade'){currentPrice=parseFloat(m.p);document.getElementById('livePrice').innerText='$'+currentPrice.toFixed(2);document.getElementById('midPrice').innerText='$'+currentPrice.toFixed(2);document.getElementById('priceInp').value=currentPrice.toFixed(2);}if(m.e==='kline'){let k=m.k;let c={time:k.t/1000,open:+k.o,high:+k.h,low:+k.l,close:+k.c};candleSeries.update(c);lastCandle=c;}};}
-function saveAndSwitch(){let ex=document.getElementById('exchangeSel').value;localStorage.setItem('selected_exchange',ex);if(ex==='OKX'){loadOKX();connectOKX();}else{loadBinance();connectBinance();}}
-updateBal();renderTrades();if(savedExchange==='BINANCE'){loadBinance();connectBinance();}else{loadOKX();connectOKX();}
+function connectBinance(){if(binanceWs)binanceWs.close();binanceWs=new WebSocket('wss://stream.binance.com:9443/ws/btcusdt@trade/btcusdt@depth10@100ms/btcusdt@kline_1m');binanceWs.onmessage=(e)=>{let m=JSON.parse(e.data);if(m.e==='trade'){currentPrice=parseFloat(m.p);document.getElementById('livePrice').innerText='$'+currentPrice.toFixed(2);document.getElementById('midPrice').innerText='$'+currentPrice.toFixed(2);document.getElementById('priceInp').value=currentPrice.toFixed(2);}if(m.e==='depthUpdate'||m.e==='depth10'){let asks='',bids='';(m.asks||[]).slice(0,8).reverse().forEach(a=>{asks+=`<div class="ob-row"><span style="color:#f6465d">${parseFloat(a[0]).toFixed(2)}</span><span>${parseFloat(a[1]).toFixed(4)}</span></div>`;});(m.bids||[]).slice(0,8).forEach(b=>{bids+=`<div class="ob-row"><span style="color:#0ecb81">${parseFloat(b[0]).toFixed(2)}</span><span>${parseFloat(b[1]).toFixed(4)}</span></div>`;});if(asks)document.getElementById('asks').innerHTML=asks;if(bids)document.getElementById('bids').innerHTML=bids;}if(m.e==='kline'){let k=m.k;let c={time:k.t/1000,open:+k.o,high:+k.h,low:+k.l,close:+k.c};candleSeries.update(c);lastCandle=c;}};}
+updateBal();renderTrades();loadBinance();connectBinance();
 setInterval(()=>{if(lastCandle&&currentPrice){let c={...lastCandle,close:currentPrice,high:Math.max(lastCandle.high,currentPrice),low:Math.min(lastCandle.low,currentPrice)};candleSeries.update(c);}},900);
 </script>
 </body>
