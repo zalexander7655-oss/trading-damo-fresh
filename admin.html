@@ -8,16 +8,22 @@ body{font-family:Arial;background:#0f172a;color:white;margin:0;padding:15px}
 .email-list{background:#1e293b;padding:12px;border-radius:10px;margin:8px 0;cursor:pointer;border-left:4px solid #f59e0b}
 .email-list:hover{background:#334155}
 .modal{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.8);justify-content:center;align-items:center;z-index:999}
-.modal-content{background:#1e293b;padding:20px;border-radius:12px;width:90%;max-width:400px}
+.modal-content{background:#1e293b;padding:20px;border-radius:12px;width:90%;max-width:450px;max-height:90vh;overflow-y:auto}
 .modal-content img{width:100%;border-radius:8px;margin:10px 0;border:1px solid #475569}
 .btn{width:100%;padding:12px;border:none;border-radius:8px;font-weight:bold;cursor:pointer;margin-top:8px}
 .approve{background:#22c55e;color:white}.reject{background:#ef4444;color:white}.close{background:#475569;color:white}
+h3{color:#f3ba2f;border-bottom:1px solid #334155;padding-bottom:10px}
 </style>
 </head>
 <body>
 <h2>Admin Panel - Trading Master</h2>
-<p style="color:#94a3b8">Till: 981149773 | USDT: T9yimC9YJdVtCQbgfHdj8bDh1c8uNGKDmu</p>
+<p style="color:#94a3b8;background:#1e293b;padding:10px;border-radius:8px">Till: <b style="color:white">981149773</b> | USDT: <b style="color:#f3ba2f">T9yimC9YJdVtCQbgfHdj8bDh1c8uNGKDmu</b> (TRC20)</p>
+
+<h3>1. Email Purchase Requests (Purana System)</h3>
 <div id="emailContainer"></div>
+
+<h3 style="margin-top:30px">2. New Screenshot Payments (Naya System)</h3>
+<div id="newPaymentContainer"></div>
 
 <!-- Popup Modal -->
 <div id="detailModal" class="modal">
@@ -27,10 +33,12 @@ body{font-family:Arial;background:#0f172a;color:white;margin:0;padding:15px}
 <script>
 let requests = JSON.parse(localStorage.getItem('purchaseRequests')||"[]");
 let users = JSON.parse(localStorage.getItem('tradingUsers')||"{}");
+let allPayments = JSON.parse(localStorage.getItem('all_payments')||"[]");
 
+// ===== PURANA SYSTEM - Aapki pehle wali coding same hai =====
 function showEmails(){
   let html="";
-  if(requests.length==0){document.getElementById('emailContainer').innerHTML="No Pending Request"; return;}
+  if(requests.length==0){document.getElementById('emailContainer').innerHTML="<div style='color:#64748b'>No Pending Email Request</div>"; return;}
   requests.slice().reverse().forEach((r,revIdx)=>{
     let idx = requests.length-1-revIdx;
     let color = r.status=='approved'?'#22c55e':r.status=='rejected'?'#ef4444':'#f59e0b';
@@ -51,7 +59,6 @@ function openDetail(i){
     <b>Payment Method:</b> ${r.method}<br>
     <b>Date:</b> ${r.date}<br>
     <b>Status:</b> ${r.status}<br>
-    <b>Time:</b> ${r.date}<br>
     <b>Screenshot:</b><br><img src="${r.screenshot}">
     ${r.status=='pending'?`<button class="btn approve" onclick="approveNow(${i})">CHECK & APPROVE - $${r.demoAmount}</button>
     <button class="btn reject" onclick="rejectNow(${i})">Reject</button>`: `<p>Already ${r.status}</p>`}
@@ -64,17 +71,68 @@ function closeModal(){document.getElementById('detailModal').style.display='none
 function approveNow(i){
   let r=requests[i];
   if(!users[r.email]) users[r.email]={balance:0,demoBalance:0,email:r.email};
-  // Final Fix: Balance Add
   users[r.email].demoBalance = (users[r.email].demoBalance||0) + Number(r.demoAmount);
-  users[r.email].balance = users[r.email].demoBalance; // Main balance for trading board
+  users[r.email].balance = users[r.email].demoBalance;
   r.status='approved';
   localStorage.setItem('purchaseRequests',JSON.stringify(requests));
   localStorage.setItem('tradingUsers',JSON.stringify(users));
-  alert('Approved! '+r.email+' ko $'+r.demoAmount+' mil gaya. Ab uski ID me balance nazar ayega.');
+  // Main trading board ke liye bhi add karo
+  let bal = parseFloat(localStorage.getItem('demo_bal_purchased')||'1000');
+  localStorage.setItem('demo_bal_purchased', (bal + Number(r.demoAmount)).toString());
+  alert('Approved! '+r.email+' ko $'+r.demoAmount+' mil gaya.');
   closeModal(); showEmails();
 }
 function rejectNow(i){requests[i].status='rejected';localStorage.setItem('purchaseRequests',JSON.stringify(requests));closeModal();showEmails();}
+
+// ===== NAYA SYSTEM - Ab wala add kiya hai =====
+function showNewPayments(){
+  let html="";
+  if(allPayments.length==0){document.getElementById('newPaymentContainer').innerHTML="<div style='color:#64748b'>No Screenshot Payment</div>"; return;}
+  allPayments.slice().reverse().forEach((p,revIdx)=>{
+    let idx = allPayments.length-1-revIdx;
+    let color = p.status=='approved'?'#22c55e':p.status=='rejected'?'#ef4444':'#f59e0b';
+    html+=`<div class="email-list" style="border-left-color:${color}" onclick="openNewDetail(${idx})">
+      <b>Package: $${p.real} -> $${p.demo}</b> - <span style="color:${color}">${p.status.toUpperCase()}</span><br>
+      <small>TxID: ${p.tx.substring(0,20)}... | ${p.time}</small>
+    </div>`;
+  });
+  document.getElementById('newPaymentContainer').innerHTML=html;
+}
+
+function openNewDetail(i){
+  let p=allPayments[i];
+  document.getElementById('modalData').innerHTML=`
+    <h3>New Payment Detail</h3>
+    <b>Package:</b> $${p.real} Real -> $${p.demo} Demo<br>
+    <b>TxID:</b> ${p.tx}<br>
+    <b>Time:</b> ${p.time}<br>
+    <b>Status:</b> ${p.status}<br>
+    <b>Screenshot:</b><br><img src="${p.screenshot}">
+    ${p.status=='pending'?`<button class="btn approve" onclick="approveNew(${i})">Approve - $${p.demo} Demo De Do</button>
+    <button class="btn reject" onclick="rejectNew(${i})">Reject</button>`: `<p>Already ${p.status}</p>`}
+    <button class="btn close" onclick="closeModal()">Close</button>
+  `;
+  document.getElementById('detailModal').style.display='flex';
+}
+
+function approveNew(i){
+  let p=allPayments[i];
+  p.status='approved';
+  let bal=parseFloat(localStorage.getItem('demo_bal_purchased')||'1000');
+  localStorage.setItem('demo_bal_purchased', (bal + Number(p.demo)).toString());
+  localStorage.setItem('all_payments',JSON.stringify(allPayments));
+  alert(`Approved! $${p.demo} Demo Balance Add Ho Gaya`);
+  closeModal(); showNewPayments();
+}
+
+function rejectNew(i){
+  allPayments.splice(i,1);
+  localStorage.setItem('all_payments',JSON.stringify(allPayments));
+  closeModal(); showNewPayments();
+}
+
 showEmails();
+showNewPayments();
 </script>
 </body>
 </html>
