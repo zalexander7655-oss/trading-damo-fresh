@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+<head><meta charset="UTF-8"><title>Trading Master - Login</title>
+<style>body{margin:0;font-family:Arial;background:#eef6f7;min-height:100vh}.center{text-align:center;padding:20px;max-width:700px;margin:auto}.box{background:white;padding:20px;border-radius:12px;box-shadow:0 4px 10px rgba(0,0,0,0.1);margin-top:15px}input{width:90%;padding:12px;margin:8px 0;border:1px solid #cbd5e1;border-radius:8px}.pass-wrap{position:relative;width:95%;margin:auto}.pass-wrap input{width:100%;box-sizing:border-box}.eye{position:absolute;right:10px;top:50%;transform:translateY(-50%);cursor:pointer;background:none;border:none;font-size:18px}button.green{background:#F0B90B;color:#1e2329;padding:14px 30px;font-size:18px;border:none;border-radius:10px;cursor:pointer;margin-top:15px;min-width:220px;font-weight:bold}button.linkbtn{background:#e2e8f0;width:100%;margin-top:8px;padding:12px;border:none;border-radius:8px;cursor:pointer}.hidden{display:none}</style>
+</head>
+<body>
+<div id="authPage" class="center">
+<h2>Trading Master Login</h2>
+<div id="registerBox" class="box"><h3>Create Account</h3><input id="fName" placeholder="First Name"><input id="lName" placeholder="Last Name"><input id="rEmail" placeholder="Email" type="email"><div class="pass-wrap"><input id="rPass" placeholder="Password" type="password"><button class="eye" onclick="togglePass('rPass',this)">👁️</button></div><div class="pass-wrap"><input id="rPass2" placeholder="Confirm Password" type="password"><button class="eye" onclick="togglePass('rPass2',this)">👁️</button></div><button class="green" onclick="sendOTP('register')">Continue</button><button class="linkbtn" onclick="showLogin()">Sign Up</button><button class="linkbtn" onclick="showForgot()">Forgot Password</button></div>
+<div id="loginBox" class="box hidden"><h3>Sign Up</h3><input id="lEmail" placeholder="Email" type="email"><div class="pass-wrap"><input id="lPass" placeholder="Password" type="password"><button class="eye" onclick="togglePass('lPass',this)">👁️</button></div><button class="green" onclick="doLogin()">Login</button><button class="linkbtn" onclick="showRegister()">Back</button></div>
+<div id="forgotBox" class="box hidden"><h3>Forgot Password</h3><input id="fEmail" placeholder="Email" type="email"><div class="pass-wrap"><input id="fNewPass" placeholder="New Password" type="password"><button class="eye" onclick="togglePass('fNewPass',this)">👁️</button></div><div class="pass-wrap"><input id="fNewPass2" placeholder="Confirm Password" type="password"><button class="eye" onclick="togglePass('fNewPass2',this)">👁️</button></div><button class="green" onclick="sendOTP('forgot')">Continue</button><button class="linkbtn" onclick="showRegister()">Back</button></div>
+<div id="otpBox" class="box hidden"><h3>Enter OTP</h3><p>Demo OTP: <b id="demoOTP"></b></p><input id="otpInput" placeholder="Enter 6 character OTP"><button class="green" onclick="verifyOTP()">Verify</button></div>
+</div>
+<script>
+function togglePass(id,btn){let x=document.getElementById(id);if(x.type==="password"){x.type="text";btn.textContent="🙈"}else{x.type="password";btn.textContent="👁️"}}
+function generateOTP(){const l="ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnpqrstuvwxyz";const n="23456789";let o="";for(let i=0;i<3;i++)o+=l.charAt(Math.floor(Math.random()*l.length));for(let i=0;i<3;i++)o+=n.charAt(Math.floor(Math.random()*n.length));return o.split('').sort(()=>Math.random()-0.5).join('')}
+let currentOTP="",tempUser={};
+function showLogin(){hideAll();document.getElementById('loginBox').classList.remove('hidden')}
+function showRegister(){hideAll();document.getElementById('registerBox').classList.remove('hidden')}
+function showForgot(){hideAll();document.getElementById('forgotBox').classList.remove('hidden')}
+function hideAll(){['registerBox','loginBox','forgotBox','otpBox'].forEach(id=>document.getElementById(id).classList.add('hidden'))}
+function sendOTP(m){if(m=='register'){let e=document.getElementById('rEmail').value.trim().toLowerCase(),p=document.getElementById('rPass').value,p2=document.getElementById('rPass2').value;if(!e||p!=p2||!p){alert('Check fields');return}if(localStorage.getItem('tm_user_'+e)){alert('your mail already login - Please use Sign Up with same mail');showLogin();return}tempUser={email:e,pass:p,fname:document.getElementById('fName').value}}if(m=='forgot'){let e=document.getElementById('fEmail').value.trim().toLowerCase(),p=document.getElementById('fNewPass').value,p2=document.getElementById('fNewPass2').value;if(!e||p!=p2||!p){alert('Check fields');return}let s=JSON.parse(localStorage.getItem('tm_user_'+e)||'null');if(!s){alert('Email not found');return}tempUser={email:e,pass:p,fname:s.fname}}currentOTP=generateOTP();document.getElementById('demoOTP').innerText=currentOTP;hideAll();document.getElementById('otpBox').classList.remove('hidden')}
+function verifyOTP(){if(document.getElementById('otpInput').value===currentOTP){localStorage.setItem('tm_user_'+tempUser.email,JSON.stringify(tempUser));localStorage.setItem('tm_last',tempUser.email);window.location.href='main.html'}else alert('Wrong OTP')}
+function doLogin(){let e=document.getElementById('lEmail').value.trim().toLowerCase(),p=document.getElementById('lPass').value;let s=JSON.parse(localStorage.getItem('tm_user_'+e)||'null');if(s&&s.pass==p){localStorage.setItem('tm_last',e);window.location.href='main.html'}else alert('Wrong email/password')}
+let last=localStorage.getItem('tm_last');if(last){let u=JSON.parse(localStorage.getItem('tm_user_'+last)||'null');if(u) window.location.href='main.html';}
+</script>
+</body>
+</html>
