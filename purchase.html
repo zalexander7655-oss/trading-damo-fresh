@@ -1,3 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Purchase Demo - Trading Master Pro</title>
+<style>
+*{box-sizing:border-box}body{margin:0;background:#0f172a;color:#fff;font-family:Inter,Arial;padding:20px}
+.header{max-width:1000px;margin:auto;display:flex;justify-content:space-between;align-items:center;padding:12px 0;border-bottom:1px solid #1e293b}
+.grid{max-width:1000px;margin:30px auto;display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:16px}
+.card{background:#1e293b;border:1px solid #334155;border-radius:14px;padding:20px;text-align:center}
+.price{font-size:24px;font-weight:900}.bonus{color:#22c55e;font-weight:800;font-size:18px;margin:8px 0}
+.btn{width:100%;padding:12px;background:#f59e0b;color:#000;border:none;border-radius:10px;font-weight:900;cursor:pointer;margin-top:12px}
+.btn:hover{background:#fbbf24}
+.loader{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.85);justify-content:center;align-items:center;z-index:9999;flex-direction:column}
+</style>
+</head>
+<body>
+<div class="header">
+<b style="color:#f59e0b">TRADING MASTER PRO</b>
+<div><span id="bal">Balance: $0</span> <button onclick="location.href='main.html'" style="margin-left:10px;background:#1e293b;color:#fff;border:1px solid #334155;padding:6px 14px;border-radius:6px;cursor:pointer">Back</button></div>
+</div>
+
+<h2 style="text-align:center;margin-top:20px">Purchase Demo Balance</h2>
+<p style="text-align:center;color:#94a3b8;font-size:13px">Pay with Binance / Crypto via NOWPayments</p>
+
+<div class="grid" id="grid"></div>
+
+<div id="loader" class="loader">
+<h3 style="color:#f59e0b">Creating Payment...</h3>
+<p style="color:#94a3b8">Please wait</p>
+</div>
+
 <script>
 const packages = [
   { id: 1, real: 1, demo: 20 },
@@ -9,61 +41,38 @@ const packages = [
 ];
 
 document.getElementById('bal').innerText = "Balance: $" + (localStorage.getItem('demo_bal_purchased') || '1000');
-document.getElementById('grid').innerHTML = packages.map(p => `
-  <div class="card">
-    <h3 style="color:#f59e0b">PACKAGE $${p.real}</h3>
-    <div class="price">Pay $${p.real} Real</div>
-    <div class="bonus">Get $${p.demo.toLocaleString()} Demo</div>
-    <div style="font-size:11px;color:#94a3b8;margin-top:6px">Practice trading without loss</div>
-    <button class="btn" onclick="buyNow(${p.real}, ${p.demo})">Buy with Binance</button>
-  </div>
-`).join('');
+
+const grid = document.getElementById('grid');
+let html = '';
+for(let p of packages){
+  html += '<div class="card"><h3 style="color:#f59e0b">PACKAGE $'+p.real+'</h3><div class="price">Pay $'+p.real+' Real</div><div class="bonus">Get $'+p.demo.toLocaleString()+' Demo</div><button class="btn" onclick="buyNow('+p.real+','+p.demo+')">Buy with Binance</button></div>';
+}
+grid.innerHTML = html;
 
 async function buyNow(realUSD, demoAmount) {
   document.getElementById('loader').style.display = 'flex';
   
-  // 1. EMAIL NIKALO - Sab jagah se check karo
-  let userEmail = localStorage.getItem('email') || 
-                  localStorage.getItem('user_email') || 
-                  localStorage.getItem('userEmail') ||
-                  localStorage.getItem('trading_email') ||
-                  localStorage.getItem('user');
-
-  // Agar email localStorage me nahi mila to user se pucho
-  if (!userEmail || !userEmail.includes('@')) {
-    userEmail = prompt("Apna Email likho jahan balance add karna hai:");
+  let userEmail = localStorage.getItem('email') || localStorage.getItem('user_email') || localStorage.getItem('userEmail');
+  if(!userEmail || userEmail.indexOf('@') === -1){
+    userEmail = prompt("Apna Email likho:");
   }
-
-  if (!userEmail || !userEmail.includes('@')) {
+  if(!userEmail || userEmail.indexOf('@') === -1){
     alert("Email zaroori hai!");
     document.getElementById('loader').style.display = 'none';
     return;
   }
-
-  // Email save kar do agle baar ke liye
   localStorage.setItem('email', userEmail);
   localStorage.setItem('pending_demo', demoAmount);
-  localStorage.setItem('pending_real', realUSD);
 
   try {
-    // 2. AB EMAIL KE SATH API CALL KARO
     const response = await fetch('/api/create-payment', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ 
-        price_amount: realUSD, 
-        demo_amount: demoAmount,
-        email: userEmail  // <-- YE LINE MISSING THI, AB ADD KI HAI
-      })
+      body: JSON.stringify({ price_amount: realUSD, demo_amount: demoAmount, email: userEmail })
     });
-
     const data = await response.json();
-    
-    if (data.invoice_url) {
+    if(data.invoice_url){
       window.location.href = data.invoice_url;
-    } else if (data.pay_address) {
-      alert("Pay to: " + data.pay_address + " Amount: " + data.pay_amount);
-      window.location.href = data.invoice_url || 'main.html';
     } else {
       alert("Error: " + JSON.stringify(data));
       document.getElementById('loader').style.display = 'none';
@@ -74,3 +83,5 @@ async function buyNow(realUSD, demoAmount) {
   }
 }
 </script>
+</body>
+</html>
