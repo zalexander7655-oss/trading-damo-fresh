@@ -5,14 +5,13 @@
 <title>Purchase Demo - Trading Master Pro</title>
 <style>
 *{box-sizing:border-box}body{margin:0;background:#0f172a;color:#fff;font-family:Inter,Arial;padding:20px}
-.header{max-width:1000px;margin:auto;display:flex;justify-content:space-between;align-items:center;padding:12px 0;border-bottom:1px solid #1e293b}
-.grid{max-width:1000px;margin:30px auto;display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:16px}
+.header{max-width:1100px;margin:auto;display:flex;justify-content:space-between;align-items:center;padding:12px 0;border-bottom:1px solid #1e293b}
+.grid{max-width:1100px;margin:30px auto;display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:16px}
 .card{background:#1e293b;border:1px solid #334155;border-radius:14px;padding:20px;text-align:center}
-.price{font-size:24px;font-weight:900}.bonus{color:#22c55e;font-weight:800;font-size:18px;margin:8px 0}
+.price{font-size:22px;font-weight:900}.bonus{color:#22c55e;font-weight:800;font-size:18px;margin:8px 0}
 .btn{width:100%;padding:12px;background:#f59e0b;color:#000;border:none;border-radius:10px;font-weight:900;cursor:pointer;margin-top:12px}
 .btn:hover{background:#fbbf24}
 .loader{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.85);justify-content:center;align-items:center;z-index:9999;flex-direction:column}
-/* Ye box shuru me hidden rahega */
 .confirm-box{max-width:600px;margin:40px auto;background:#1e293b;border:2px solid #f59e0b;border-radius:14px;padding:20px;display:none}
 .input{width:100%;padding:12px;border-radius:8px;border:1px solid #334155;background:#0f172a;color:#fff;margin:8px 0}
 .upload-area{width:100%;height:180px;border:2px dashed #475569;border-radius:10px;display:flex;justify-content:center;align-items:center;flex-direction:column;cursor:pointer;margin:12px 0;background:#0f172a;overflow:hidden}
@@ -26,26 +25,26 @@
 </div>
 
 <h2 style="text-align:center;margin-top:20px">Purchase Demo Balance</h2>
-<p style="text-align:center;color:#94a3b8;font-size:13px">Pay with Binance / Crypto via NOWPayments - QR & Address</p>
+<p style="text-align:center;color:#94a3b8;font-size:13px">Pay with Binance / Crypto via NOWPayments</p>
 
 <div class="grid" id="grid"></div>
 
-<!-- YE BOX AB SIRF PAYMENT KE BAAD SHOW HOGA - VIDEO WALI DEMAND -->
+<!-- CONFIRM BOX - SIRF PAYMENT KE BAAD SHOW HOGA - ADMIN APPROVAL KE LIYE -->
 <div class="confirm-box" id="confirmBox">
-  <h3 style="color:#f59e0b;text-align:center">Confirm Your Payment</h3>
-  <p id="detailsText" style="color:#94a3b8;font-size:12px;text-align:center"></p>
+  <h3 style="color:#f59e0b;text-align:center;margin:0">Confirm Your Payment</h3>
+  <p id="detailsText" style="color:#94a3b8;font-size:12px;text-align:center;margin-top:8px"></p>
 
   <label style="font-size:13px">Your Email</label>
-  <input type="email" id="confEmail" class="input" placeholder="a****@gmail.com">
+  <input type="email" id="confEmail" class="input" placeholder="Enter email">
 
-  <label style="font-size:13px;margin-top:10px;display:block">Payment Screenshot *</label>
+  <label style="font-size:13px;margin-top:10px;display:block">Upload Payment Screenshot *</label>
   <div class="upload-area" id="uploadArea" onclick="document.getElementById('screenshotInput').click()">
     <span id="uploadText" style="color:#94a3b8">Click to upload screenshot</span>
     <img id="preview">
   </div>
   <input type="file" id="screenshotInput" accept="image/*" style="display:none">
 
-  <button class="btn" onclick="confirmPayment()">Confirm & Send to Admin Approval</button>
+  <button class="btn" onclick="confirmPayment()">Confirm & Send to Admin</button>
   <p id="statusMsg" style="text-align:center;margin-top:12px;color:#22c55e;display:none;font-weight:800"></p>
 </div>
 
@@ -56,24 +55,38 @@
 
 <script>
 const packages = [
-  { id: 1, real: 1, demo: 20 },
-  { id: 2, real: 10, demo: 2000 },
-  { id: 3, real: 25, demo: 10000 },
-  { id: 4, real: 50, demo: 40000 },
-  { id: 5, real: 70, demo: 60000 },
-  { id: 6, real: 100, demo: 100000 }
+  { real: 25, demo: 10000 },
+  { real: 50, demo: 40000 },
+  { real: 70, demo: 60000 },
+  { real: 100, demo: 100000 },
+  { real: 130, demo: 150000 },
+  { real: 150, demo: 200000 }
 ];
 
 let screenshotBase64 = null;
 
-document.getElementById('bal').innerText = "Balance: $" + (localStorage.getItem('demo_bal_purchased') || '1000');
+// HAR NEW EMAIL PAR BALANCE ZERO - AAPKI DEMAND
+function updateBalanceDisplay(){
+  let email = localStorage.getItem('email') || '';
+  let bal = 0;
+  if(email){
+    bal = localStorage.getItem('demo_bal_' + email) || localStorage.getItem('demo_bal_purchased') || 0;
+  } else {
+    bal = localStorage.getItem('demo_bal_purchased') || 0;
+    if(!localStorage.getItem('demo_bal_purchased')) bal = 0; // new user = 0
+  }
+  document.getElementById('bal').innerText = "Balance: $" + bal;
+}
+updateBalanceDisplay();
 
 const grid = document.getElementById('grid');
 grid.innerHTML = packages.map(p => `
-  <div class="card"><h3 style="color:#f59e0b">PACKAGE $${p.real}</h3>
-  <div class="price">Pay $${p.real} Real</div>
-  <div class="bonus">Get $${p.demo.toLocaleString()} Demo</div>
-  <button class="btn" onclick="buyNow(${p.real},${p.demo})">Buy with Binance</button></div>
+  <div class="card">
+    <h3 style="color:#f59e0b">PACKAGE $${p.real}</h3>
+    <div class="price">Pay $${p.real} Real</div>
+    <div class="bonus">Get $${p.demo.toLocaleString()} Demo</div>
+    <button class="btn" onclick="buyNow(${p.real},${p.demo})">Buy with Binance</button>
+  </div>
 `).join('');
 
 document.getElementById('screenshotInput').addEventListener('change', function(e){
@@ -103,10 +116,10 @@ async function buyNow(realUSD, demoAmount) {
   localStorage.setItem('email', userEmail);
   localStorage.setItem('pending_real', realUSD);
   localStorage.setItem('pending_demo', demoAmount);
-  const orderId = 'DEMO_'+Date.now()+'_'+realUSD;
+  const orderId = 'DEMO_' + Date.now() + '_' + realUSD;
+  localStorage.setItem('last_order_id', orderId);
 
   try {
-    // FIRST 2 KO BHI SAME API CALL - FIX
     const response = await fetch('/api/create-payment', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -114,17 +127,9 @@ async function buyNow(realUSD, demoAmount) {
     });
     const data = await response.json();
     if(data.invoice_url){
-      // VIDEO ME JAISA HAI - QR PAGE KHULEGA
       window.location.href = data.invoice_url;
     } else {
-      // Agar NOWPayments $1 ko reject kare to bhi manual approval ke liye confirm box dikhao
-      console.log("API Error", data);
-      if(data.message && data.message.toLowerCase().includes('minimum')){
-        alert("NOWPayments ka minimum $3 hai. Aapka $"+realUSD+" ka order Admin manual check karega. Screenshot upload karein.");
-        showConfirmBoxAfterReturn();
-      } else {
-        alert("Error: " + JSON.stringify(data));
-      }
+      alert("Error: " + JSON.stringify(data));
       document.getElementById('loader').style.display = 'none';
     }
   } catch (err) {
@@ -133,45 +138,49 @@ async function buyNow(realUSD, demoAmount) {
   }
 }
 
-function showConfirmBoxAfterReturn(){
-  // Ye function tab chalega jab user NOWPayments se wapis aayega
+function showConfirmBox(){
   document.getElementById('confirmBox').style.display = 'block';
   document.getElementById('confEmail').value = localStorage.getItem('email') || '';
-  document.getElementById('detailsText').innerText = 'Order ID: ' + localStorage.getItem('last_order_id') + ' | Pay $' + localStorage.getItem('pending_real') + ' for $' + localStorage.getItem('pending_demo') + ' Demo - for ' + localStorage.getItem('email');
-  window.scrollTo({top: document.body.scrollHeight, behavior:'smooth'});
+  document.getElementById('detailsText').innerText = 'Pay $' + localStorage.getItem('pending_real') + ' -> Get $' + Number(localStorage.getItem('pending_demo')).toLocaleString() + ' Demo | Order: ' + localStorage.getItem('last_order_id');
+  window.scrollTo({top: document.getElementById('confirmBox').offsetTop, behavior:'smooth'});
 }
 
-// Jab page NOWPayments se wapis load ho to check karo
+// Agar user NOWPayments se wapis aaya to auto confirm box dikhao
 window.addEventListener('load', ()=>{
-  if(localStorage.getItem('pending_demo') && document.referrer.includes('nowpayments')){
-    showConfirmBoxAfterReturn();
+  if(localStorage.getItem('pending_demo') && (document.referrer.includes('nowpayments') || localStorage.getItem('last_order_id'))){
+    // optional: check URL param?payment_done=1
   }
 });
 
 function confirmPayment(){
   const email = document.getElementById('confEmail').value.trim();
   if(!email || email.indexOf('@') === -1){ alert("Valid email likho"); return; }
-  if(!screenshotBase64){ alert("Payment ka screenshot upload karo"); return; }
+  if(!screenshotBase64){ alert("Screenshot upload karo"); return; }
 
-  // AUTO APPROVE KHATAM - SIRF ADMIN APPROVAL
+  // NO AUTO CREDIT - SIRF ADMIN APPROVAL KE LIYE SAVE
   const approvals = JSON.parse(localStorage.getItem('pending_approvals') || '[]');
   approvals.push({
     id: Date.now(),
     email: email,
     real_amount: localStorage.getItem('pending_real'),
     demo_amount: localStorage.getItem('pending_demo'),
-    order_id: localStorage.getItem('last_order_id') || 'ORD_'+Date.now(),
+    order_id: localStorage.getItem('last_order_id'),
     screenshot: screenshotBase64,
-    status: 'pending_admin_approval',
+    status: 'pending',
     date: new Date().toISOString()
   });
   localStorage.setItem('pending_approvals', JSON.stringify(approvals));
 
   document.getElementById('statusMsg').style.display = 'block';
-  document.getElementById('statusMsg').innerText = "Submitted to Admin! Demo balance will be added ONLY after Admin Approval. No auto credit.";
+  document.getElementById('statusMsg').innerText = "Submitted! Admin approval ke baad hi balance add hoga. Auto credit nahi hoga.";
 
-  // Backend par bhejna hai to
-  // fetch('/api/submit-proof', {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({email, screenshot: screenshotBase64})})
+  // Backend ke liye - aapka server isko admin panel me dikhayega
+  // fetch('/api/submit-proof', {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({email, real: localStorage.getItem('pending_real'), demo: localStorage.getItem('pending_demo'), screenshot: screenshotBase64})})
+}
+
+// Manual trigger agar user kehta hai maine pay kar diya
+if(new URLSearchParams(window.location.search).get('show_confirm') === '1'){
+  showConfirmBox();
 }
 </script>
 </body>
