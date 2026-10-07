@@ -25,32 +25,32 @@
 </div>
 
 <h2 style="text-align:center;margin-top:20px">Purchase Demo Balance</h2>
-<p style="text-align:center;color:#94a3b8;font-size:13px">Pay with Binance / Crypto via NOWPayments</p>
+<p style="text-align:center;color:#94a3b8;font-size:13px">Pay with Binance / Crypto via NOWPayments - QR & Address</p>
 
 <div class="grid" id="grid"></div>
 
-<!-- CONFIRM BOX - SIRF PAYMENT KE BAAD SHOW HOGA - ADMIN APPROVAL KE LIYE -->
+<!-- EMAIL + SCREENSHOT BOX BELOW EMAIL - ADMIN APPROVAL FLOW -->
 <div class="confirm-box" id="confirmBox">
   <h3 style="color:#f59e0b;text-align:center;margin:0">Confirm Your Payment</h3>
   <p id="detailsText" style="color:#94a3b8;font-size:12px;text-align:center;margin-top:8px"></p>
 
-  <label style="font-size:13px">Your Email</label>
-  <input type="email" id="confEmail" class="input" placeholder="Enter email">
+  <label style="font-size:13px;font-weight:600">Your Email</label>
+  <input type="email" id="confEmail" class="input" placeholder="Enter your email">
 
-  <label style="font-size:13px;margin-top:10px;display:block">Upload Payment Screenshot *</label>
+  <label style="font-size:13px;font-weight:600;margin-top:12px;display:block">Upload Payment Screenshot with Email *</label>
   <div class="upload-area" id="uploadArea" onclick="document.getElementById('screenshotInput').click()">
     <span id="uploadText" style="color:#94a3b8">Click to upload screenshot</span>
     <img id="preview">
   </div>
   <input type="file" id="screenshotInput" accept="image/*" style="display:none">
 
-  <button class="btn" onclick="confirmPayment()">Confirm & Send to Admin</button>
+  <button class="btn" onclick="confirmPayment()">Confirm & Send to Admin Approval</button>
   <p id="statusMsg" style="text-align:center;margin-top:12px;color:#22c55e;display:none;font-weight:800"></p>
 </div>
 
 <div id="loader" class="loader">
 <h3 style="color:#f59e0b">Creating Payment...</h3>
-<p style="color:#94a3b8">Please wait</p>
+<p style="color:#94a3b8">Opening NOWPayments QR...</p>
 </div>
 
 <script>
@@ -65,17 +65,20 @@ const packages = [
 
 let screenshotBase64 = null;
 
-// HAR NEW EMAIL PAR BALANCE ZERO - AAPKI DEMAND
 function updateBalanceDisplay(){
   let email = localStorage.getItem('email') || '';
   let bal = 0;
   if(email){
-    bal = localStorage.getItem('demo_bal_' + email) || localStorage.getItem('demo_bal_purchased') || 0;
-  } else {
-    bal = localStorage.getItem('demo_bal_purchased') || 0;
-    if(!localStorage.getItem('demo_bal_purchased')) bal = 0; // new user = 0
+    let approvals = JSON.parse(localStorage.getItem('pending_approvals') || '[]');
+    let approvedSum = 0;
+    approvals.forEach(a => {
+      if(a.email === email && a.status === 'approved'){
+        approvedSum += Number(a.demo_amount || 0);
+      }
+    });
+    bal = approvedSum > 0? approvedSum : Number(localStorage.getItem('demo_bal_' + email) || 0);
   }
-  document.getElementById('bal').innerText = "Balance: $" + bal;
+  document.getElementById('bal').innerText = "Balance: $" + bal.toLocaleString();
 }
 updateBalanceDisplay();
 
@@ -103,13 +106,12 @@ document.getElementById('screenshotInput').addEventListener('change', function(e
 
 async function buyNow(realUSD, demoAmount) {
   document.getElementById('loader').style.display = 'flex';
-
-  let userEmail = localStorage.getItem('email') || localStorage.getItem('user_email') || '';
+  let userEmail = localStorage.getItem('email') || '';
   if(!userEmail || userEmail.indexOf('@') === -1){
-    userEmail = prompt("Apna Email likho:");
+    userEmail = prompt("Enter Your Email:");
   }
   if(!userEmail || userEmail.indexOf('@') === -1){
-    alert("Email zaroori hai!");
+    alert("Email is required!");
     document.getElementById('loader').style.display = 'none';
     return;
   }
@@ -127,37 +129,31 @@ async function buyNow(realUSD, demoAmount) {
     });
     const data = await response.json();
     if(data.invoice_url){
-      window.location.href = data.invoice_url;
+      localStorage.setItem('last_invoice_url', data.invoice_url);
+      window.open(data.invoice_url, '_blank'); // Open NOWPayments QR in new tab
+      showConfirmBox(); // Show email + screenshot box below email on same page
     } else {
       alert("Error: " + JSON.stringify(data));
-      document.getElementById('loader').style.display = 'none';
     }
   } catch (err) {
-    alert("API Error: " + err.message);
-    document.getElementById('loader').style.display = 'none';
+    showConfirmBox(); // Even on API error, go to admin approval, no auto credit
   }
+  document.getElementById('loader').style.display = 'none';
 }
 
 function showConfirmBox(){
   document.getElementById('confirmBox').style.display = 'block';
   document.getElementById('confEmail').value = localStorage.getItem('email') || '';
-  document.getElementById('detailsText').innerText = 'Pay $' + localStorage.getItem('pending_real') + ' -> Get $' + Number(localStorage.getItem('pending_demo')).toLocaleString() + ' Demo | Order: ' + localStorage.getItem('last_order_id');
+  document.getElementById('detailsText').innerText = 'Order: ' + localStorage.getItem('last_order_id') + ' | Pay $' + localStorage.getItem('pending_real') + ' -> Get $' + Number(localStorage.getItem('pending_demo')).toLocaleString() + ' Demo';
   window.scrollTo({top: document.getElementById('confirmBox').offsetTop, behavior:'smooth'});
 }
 
-// Agar user NOWPayments se wapis aaya to auto confirm box dikhao
-window.addEventListener('load', ()=>{
-  if(localStorage.getItem('pending_demo') && (document.referrer.includes('nowpayments') || localStorage.getItem('last_order_id'))){
-    // optional: check URL param?payment_done=1
-  }
-});
-
 function confirmPayment(){
   const email = document.getElementById('confEmail').value.trim();
-  if(!email || email.indexOf('@') === -1){ alert("Valid email likho"); return; }
-  if(!screenshotBase64){ alert("Screenshot upload karo"); return; }
+  if(!email || email.indexOf('@') === -1){ alert("Please enter valid email"); return; }
+  if(!screenshotBase64){ alert("Please upload payment screenshot"); return; }
 
-  // NO AUTO CREDIT - SIRF ADMIN APPROVAL KE LIYE SAVE
+  // SAVE FOR ADMIN APPROVAL - NO AUTO CREDIT
   const approvals = JSON.parse(localStorage.getItem('pending_approvals') || '[]');
   approvals.push({
     id: Date.now(),
@@ -172,15 +168,7 @@ function confirmPayment(){
   localStorage.setItem('pending_approvals', JSON.stringify(approvals));
 
   document.getElementById('statusMsg').style.display = 'block';
-  document.getElementById('statusMsg').innerText = "Submitted! Admin approval ke baad hi balance add hoga. Auto credit nahi hoga.";
-
-  // Backend ke liye - aapka server isko admin panel me dikhayega
-  // fetch('/api/submit-proof', {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({email, real: localStorage.getItem('pending_real'), demo: localStorage.getItem('pending_demo'), screenshot: screenshotBase64})})
-}
-
-// Manual trigger agar user kehta hai maine pay kar diya
-if(new URLSearchParams(window.location.search).get('show_confirm') === '1'){
-  showConfirmBox();
+  document.getElementById('statusMsg').innerText = "Submitted! Sent to Admin Approval with Email + Screenshot. Balance will be added only after Admin Approval.";
 }
 </script>
 </body>
