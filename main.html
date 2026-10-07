@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Trading Master</title>
-<style>body{margin:0;font-family:Arial;background:#eef6f7;min-height:100vh}.topbar{display:flex;justify-content:space-between;padding:15px}.topbar button{padding:10px 18px;border:none;border-radius:8px;cursor:pointer;font-weight:bold}.center{text-align:center;padding:20px;max-width:700px;margin:auto}.main-top-space{height:30px}.logo-main{width:180px;max-width:60%;margin-bottom:10px}#mainPage{background:#ffffff;min-height:100vh;color:#1e2329}#mainPage h1.one-line{font-size:46px;font-weight:900;color:#1e2329;margin:0 0 15px 0}p.welcome-name{margin:0 0 25px 0;color:#474d57}button.green{background:#F0B90B;color:#1e2329;padding:14px 30px;font-size:18px;border:none;border-radius:10px;cursor:pointer;margin-top:15px;min-width:220px;font-weight:bold}.bottom-left{position:fixed;bottom:15px;left:15px}.bottom-left button{background:#facc15;padding:12px 20px;border:none;border-radius:8px;font-weight:bold;cursor:pointer}.bottom-right{position:fixed;bottom:15px;right:15px}.bottom-right button{background:#F0B90B;color:#1e2329;padding:12px 20px;border:none;border-radius:8px;font-weight:bold;cursor:pointer}.balance-card{background:#1e293b;color:#fff;padding:15px;border-radius:12px;margin:20px auto;max-width:300px}.balance-card b{color:#F0B90B}</style>
+<style>body{margin:0;font-family:Arial;background:#eef6f7;min-height:100vh}.topbar{display:flex;justify-content:space-between;padding:15px}.topbar button{padding:10px 18px;border:none;border-radius:8px;cursor:pointer;font-weight:bold}.center{text-align:center;padding:20px;max-width:700px;margin:auto}.main-top-space{height:30px}.logo-main{width:180px;max-width:60%;margin-bottom:10px}#mainPage{background:#ffffff;min-height:100vh;color:#1e2329}#mainPage h1.one-line{font-size:46px;font-weight:900;color:#1e2329;margin:0 0 15px 0}p.welcome-name{margin:0 0 25px 0;color:#474d57}button.green{background:#F0B90B;color:#1e2329;padding:14px 30px;font-size:18px;border:none;border-radius:10px;cursor:pointer;margin-top:15px;min-width:220px;font-weight:bold}.bottom-left{position:fixed;bottom:15px;left:15px}.bottom-left button{background:#facc15;padding:12px 20px;border:none;border-radius:8px;font-weight:bold;cursor:pointer}.bottom-right{position:fixed;bottom:15px;right:15px}.bottom-right button{background:#F0B90B;color:#1e2329;padding:12px 20px;border:none;border-radius:8px;font-weight:bold;cursor:pointer}</style>
 </head>
 <body>
 <div id="mainPage">
@@ -14,15 +14,7 @@
 <img src="logo_transparent.png" class="logo-main" alt="Trading Master Logo">
 <h1 class="one-line">Welcome to Trading Master</h1>
 <p id="welcomeUser" class="welcome-name"></p>
-
-<div class="balance-card">
-<div>Your Demo Balance</div>
-<div style="font-size:28px;font-weight:900;margin-top:5px" id="balanceDisplay">$0.00</div>
-<div style="font-size:12px;color:#94a3b8;margin-top:5px" id="emailDisplay"></div>
-</div>
-
-<button class="green" onclick="goTrading()">Start Now Trading</button>
-<p style="font-size:12px;color:#64748b;margin-top:15px">If balance is $0, please purchase demo balance first</p>
+<button class="green" onclick="location.href='demo-trading.html'">Start Now Trading</button>
 </div>
 <div class="bottom-left"><button onclick="location.href='help.html'">Help</button></div>
 <div class="bottom-right"><button onclick="location.href='real-trading.html'">Real Trading</button></div>
@@ -39,18 +31,16 @@ if(!last){
   } else {
     document.getElementById('welcomeUser').innerText='Welcome '+(u.fname||u.email);
     
-    // FIXED LOGIC START
     let cleanEmail = last.toLowerCase().trim();
     localStorage.setItem('current_user_email', cleanEmail);
     localStorage.setItem('email', cleanEmail);
-    document.getElementById('emailDisplay').innerText = cleanEmail;
 
-    // Initialize balance 0 if new user
+    // If new user, set balance 0 for that email only
     if(localStorage.getItem('bal_' + cleanEmail) === null){
       localStorage.setItem('bal_' + cleanEmail, '0');
     }
 
-    // Add pending purchase balance
+    // If user purchased, add balance to same email
     let pendingDemo = localStorage.getItem('pending_demo');
     if(pendingDemo){
       let oldBal = Number(localStorage.getItem('bal_' + cleanEmail) || 0);
@@ -58,33 +48,12 @@ if(!last){
       localStorage.setItem('bal_' + cleanEmail, newBal.toString());
       localStorage.removeItem('pending_demo');
       localStorage.removeItem('pending_real');
-      alert('Success! $' + pendingDemo + ' Demo added to ' + cleanEmail);
     }
-
-    // Show balance
-    function updateBalanceUI(){
-      let bal = Number(localStorage.getItem('bal_' + cleanEmail) || 0);
-      document.getElementById('balanceDisplay').innerText = '$' + bal.toLocaleString(undefined,{minimumFractionDigits:2, maximumFractionDigits:2});
-    }
-    updateBalanceUI();
-    // FIXED LOGIC END
   }
-}
-
-function goTrading(){
-  let curEmail = localStorage.getItem('current_user_email');
-  let bal = Number(localStorage.getItem('bal_' + curEmail) || 0);
-  if(bal <= 0){
-    alert('Your balance is $0. Please purchase demo balance first.');
-    window.location.href='purchase.html';
-    return;
-  }
-  window.location.href='demo-trading.html';
 }
 
 function logout(){
   localStorage.removeItem('tm_last');
-  // Do not remove current_user_email and bal_ data, keep for next login
   window.location.href='login.html';
 }
 </script>
