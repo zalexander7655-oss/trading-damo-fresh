@@ -12,9 +12,6 @@
 .btn{width:100%;padding:12px;background:#f59e0b;color:#000;border:none;border-radius:10px;font-weight:900;cursor:pointer;margin-top:12px}
 .btn:hover{background:#fbbf24}
 .loader{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.85);justify-content:center;align-items:center;z-index:9999;flex-direction:column}
-.modal{position:fixed;inset:0;background:rgba(0,0,0,0.85);display:none;align-items:center;justify-content:center;z-index:10000;padding:15px}
-.modal-box{background:#1e293b;border:1px solid #334155;padding:20px;border-radius:14px;width:100%;max-width:420px}
-.inp{width:100%;padding:11px;background:#0f172a;border:1px solid #334155;color:#fff;border-radius:8px;margin:6px 0}
 </style>
 </head>
 <body>
@@ -33,27 +30,6 @@
 <p style="color:#94a3b8">Please wait</p>
 </div>
 
-<!-- NEW PAYMENT + SS MODAL -->
-<div class="modal" id="payModal">
-<div class="modal-box">
-<h3 id="mTitle" style="color:#f59e0b;margin:0 0 10px 0">Confirm Payment</h3>
-<p style="font-size:12px;color:#94a3b8;margin:0 0 10px 0">Enter your login email and upload payment screenshot after paying</p>
-
-<label style="font-size:11px;color:#94a3b8">Login Email</label>
-<input class="inp" id="emailInput" type="email" placeholder="your login email">
-
-<label style="font-size:11px;color:#94a3b8">Give Payment Screenshot (SS)</label>
-<input class="inp" type="file" id="ssFile" accept="image/*">
-<img id="ssPreview" style="width:100%;max-height:180px;display:none;border-radius:8px;margin-top:6px;border:1px solid #334155">
-
-<div id="nowPaymentInfo" style="display:none;background:#0f172a;border:1px dashed #f59e0b;padding:10px;border-radius:8px;margin-top:10px;font-size:12px"></div>
-
-<button class="btn" id="confirmBtn" onclick="confirmPurchase()">Confirm & Submit to Admin</button>
-<button class="btn" style="background:#334155;color:#fff" onclick="closeModal()">Cancel</button>
-<div id="waitMsg" style="display:none;text-align:center;color:#fbbf24;font-size:13px;margin-top:12px;font-weight:700"></div>
-</div>
-</div>
-
 <script>
 const packages = [
   { id: 1, real: 1, demo: 20 },
@@ -64,56 +40,31 @@ const packages = [
   { id: 6, real: 100, demo: 100000 }
 ];
 
-// Balance per email - 0 for new email
-let curEmail = (localStorage.getItem('current_user_email') || localStorage.getItem('email') || localStorage.getItem('tm_last') || '').toLowerCase().trim();
-if(curEmail){
-  if(localStorage.getItem('bal_' + curEmail)===null) localStorage.setItem('bal_' + curEmail,'0');
-  document.getElementById('bal').innerText = "Balance: $" + Number(localStorage.getItem('bal_' + curEmail)||0).toLocaleString();
-} else {
-  document.getElementById('bal').innerText = "Balance: $0";
-}
+document.getElementById('bal').innerText = "Balance: $" + (localStorage.getItem('demo_bal_purchased') || '1000');
 
 const grid = document.getElementById('grid');
 let html = '';
 for(let p of packages){
-  // FIXED: Using data attributes to fix first 2 buttons not working issue
-  html += '<div class="card"><h3 style="color:#f59e0b">PACKAGE $'+p.real+'</h3><div class="price">Pay $'+p.real+' Real</div><div class="bonus">Get $'+p.demo.toLocaleString()+' Demo</div><button class="btn buyBtn" data-real="'+p.real+'" data-demo="'+p.demo+'">Buy with Binance</button></div>';
+  html += '<div class="card"><h3 style="color:#f59e0b">PACKAGE $'+p.real+'</h3><div class="price">Pay $'+p.real+' Real</div><div class="bonus">Get $'+p.demo.toLocaleString()+' Demo</div><button class="btn" onclick="buyNow('+p.real+','+p.demo+')">Buy with Binance</button></div>';
 }
 grid.innerHTML = html;
 
-let selectedReal = 0, selectedDemo = 0, ssBase64 = '', invoiceUrl = '';
+async function buyNow(realUSD, demoAmount) {
+  document.getElementById('loader').style.display = 'flex';
+  
+  let userEmail = localStorage.getItem('email') || localStorage.getItem('user_email') || localStorage.getItem('userEmail');
+  if(!userEmail || userEmail.indexOf('@') === -1){
+    userEmail = prompt("Apna Email likho:");
+  }
+  if(!userEmail || userEmail.indexOf('@') === -1){
+    alert("Email zaroori hai!");
+    document.getElementById('loader').style.display = 'none';
+    return;
+  }
+  localStorage.setItem('email', userEmail);
+  localStorage.setItem('pending_demo', demoAmount);
 
-document.querySelectorAll('.buyBtn').forEach(btn=>{
-  btn.addEventListener('click', function(){
-    let real = this.getAttribute('data-real');
-    let demo = this.getAttribute('data-demo');
-    buyNow(Number(real), Number(demo));
-  });
-});
-
-function buyNow(realUSD, demoAmount){
-  selectedReal = realUSD;
-  selectedDemo = demoAmount;
-  ssBase64 = '';
-  invoiceUrl = '';
-  document.getElementById('ssPreview').style.display='none';
-  document.getElementById('nowPaymentInfo').style.display='none';
-  document.getElementById('waitMsg').style.display='none';
-  document.getElementById('emailInput').value = curEmail || localStorage.getItem('email') || '';
-  document.getElementById('mTitle').innerText = 'Pay $'+realUSD+' Get $'+demoAmount.toLocaleString()+' Demo';
-  document.getElementById('payModal').style.display='flex';
-  document.getElementById('confirmBtn').disabled=false;
-  document.getElementById('confirmBtn').innerText='Confirm & Submit to Admin';
-
-  // Also create NOWPayments link in background
-  createNowPaymentLink(realUSD, demoAmount);
-}
-
-async function createNowPaymentLink(realUSD, demoAmount){
-  let userEmail = document.getElementById('emailInput').value || curEmail || localStorage.getItem('email');
-  if(!userEmail || userEmail.indexOf('@')===-1) return;
-  try{
-    document.getElementById('loader').style.display='flex';
+  try {
     const response = await fetch('/api/create-payment', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -121,72 +72,15 @@ async function createNowPaymentLink(realUSD, demoAmount){
     });
     const data = await response.json();
     if(data.invoice_url){
-      invoiceUrl = data.invoice_url;
-      document.getElementById('nowPaymentInfo').innerHTML = 'NOWPayments Link Created:<br><a href="'+invoiceUrl+'" target="_blank" style="color:#f59e0b;word-break:break-all">'+invoiceUrl+'</a><br><br>Pay here, then upload SS below.';
-      document.getElementById('nowPaymentInfo').style.display='block';
+      window.location.href = data.invoice_url;
+    } else {
+      alert("Error: " + JSON.stringify(data));
+      document.getElementById('loader').style.display = 'none';
     }
-  }catch(err){
-    console.log('API Error', err);
+  } catch (err) {
+    alert("API Error: " + err.message);
+    document.getElementById('loader').style.display = 'none';
   }
-  document.getElementById('loader').style.display='none';
-}
-
-document.getElementById('ssFile').addEventListener('change', function(e){
-  let file = e.target.files[0];
-  if(!file) return;
-  let reader = new FileReader();
-  reader.onload = function(ev){
-    ssBase64 = ev.target.result;
-    document.getElementById('ssPreview').src = ssBase64;
-    document.getElementById('ssPreview').style.display='block';
-  };
-  reader.readAsDataURL(file);
-});
-
-function closeModal(){ document.getElementById('payModal').style.display='none'; }
-
-async function confirmPurchase(){
-  let emailVal = document.getElementById('emailInput').value.toLowerCase().trim();
-  if(!emailVal || emailVal.indexOf('@')===-1){
-    alert('Please enter valid login email');
-    return;
-  }
-  if(!ssBase64){
-    alert('Please upload payment screenshot (SS)');
-    return;
-  }
-
-  // Save request for admin approval - NO BALANCE ADD YET
-  let reqs = JSON.parse(localStorage.getItem('purchase_requests')||'[]');
-  reqs.push({
-    id: Date.now(),
-    email: emailVal,
-    real: selectedReal,
-    demo: selectedDemo,
-    ss: ssBase64,
-    invoice_url: invoiceUrl || '',
-    status: 'pending',
-    date: new Date().toLocaleString()
-  });
-  localStorage.setItem('purchase_requests', JSON.stringify(reqs));
-  localStorage.setItem('email', emailVal);
-  localStorage.setItem('current_user_email', emailVal);
-
-  // Show waiting message - NO BALANCE WILL BE ADDED UNTIL ADMIN APPROVES
-  document.getElementById('waitMsg').innerHTML = '✅ Screenshot Submitted!<br>Please Wait For Admin Approval.<br>Your $'+selectedDemo.toLocaleString()+' demo will be added after admin approves. No balance added yet.';
-  document.getElementById('waitMsg').style.display='block';
-  document.getElementById('confirmBtn').disabled=true;
-  document.getElementById('confirmBtn').innerText='Waiting for Admin...';
-
-  // If invoice url exists, open it
-  if(invoiceUrl){
-    setTimeout(()=>{ window.open(invoiceUrl, '_blank'); }, 500);
-  }
-
-  setTimeout(()=>{
-    alert('Request sent to admin. Admin approval ke baad demo balance add hoga. Tab tak koi balance nahi jayega.');
-    closeModal();
-  }, 2000);
 }
 </script>
 </body>
