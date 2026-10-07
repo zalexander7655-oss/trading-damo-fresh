@@ -12,6 +12,10 @@
 .btn{width:100%;padding:12px;background:#f59e0b;color:#000;border:none;border-radius:10px;font-weight:900;cursor:pointer;margin-top:12px}
 .btn:hover{background:#fbbf24}
 .loader{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.85);justify-content:center;align-items:center;z-index:9999;flex-direction:column}
+.confirm-box{max-width:600px;margin:40px auto;background:#1e293b;border:1px solid #f59e0b;border-radius:14px;padding:20px}
+.input{width:100%;padding:12px;border-radius:8px;border:1px solid #334155;background:#0f172a;color:#fff;margin:8px 0}
+.upload-area{width:100%;height:180px;border:2px dashed #334155;border-radius:10px;display:flex;justify-content:center;align-items:center;flex-direction:column;cursor:pointer;margin:12px 0;background:#0f172a;overflow:hidden}
+.upload-area img{max-width:100%;max-height:100%;object-fit:contain}
 </style>
 </head>
 <body>
@@ -24,6 +28,25 @@
 <p style="text-align:center;color:#94a3b8;font-size:13px">Pay with Binance / Crypto via NOWPayments</p>
 
 <div class="grid" id="grid"></div>
+
+<!-- NEW CONFIRMATION SECTION -->
+<div class="confirm-box" id="confirmBox">
+  <h3 style="color:#f59e0b;text-align:center">Confirm Your Payment</h3>
+  <p style="color:#94a3b8;font-size:13px;text-align:center">After paying via QR, enter email and upload screenshot</p>
+
+  <label style="font-size:13px">Email used for payment</label>
+  <input type="email" id="confEmail" class="input" placeholder="Enter email you used for payment">
+
+  <label style="font-size:13px;margin-top:10px;display:block">Payment Screenshot</label>
+  <div class="upload-area" onclick="document.getElementById('screenshotInput').click()" id="uploadArea">
+    <span id="uploadText" style="color:#94a3b8">Click to upload screenshot</span>
+    <img id="preview" style="display:none">
+  </div>
+  <input type="file" id="screenshotInput" accept="image/*" style="display:none">
+
+  <button class="btn" onclick="confirmPayment()">Confirm & Send for Admin Approval</button>
+  <p id="statusMsg" style="text-align:center;margin-top:10px;color:#22c55e;display:none"></p>
+</div>
 
 <div id="loader" class="loader">
 <h3 style="color:#f59e0b">Creating Payment...</h3>
@@ -40,7 +63,11 @@ const packages = [
   { id: 6, real: 100, demo: 100000 }
 ];
 
+let selectedPackage = null;
+let screenshotBase64 = null;
+
 document.getElementById('bal').innerText = "Balance: $" + (localStorage.getItem('demo_bal_purchased') || '1000');
+document.getElementById('confEmail').value = localStorage.getItem('email') || '';
 
 const grid = document.getElementById('grid');
 let html = '';
@@ -49,20 +76,37 @@ for(let p of packages){
 }
 grid.innerHTML = html;
 
+// Screenshot preview
+document.getElementById('screenshotInput').addEventListener('change', function(e){
+  const file = e.target.files[0];
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = function(ev){
+    screenshotBase64 = ev.target.result;
+    document.getElementById('preview').src = screenshotBase64;
+    document.getElementById('preview').style.display = 'block';
+    document.getElementById('uploadText').style.display = 'none';
+  }
+  reader.readAsDataURL(file);
+});
+
 async function buyNow(realUSD, demoAmount) {
   document.getElementById('loader').style.display = 'flex';
-  
-  let userEmail = localStorage.getItem('email') || localStorage.getItem('user_email') || localStorage.getItem('userEmail');
+  selectedPackage = {realUSD, demoAmount};
+
+  let userEmail = localStorage.getItem('email') || document.getElementById('confEmail').value;
   if(!userEmail || userEmail.indexOf('@') === -1){
-    userEmail = prompt("Apna Email likho:");
+    userEmail = prompt("Enter Your Email:");
   }
   if(!userEmail || userEmail.indexOf('@') === -1){
-    alert("Email zaroori hai!");
+    alert("Email is required!");
     document.getElementById('loader').style.display = 'none';
     return;
   }
   localStorage.setItem('email', userEmail);
+  document.getElementById('confEmail').value = userEmail;
   localStorage.setItem('pending_demo', demoAmount);
+  localStorage.setItem('pending_real', realUSD);
 
   try {
     const response = await fetch('/api/create-payment', {
@@ -81,6 +125,43 @@ async function buyNow(realUSD, demoAmount) {
     alert("API Error: " + err.message);
     document.getElementById('loader').style.display = 'none';
   }
+}
+
+function confirmPayment(){
+  const email = document.getElementById('confEmail').value.trim();
+  if(!email || email.indexOf('@') === -1){
+    alert("Please enter valid email");
+    return;
+  }
+  if(!screenshotBase64){
+    alert("Please upload payment screenshot");
+    return;
+  }
+  if(!selectedPackage){
+    selectedPackage = {
+      realUSD: localStorage.getItem('pending_real') || 0,
+      demoAmount: localStorage.getItem('pending_demo') || 0
+    }
+  }
+
+  // Save for Admin Approval
+  const approvals = JSON.parse(localStorage.getItem('pending_approvals') || '[]');
+  approvals.push({
+    id: Date.now(),
+    email: email,
+    real_amount: selectedPackage.realUSD,
+    demo_amount: selectedPackage.demoAmount,
+    screenshot: screenshotBase64,
+    status: 'pending',
+    date: new Date().toISOString()
+  });
+  localStorage.setItem('pending_approvals', JSON.stringify(approvals));
+
+  document.getElementById('statusMsg').style.display = 'block';
+  document.getElementById('statusMsg').innerText = "Submitted! Waiting for Admin Approval. Demo will be added after verification.";
+
+  // You can also send to your backend here
+  // fetch('/api/submit-proof', { method:'POST', body: JSON.stringify({email, screenshot: screenshotBase64}) })
 }
 </script>
 </body>
